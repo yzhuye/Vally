@@ -80,6 +80,7 @@ class HomeScreen extends StatelessWidget {
                 )),
             const SizedBox(height: 10),
             TextField(
+              onChanged: (value) => controller.updateSearchText(value),
               decoration: InputDecoration(
                 hintText: 'Buscar..',
                 prefixIcon: const Icon(Icons.search),
@@ -97,20 +98,51 @@ class HomeScreen extends StatelessWidget {
                 if (controller.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
+                
+                final filteredCourses = controller.filteredCourses;
+                
+                if (filteredCourses.isEmpty) {
+                  return Center(
+                    child: Text(
+                      controller.selectedUserType.value == 'Profesor'
+                          ? 'No hay cursos creados. Crea tu primer curso.'
+                          : 'No estás inscrito en ningún curso. Únete a un curso usando el código de invitación.',
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+                
                 return ListView.builder(
-                  itemCount: controller.courses.length,
+                  itemCount: filteredCourses.length,
                   itemBuilder: (context, index) {
-                    final course = controller.courses[index];
+                    final course = filteredCourses[index];
                     return CourseCard(course: course);
                   },
                 );
               }),
             ),
             const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.add, color: Colors.blue),
-              label: const Text('Add Course', style: TextStyle(color: Colors.blue)),
+            Obx(() => ElevatedButton.icon(
+              onPressed: () {
+                if (controller.selectedUserType.value == 'Profesor') {
+                  _showCreateCourseDialog(context, controller);
+                } else {
+                  _showJoinCourseDialog(context, controller);
+                }
+              },
+              icon: Icon(
+                controller.selectedUserType.value == 'Profesor' 
+                    ? Icons.add 
+                    : Icons.group_add,
+                color: Colors.blue
+              ),
+              label: Text(
+                controller.selectedUserType.value == 'Profesor' 
+                    ? 'Crear Curso' 
+                    : 'Unirse a Curso',
+                style: const TextStyle(color: Colors.blue)
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.withAlpha(30),
                 minimumSize: const Size(double.infinity, 60),
@@ -119,10 +151,116 @@ class HomeScreen extends StatelessWidget {
                 ),
                 elevation: 0,
               ),
-            ),
+            )),
             const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showCreateCourseDialog(BuildContext context, HomeController controller) {
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Crear Nuevo Curso'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: 'Título del curso',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Descripción',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (titleController.text.isNotEmpty && 
+                  descriptionController.text.isNotEmpty) {
+                controller.createCourse(
+                  titleController.text,
+                  descriptionController.text,
+                );
+                Get.back();
+              } else {
+                Get.snackbar(
+                  'Error',
+                  'Por favor completa todos los campos',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              }
+            },
+            child: const Text('Crear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showJoinCourseDialog(BuildContext context, HomeController controller) {
+    final codeController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Unirse a Curso'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Ingresa el código de invitación del curso:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: codeController,
+              decoration: const InputDecoration(
+                labelText: 'Código de invitación',
+                border: OutlineInputBorder(),
+                hintText: 'Ej: ABC123',
+              ),
+              textCapitalization: TextCapitalization.characters,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (codeController.text.isNotEmpty) {
+                controller.joinCourseWithCode(codeController.text.toUpperCase());
+                Get.back();
+              } else {
+                Get.snackbar(
+                  'Error',
+                  'Por favor ingresa un código de invitación',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              }
+            },
+            child: const Text('Unirse'),
+          ),
+        ],
       ),
     );
   }
