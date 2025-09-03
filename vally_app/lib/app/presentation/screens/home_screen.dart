@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/course_card.dart';
+import '../widgets/dialogs/course_dialogs.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -18,11 +19,13 @@ class HomeScreen extends StatelessWidget {
         leading: const Icon(Icons.arrow_back_ios, color: Color(0xFF757575)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: Color(0xFF757575)),
+            icon:
+                const Icon(Icons.notifications_none, color: Color(0xFF757575)),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.account_circle_outlined, color: Color(0xFF757575)),
+            icon: const Icon(Icons.account_circle_outlined,
+                color: Color(0xFF757575)),
             onPressed: () {},
           ),
         ],
@@ -41,14 +44,17 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () => controller.selectUserType('Estudiante'),
+                        onPressed: () =>
+                            controller.selectUserType('Estudiante'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: controller.selectedUserType.value == 'Estudiante'
-                              ? Colors.blue
-                              : Colors.grey[200],
-                          foregroundColor: controller.selectedUserType.value == 'Estudiante'
-                              ? Colors.white
-                              : Color(0xFF757575),
+                          backgroundColor:
+                              controller.selectedUserType.value == 'Estudiante'
+                                  ? Colors.blue
+                                  : Colors.grey[200],
+                          foregroundColor:
+                              controller.selectedUserType.value == 'Estudiante'
+                                  ? Colors.white
+                                  : Color(0xFF757575),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -62,12 +68,14 @@ class HomeScreen extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () => controller.selectUserType('Profesor'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: controller.selectedUserType.value == 'Profesor'
-                              ? Colors.blue
-                              : Colors.grey[200],
-                          foregroundColor: controller.selectedUserType.value == 'Profesor'
-                              ? Colors.white
-                              : Color(0xFF757575),
+                          backgroundColor:
+                              controller.selectedUserType.value == 'Profesor'
+                                  ? Colors.blue
+                                  : Colors.grey[200],
+                          foregroundColor:
+                              controller.selectedUserType.value == 'Profesor'
+                                  ? Colors.white
+                                  : Color(0xFF757575),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -80,8 +88,9 @@ class HomeScreen extends StatelessWidget {
                 )),
             const SizedBox(height: 10),
             TextField(
+              onChanged: (value) => controller.updateSearchText(value),
               decoration: InputDecoration(
-                hintText: 'Buscar..',
+                hintText: 'Buscar...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -97,33 +106,64 @@ class HomeScreen extends StatelessWidget {
                 if (controller.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
+                final filteredCourses = controller.filteredCourses;
+
+                if (filteredCourses.isEmpty) {
+                  return Center(
+                    child: Text(
+                      controller.selectedUserType.value == 'Profesor'
+                          ? 'No hay cursos creados. Crea tu primer curso.'
+                          : 'No estás inscrito en ningún curso. Únete a un curso usando el código de invitación.',
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+
                 return ListView.builder(
-                  itemCount: controller.courses.length,
+                  itemCount: filteredCourses.length,
                   itemBuilder: (context, index) {
-                    final course = controller.courses[index];
+                    final course = filteredCourses[index];
                     return CourseCard(course: course);
                   },
                 );
               }),
             ),
             const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.add, color: Colors.blue),
-              label: const Text('Add Course', style: TextStyle(color: Colors.blue)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.withAlpha(30),
-                minimumSize: const Size(double.infinity, 60),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                elevation: 0,
-              ),
-            ),
+            Obx(() => ElevatedButton.icon(
+                  onPressed: () {
+                    if (controller.selectedUserType.value == 'Profesor') {
+                      CourseDialogs.showCreateCourse(context, controller);
+                    } else {
+                      CourseDialogs.showJoinCourse(context, controller);
+                    }
+                  },
+                  icon: Icon(
+                      controller.selectedUserType.value == 'Profesor'
+                          ? Icons.add
+                          : Icons.group_add,
+                      color: Colors.blue),
+                  label: Text(
+                      controller.selectedUserType.value == 'Profesor'
+                          ? 'Crear Curso'
+                          : 'Unirse a Curso',
+                      style: const TextStyle(color: Colors.blue)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[50],
+                    minimumSize: const Size(double.infinity, 60),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 0,
+                  ),
+                )),
             const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
+
+  
 }
