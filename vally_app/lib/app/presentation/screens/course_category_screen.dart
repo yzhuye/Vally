@@ -63,9 +63,6 @@ class CourseCategoryScreen extends StatelessWidget {
                       final category = categories[index];
                       return ListTile(
                         title: Text(category.name),
-                        subtitle: Text(
-                          'Método: ${category.groupingMethod} | Grupos: ${category.groupCount} | Estudiantes/grupo: ${category.studentsPerGroup}',
-                        ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {},
                       );

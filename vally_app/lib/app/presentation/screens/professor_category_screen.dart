@@ -93,7 +93,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                           studentsPerGroup: studentsPerGroup,
                         ),
                       );
-                      setState(() {});
+                      this.setState(() {});
                       Navigator.of(context).pop();
                     }
                   },
@@ -187,7 +187,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                           studentsPerGroup: studentsPerGroup,
                         ),
                       );
-                      setState(() {});
+                      this.setState(() {});
                       Navigator.of(context).pop();
                     }
                   },
@@ -273,7 +273,6 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
                             _showEditCategoryDialog(context, category);
-                            setState(() {});
                           },
                         ),
                         IconButton(
@@ -296,7 +295,6 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                         label: const Text('Agregar categoría'),
                         onPressed: () {
                           _showAddCategoryDialog(context);
-                          setState(() {});
                         },
                       ),
                     ),
