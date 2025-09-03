@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:get/get.dart';
 import 'package:vally_app/app/presentation/widgets/password_text_field.dart';
 import 'package:vally_app/app/domain/services/api_service.dart';
+import 'package:vally_app/app/presentation/screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +24,7 @@ class LoginScreenState extends State<LoginScreen> {
       passwordController.text,
     );
 
-    if (response != null && response.containsKey("tokens")) {
+    if (response != null && response["success"] == true) {
       logger.i("Login successful: $response");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -32,15 +34,17 @@ class LoginScreenState extends State<LoginScreen> {
       );
 
       Future.delayed(Duration(seconds: 2), () {
-        Navigator.pushReplacementNamed(context, '/home');
+        Get.offAll(() => HomeScreen());
       });
     } else {
       logger.e("Login failed");
-      String errorMessage = response?["error"] ?? "Unknown error";
+      // String errorMessage = response?["error"] ?? "Unknown error";
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Login failed 😢\n$errorMessage'),
+          //TODO: Replace with error message when backend is ready
+          content: Text('Login failed 😢'), 
+          //content: Text('Login failed 😢\n$errorMessage'),
           backgroundColor: Colors.red,
         ),
       );
@@ -49,7 +53,7 @@ class LoginScreenState extends State<LoginScreen> {
 
   static final ButtonStyle darkButtonStyle = ElevatedButton.styleFrom(
     backgroundColor: Colors.blue, // Button color
-    foregroundColor: Colors.black, // Text color
+    foregroundColor: Colors.white, // Text color
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
     padding: EdgeInsets.symmetric(vertical: 16),
   );
@@ -74,6 +78,8 @@ class LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(height: 10),
+            /*
+            // NOT IMPLEMENTED YET LOL
             Align(
               alignment: Alignment.topLeft,
               child: IconButton(
@@ -87,6 +93,7 @@ class LoginScreenState extends State<LoginScreen> {
                 },
               ),
             ),
+            */
             SingleChildScrollView(
               child: Center(
                 child: Column(
@@ -94,7 +101,7 @@ class LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      "Ready to Play?",
+                      "Welcome Back!",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 24,
@@ -124,6 +131,8 @@ class LoginScreenState extends State<LoginScreen> {
                       child: Text("Log In", style: TextStyle(fontSize: 18)),
                     ),
                     SizedBox(height: 15),
+                    /*
+                    // NOT IMPLEMENTED YET LOL
                     GestureDetector(
                       onTap: () {
                         // Navigate to the login screen
@@ -145,6 +154,7 @@ class LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                    */
                   ],
                 ),
               ),
