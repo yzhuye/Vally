@@ -15,22 +15,14 @@ class CourseManagementScreen extends StatelessWidget {
         Get.put(CourseManagementController(course));
 
     return Scaffold(
-      backgroundColor: const Color(0xFF81C784),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF81C784),
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF757575)),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Administrar Curso',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
       ),
-      body: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.all(16),
+        body: Container(
+          margin: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -40,6 +32,7 @@ class CourseManagementScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+<<<<<<< HEAD
                 // Header del curso
                 Obx(() => Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,10 +67,46 @@ class CourseManagementScreen extends StatelessWidget {
 
                 // Lista de estudiantes
                 Obx(() => _buildStudentsSection(controller)),
+=======
+                                 // Header del curso
+                 Obx(() => Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     Text(
+                       controller.course.value.title,
+                       style: const TextStyle(
+                         fontSize: 24,
+                         fontWeight: FontWeight.bold,
+                         color: Colors.black,
+                       ),
+                     ),
+                     const SizedBox(height: 8),
+                     Text(
+                       controller.course.value.description,
+                       style: const TextStyle(
+                         fontSize: 16,
+                         color: Colors.grey,
+                       ),
+                     ),
+                   ],
+                 )),
+                 const SizedBox(height: 24),
+  
+                 // Estadísticas
+                 Obx(() => _buildStatsSection(controller)),
+                 const SizedBox(height: 24),
+  
+                 // Código de invitación
+                 Obx(() => _buildInvitationCodeSection(controller)),
+                 const SizedBox(height: 24),
+  
+                 // Lista de estudiantes
+                 Obx(() => _buildStudentsSection(controller)),
+>>>>>>> main
               ],
             ),
           ),
-        ),
+        
       ),
     );
   }

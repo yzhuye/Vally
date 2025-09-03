@@ -115,8 +115,8 @@ class CourseRepositoryImpl implements CourseRepository {
   }
 
   // Funcionalidades adicionales para gestión de cursos
-  static List<Course> _allCourses = [];
-  static List<Course> _enrolledCourses = [];
+  static final List<Course> _allCourses = [];
+  static final List<Course> _enrolledCourses = [];
   static const String _currentStudentName = 'Estudiante Actual';
   static bool _isInitialized = false;
 
