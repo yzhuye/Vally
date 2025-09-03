@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../domain/entities/course.dart';
 import '../controllers/home_controller.dart';
 import '../screens/course_management_screen.dart';
+import '../screens/course_category_screen.dart';
 
 class CourseCard extends StatelessWidget {
   final Course course;
@@ -12,11 +13,13 @@ class CourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController homeController = Get.find<HomeController>();
-    
+
     return GestureDetector(
       onTap: () {
         if (homeController.selectedUserType.value == 'Profesor') {
           Get.to(() => CourseManagementScreen(course: course));
+        } else {
+          Get.to(() => CourseCategoryScreen(course: course));
         }
       },
       child: Card(
@@ -37,16 +40,16 @@ class CourseCard extends StatelessWidget {
                 height: 120,
                 width: double.infinity,
                 color: const Color(0xFFB3E5FC),
-                child: course.imageUrl != null 
-                  ? Image.asset(
-                      course.imageUrl!,
-                      height: 120, 
-                      width: double.infinity, 
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => 
-                        _buildPlaceholderImage(),
-                    )
-                  : _buildPlaceholderImage(),
+                child: course.imageUrl != null
+                    ? Image.asset(
+                        course.imageUrl!,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildPlaceholderImage(),
+                      )
+                    : _buildPlaceholderImage(),
               ),
             ),
             Padding(
@@ -59,7 +62,8 @@ class CourseCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           course.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
                         ),
                       ),
                       if (homeController.selectedUserType.value == 'Profesor')
@@ -84,11 +88,13 @@ class CourseCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '${course.enrolledStudents.length} estudiantes',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xFF4FC3F7),
                           borderRadius: BorderRadius.circular(12),
