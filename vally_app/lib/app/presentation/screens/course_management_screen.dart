@@ -6,12 +6,13 @@ import '../../domain/entities/course.dart';
 
 class CourseManagementScreen extends StatelessWidget {
   final Course course;
-  
+
   const CourseManagementScreen({super.key, required this.course});
 
   @override
   Widget build(BuildContext context) {
-    final CourseManagementController controller = Get.put(CourseManagementController(course));
+    final CourseManagementController controller =
+        Get.put(CourseManagementController(course));
 
     return Scaffold(
       backgroundColor: const Color(0xFF81C784),
@@ -39,40 +40,40 @@ class CourseManagementScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                                 // Header del curso
-                 Obx(() => Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     Text(
-                       controller.course.value.title,
-                       style: const TextStyle(
-                         fontSize: 24,
-                         fontWeight: FontWeight.bold,
-                         color: Color(0xFF2E7D32),
-                       ),
-                     ),
-                     const SizedBox(height: 8),
-                     Text(
-                       controller.course.value.description,
-                       style: const TextStyle(
-                         fontSize: 16,
-                         color: Colors.grey,
-                       ),
-                     ),
-                   ],
-                 )),
-                 const SizedBox(height: 24),
+                // Header del curso
+                Obx(() => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          controller.course.value.title,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E7D32),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          controller.course.value.description,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    )),
+                const SizedBox(height: 24),
 
-                 // Estadísticas
-                 Obx(() => _buildStatsSection(controller)),
-                 const SizedBox(height: 24),
+                // Estadísticas
+                Obx(() => _buildStatsSection(controller)),
+                const SizedBox(height: 24),
 
-                 // Código de invitación
-                 Obx(() => _buildInvitationCodeSection(controller)),
-                 const SizedBox(height: 24),
+                // Código de invitación
+                Obx(() => _buildInvitationCodeSection(controller)),
+                const SizedBox(height: 24),
 
-                 // Lista de estudiantes
-                 Obx(() => _buildStudentsSection(controller)),
+                // Lista de estudiantes
+                Obx(() => _buildStudentsSection(controller)),
               ],
             ),
           ),
@@ -199,30 +200,31 @@ class CourseManagementScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                                 Expanded(
-                   child: Text(
-                     controller.course.value.invitationCode,
-                     style: const TextStyle(
-                       fontSize: 24,
-                       fontWeight: FontWeight.bold,
-                       color: Color(0xFF1976D2),
-                       letterSpacing: 2,
-                     ),
-                   ),
-                 ),
-                 IconButton(
-                   onPressed: () {
-                     Clipboard.setData(ClipboardData(text: controller.course.value.invitationCode));
-                     Get.snackbar(
-                       'Copiado',
-                       'Código copiado al portapapeles',
-                       backgroundColor: Colors.green,
-                       colorText: Colors.white,
-                       duration: const Duration(seconds: 2),
-                     );
-                   },
-                   icon: const Icon(Icons.copy, color: Color(0xFF1976D2)),
-                 ),
+                Expanded(
+                  child: Text(
+                    controller.course.value.invitationCode,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1976D2),
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(
+                        text: controller.course.value.invitationCode));
+                    Get.snackbar(
+                      'Copiado',
+                      'Código copiado al portapapeles',
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 2),
+                    );
+                  },
+                  icon: const Icon(Icons.copy, color: Color(0xFF1976D2)),
+                ),
               ],
             ),
           ),
@@ -302,14 +304,16 @@ class CourseManagementScreen extends StatelessWidget {
                 : ListView.builder(
                     itemCount: controller.course.value.enrolledStudents.length,
                     itemBuilder: (context, index) {
-                      final student = controller.course.value.enrolledStudents[index];
+                      final student =
+                          controller.course.value.enrolledStudents[index];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F8E9),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF8BC34A), width: 1),
+                          border: Border.all(
+                              color: const Color(0xFF8BC34A), width: 1),
                         ),
                         child: Row(
                           children: [
@@ -347,4 +351,4 @@ class CourseManagementScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}
