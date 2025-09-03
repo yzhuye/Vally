@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'app/presentation/screens/home_screen.dart';
+import 'app/presentation/screens/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true, 
         fontFamily: GoogleFonts.lato().fontFamily,
       ),
-      home: const HomeScreen(),
+      home: const LoginScreen(),
     );
   }
 }
