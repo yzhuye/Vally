@@ -14,22 +14,14 @@ class CourseManagementScreen extends StatelessWidget {
     final CourseManagementController controller = Get.put(CourseManagementController(course));
 
     return Scaffold(
-      backgroundColor: const Color(0xFF81C784),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF81C784),
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF757575)),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Administrar Curso',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
       ),
-      body: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.all(16),
+        body: Container(
+          margin: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -48,7 +40,7 @@ class CourseManagementScreen extends StatelessWidget {
                        style: const TextStyle(
                          fontSize: 24,
                          fontWeight: FontWeight.bold,
-                         color: Color(0xFF2E7D32),
+                         color: Colors.black,
                        ),
                      ),
                      const SizedBox(height: 8),
@@ -62,21 +54,21 @@ class CourseManagementScreen extends StatelessWidget {
                    ],
                  )),
                  const SizedBox(height: 24),
-
+  
                  // Estadísticas
                  Obx(() => _buildStatsSection(controller)),
                  const SizedBox(height: 24),
-
+  
                  // Código de invitación
                  Obx(() => _buildInvitationCodeSection(controller)),
                  const SizedBox(height: 24),
-
+  
                  // Lista de estudiantes
                  Obx(() => _buildStudentsSection(controller)),
               ],
             ),
           ),
-        ),
+        
       ),
     );
   }
