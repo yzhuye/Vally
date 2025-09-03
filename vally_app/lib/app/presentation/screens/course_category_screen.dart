@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../domain/entities/course.dart';
-import '../../domain/entities/category.dart';
 import '../widgets/course_card.dart';
 import '../../data/repositories/category_repository_imp.dart';
 
@@ -12,9 +10,8 @@ class CourseCategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Obtener categorías desde el repositorio
-    final categories = CategoryRepositoryImpl().getAll();
-
+    final categories =
+        CategoryRepositoryImpl().getCategoriesForCourse(course.id);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Categorías del Curso'),
@@ -37,22 +34,43 @@ class CourseCategoryScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              itemCount: categories.length,
-              separatorBuilder: (_, __) => const Divider(),
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return ListTile(
-                  title: Text(category.name),
-                  subtitle: Text(
-                    'Método: ${category.groupingMethod} | Grupos: ${category.groupCount} | Estudiantes/grupo: ${category.studentsPerGroup}',
+            child: categories.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.info_outline,
+                            size: 48, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No hay categorías para este curso.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Contacta al profesor para agregar categorías.',
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    itemCount: categories.length,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      return ListTile(
+                        title: Text(category.name),
+                        subtitle: Text(
+                          'Método: ${category.groupingMethod} | Grupos: ${category.groupCount} | Estudiantes/grupo: ${category.studentsPerGroup}',
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {},
+                      );
+                    },
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {},
-                );
-              },
-            ),
           ),
         ],
       ),

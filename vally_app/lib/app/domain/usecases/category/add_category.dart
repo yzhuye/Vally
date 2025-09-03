@@ -1,4 +1,4 @@
-import '../../entities/category.dart';
+import '../../entities/course.dart';
 import '../../repositories/category_repository.dart';
 
 class AddCategory {
@@ -6,7 +6,7 @@ class AddCategory {
 
   AddCategory(this.repository);
 
-  void call(Category category) {
-    repository.add(category);
+  void call(String courseId, Category category) {
+    repository.addCategory(courseId, category);
   }
 }

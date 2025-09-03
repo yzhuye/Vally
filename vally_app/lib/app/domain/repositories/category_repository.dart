@@ -1,9 +1,8 @@
-import '../entities/category.dart';
+import '../entities/course.dart';
 
 abstract class CategoryRepository {
-  List<Category> getAll();
-  Category? getById(String id);
-  void add(Category category);
-  void update(Category category);
-  void delete(String id);
+  List<Category> getCategoriesForCourse(String courseId);
+  void addCategory(String courseId, Category category);
+  void updateCategory(String courseId, Category category);
+  void deleteCategory(String courseId, String categoryId);
 }

@@ -22,10 +22,19 @@ class Course {
 
 class Category {
   final String id;
-  final String name;
+  String name;
+  String groupingMethod; // "random" | "self-assigned" | "manual"
+  int groupCount;
+  int studentsPerGroup;
   final List<Activity> activities;
 
-  Category({required this.id, required this.name, this.activities = const []});
+  Category(
+      {required this.id,
+      required this.name,
+      required this.groupingMethod,
+      required this.groupCount,
+      required this.studentsPerGroup,
+      this.activities = const []});
 }
 
 class Activity {

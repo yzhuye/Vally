@@ -1,11 +1,12 @@
+import '../../entities/course.dart';
 import '../../repositories/category_repository.dart';
 
-class DeleteCategory {
+class UpdateCategory {
   final CategoryRepository repository;
 
-  DeleteCategory(this.repository);
+  UpdateCategory(this.repository);
 
-  void call(String id) {
-    repository.delete(id);
+  void call(String courseId, Category category) {
+    repository.updateCategory(courseId, category);
   }
 }

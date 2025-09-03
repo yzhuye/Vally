@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../controllers/course_management_controller.dart';
 import '../../domain/entities/course.dart';
+import 'professor_category_screen.dart';
 
 class CourseManagementScreen extends StatelessWidget {
   final Course course;
@@ -21,92 +22,75 @@ class CourseManagementScreen extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
-        body: Container(
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-<<<<<<< HEAD
-                // Header del curso
-                Obx(() => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          controller.course.value.title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2E7D32),
-                          ),
+      body: Container(
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header del curso
+              Obx(() => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        controller.course.value.title,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          controller.course.value.description,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        controller.course.value.description,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
                         ),
-                      ],
-                    )),
-                const SizedBox(height: 24),
+                      ),
+                    ],
+                  )),
+              const SizedBox(height: 24),
 
-                // Estadísticas
-                Obx(() => _buildStatsSection(controller)),
-                const SizedBox(height: 24),
+              // Estadísticas
+              Obx(() => _buildStatsSection(controller)),
+              const SizedBox(height: 24),
 
-                // Código de invitación
-                Obx(() => _buildInvitationCodeSection(controller)),
-                const SizedBox(height: 24),
+              // Código de invitación
+              Obx(() => _buildInvitationCodeSection(controller)),
+              const SizedBox(height: 24),
 
-                // Lista de estudiantes
-                Obx(() => _buildStudentsSection(controller)),
-=======
-                                 // Header del curso
-                 Obx(() => Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     Text(
-                       controller.course.value.title,
-                       style: const TextStyle(
-                         fontSize: 24,
-                         fontWeight: FontWeight.bold,
-                         color: Colors.black,
-                       ),
-                     ),
-                     const SizedBox(height: 8),
-                     Text(
-                       controller.course.value.description,
-                       style: const TextStyle(
-                         fontSize: 16,
-                         color: Colors.grey,
-                       ),
-                     ),
-                   ],
-                 )),
-                 const SizedBox(height: 24),
-  
-                 // Estadísticas
-                 Obx(() => _buildStatsSection(controller)),
-                 const SizedBox(height: 24),
-  
-                 // Código de invitación
-                 Obx(() => _buildInvitationCodeSection(controller)),
-                 const SizedBox(height: 24),
-  
-                 // Lista de estudiantes
-                 Obx(() => _buildStudentsSection(controller)),
->>>>>>> main
-              ],
-            ),
+              // Lista de estudiantes
+              Obx(() => _buildStudentsSection(controller)),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.category),
+                  label: const Text('Administrar Categorías'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFA726),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Get.to(() => ProfessorCategoryScreen(
+                        course: controller.course.value));
+                  },
+                ),
+              ),
+            ],
           ),
-        
+        ),
       ),
     );
   }

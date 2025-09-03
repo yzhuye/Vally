@@ -1,74 +1,64 @@
-import '../../domain/entities/category.dart';
+import '../../domain/entities/course.dart';
 import '../../domain/repositories/category_repository.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
-  static final List<Category> _categories = [];
+  static final Map<String, List<Category>> _categoriesByCourse = {};
   static bool _isInitialized = false;
-  final uuid = DateTime.now().millisecondsSinceEpoch.toString();
 
   void _initializeData() {
     if (!_isInitialized) {
-      _categories.addAll([
+      print('Inicializando categorías para curso 1');
+
+      _categoriesByCourse['1'] = [
         Category(
-          id: uuid,
+          id: 'cat1',
           name: "Trabajo en Equipo",
           groupingMethod: "random",
           groupCount: 3,
           studentsPerGroup: 5,
         ),
         Category(
-          id: uuid,
+          id: 'cat2',
           name: "Investigación",
           groupingMethod: "self-assigned",
           groupCount: 2,
           studentsPerGroup: 4,
         ),
-        Category(
-          id: uuid,
-          name: "Proyecto Final",
-          groupingMethod: "manual",
-          groupCount: 4,
-          studentsPerGroup: 6,
-        ),
-      ]);
+      ];
       _isInitialized = true;
     }
   }
 
   @override
-  List<Category> getAll() {
+  List<Category> getCategoriesForCourse(String courseId) {
+    print('Fetching categories for courseId: $courseId');
     _initializeData();
-    return List.unmodifiable(_categories);
+    print('Contenido actual del mapa: $_categoriesByCourse');
+    return List.unmodifiable(_categoriesByCourse[courseId] ?? []);
   }
 
   @override
-  Category? getById(String id) {
+  void addCategory(String courseId, Category category) {
     _initializeData();
-    try {
-      return _categories.firstWhere((c) => c.id == id);
-    } catch (_) {
-      return null;
+    _categoriesByCourse.putIfAbsent(courseId, () => []);
+    _categoriesByCourse[courseId]!.add(category);
+  }
+
+  @override
+  void updateCategory(String courseId, Category category) {
+    _initializeData();
+    final categories = _categoriesByCourse[courseId];
+    if (categories != null) {
+      final index = categories.indexWhere((c) => c.id == category.id);
+      if (index != -1) {
+        categories[index] = category;
+      }
     }
   }
 
   @override
-  void add(Category category) {
+  void deleteCategory(String courseId, String categoryId) {
     _initializeData();
-    _categories.add(category);
-  }
-
-  @override
-  void update(Category category) {
-    _initializeData();
-    final index = _categories.indexWhere((c) => c.id == category.id);
-    if (index != -1) {
-      _categories[index] = category;
-    }
-  }
-
-  @override
-  void delete(String id) {
-    _initializeData();
-    _categories.removeWhere((c) => c.id == id);
+    _categoriesByCourse[courseId]?.removeWhere((c) => c.id == categoryId);
   }
 }
