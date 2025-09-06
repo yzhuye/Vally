@@ -1,5 +1,5 @@
 import '../../domain/entities/course.dart';
-import '../../domain/repositories/category_repository.dart';
+import 'category_repository.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
   static final Map<String, List<Category>> _categoriesByCourse = {};

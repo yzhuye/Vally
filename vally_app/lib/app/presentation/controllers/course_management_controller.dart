@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/course.dart';
-import '../../domain/repositories/course_repository_impl.dart';
+import '../../data/repositories/course_repository_impl.dart';
 import 'home_controller.dart';
 import 'dart:math';
 

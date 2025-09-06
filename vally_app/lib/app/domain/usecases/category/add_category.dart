@@ -1,5 +1,5 @@
 import '../../entities/course.dart';
-import '../../repositories/category_repository.dart';
+import '../../../data/repositories/category_repository.dart';
 
 class AddCategory {
   final CategoryRepository repository;

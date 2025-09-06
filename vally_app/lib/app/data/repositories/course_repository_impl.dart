@@ -1,5 +1,5 @@
 import '../../domain/entities/course.dart';
-import '../../data/repositories/course_repository.dart';
+import 'course_repository.dart';
 import 'dart:math';
 
 class CourseRepositoryImpl implements CourseRepository {

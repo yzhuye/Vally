@@ -48,8 +48,9 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                               ))
                           .toList(),
                       onChanged: (value) {
-                        if (value != null)
+                        if (value != null) {
                           setState(() => selectedMethod = value);
+                        }
                       },
                     ),
                     TextField(
@@ -142,8 +143,9 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                               ))
                           .toList(),
                       onChanged: (value) {
-                        if (value != null)
+                        if (value != null) {
                           setState(() => selectedMethod = value);
+                        }
                       },
                     ),
                     TextField(
@@ -213,7 +215,6 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
           ElevatedButton(
-            child: const Text('Eliminar'),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
               CategoryRepositoryImpl()
@@ -221,6 +222,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
               setState(() {});
               Navigator.of(context).pop();
             },
+            child: const Text('Eliminar'),
           ),
         ],
       ),

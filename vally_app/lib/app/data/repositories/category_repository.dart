@@ -1,4 +1,4 @@
-import '../entities/course.dart';
+import '../../domain/entities/course.dart';
 
 abstract class CategoryRepository {
   List<Category> getCategoriesForCourse(String courseId);

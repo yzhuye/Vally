@@ -1,4 +1,4 @@
-import '../../repositories/category_repository.dart';
+import '../../../data/repositories/category_repository.dart';
 
 class DeleteCategory {
   final CategoryRepository repository;
