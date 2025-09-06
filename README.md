@@ -1,10 +1,16 @@
-# flutter_project
+# vally_app
 
-Yazmina Yolanda Vecino Yepes: 2) Función para agregar cursos y visualizar usuarios inscritos, 4) función para visualizar los cursos en los que un usuario está inscrito. 
+A new Flutter project.
 
-Kevin Torregrosa: función de de prueba inicio de sesión y autenticación, con pantalla de login y servicio de API.
+## Getting Started
 
-Estudiante Carlos Lopez Gallardo: 4) Pantalla de Home Integradora
+This project is a starting point for a Flutter application.
 
-Estudiante Yovany Zhu Ye: Función CRUD para categorías desde la pantalla de profesores.
+A few resources to get you started if this is your first Flutter project:
 
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
