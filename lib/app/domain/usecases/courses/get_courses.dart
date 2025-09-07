@@ -1,5 +1,5 @@
-import '../entities/course.dart';
-import '../../data/repositories/course_repository.dart';
+import '../../entities/course.dart';
+import '../../../data/repositories/course_repository.dart';
 
 class GetCourses {
   final CourseRepository repository;
