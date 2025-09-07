@@ -15,6 +15,9 @@ class CourseManagementController extends GetxController {
   @override
   void onInit() {
     course = _initialCourse.obs;
+    // Load the latest version from the repository (Hive) so enrolled students and other
+    // dynamic data are up-to-date when the screen opens.
+    refreshCourse();
     super.onInit();
   }
 
