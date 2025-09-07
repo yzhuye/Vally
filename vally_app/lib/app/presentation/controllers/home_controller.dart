@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/course.dart';
-import '../../domain/usecases/get_courses.dart';
-import '../../domain/repositories/course_repository_impl.dart';
+import '../../domain/usecases/courses/get_courses.dart';
+import '../../data/repositories/course_repository_impl.dart';
 import 'course_management_controller.dart';
 
 class HomeController extends GetxController {

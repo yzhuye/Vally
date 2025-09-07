@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/course.dart';
-import '../../domain/repositories/course_repository_impl.dart';
+import '../../data/repositories/course_repository_impl.dart';
 import 'home_controller.dart';
 import 'dart:math';
 
@@ -15,14 +15,18 @@ class CourseManagementController extends GetxController {
   @override
   void onInit() {
     course = _initialCourse.obs;
+    // Load the latest version from the repository (Hive) so enrolled students and other
+    // dynamic data are up-to-date when the screen opens.
+    refreshCourse();
     super.onInit();
   }
 
   Future<void> generateNewInvitationCode() async {
     try {
       // Usar el repository para actualizar el código
-      final updatedCourse = await _repository.updateInvitationCode(course.value.id);
-      
+      final updatedCourse =
+          await _repository.updateInvitationCode(course.value.id);
+
       // Actualizar el estado local
       course.value = updatedCourse;
 
@@ -34,15 +38,15 @@ class CourseManagementController extends GetxController {
         duration: const Duration(seconds: 3),
         icon: const Icon(Icons.check_circle, color: Colors.white),
       );
-      
+
       // Actualizar también el HomeController si está activo
       try {
         final homeController = Get.find<HomeController>();
-        homeController.fetchCoursesForRole(homeController.selectedUserType.value);
+        homeController
+            .fetchCoursesForRole(homeController.selectedUserType.value);
       } catch (e) {
         // HomeController no está activo, no hacer nada
       }
-      
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -57,7 +61,7 @@ class CourseManagementController extends GetxController {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
     return String.fromCharCodes(Iterable.generate(
-      6, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
+        6, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
   }
 
   void refreshCourse() async {
@@ -71,6 +75,6 @@ class CourseManagementController extends GetxController {
   int get totalStudents => course.value.enrolledStudents.length;
   int get totalCategories => course.value.categories.length;
   int get totalGroups => course.value.groups.length;
-  
+
   String get currentInvitationCode => course.value.invitationCode;
-} 
+}
