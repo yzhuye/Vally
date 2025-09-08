@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'app/presentation/screens/login/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'app/data/models/course_hive_model.dart';
+import 'app/data/models/category_hive_model.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(CourseHiveModelAdapter());
+  Hive.registerAdapter(CategoryHiveModelAdapter());
+  await Hive.openBox<CourseHiveModel>('courses');
+  await Hive.openBox('categories');
   runApp(const MyApp());
 }
 
