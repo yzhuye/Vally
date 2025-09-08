@@ -1,4 +1,4 @@
-import '../../domain/entities/course.dart';
+import 'package:vally_app/app/domain/entities/course.dart';
 import 'category_repository.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {

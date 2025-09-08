@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../controllers/course_management_controller.dart';
-import '../../domain/entities/course.dart';
+import 'package:vally_app/app/presentation/controllers/course/course_management_controller.dart';
+import 'package:vally_app/app/domain/entities/course.dart';
 import 'professor_category_screen.dart';
 
 class CourseManagementScreen extends StatelessWidget {

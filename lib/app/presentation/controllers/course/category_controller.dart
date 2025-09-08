@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/course.dart';
-import '../../data/repositories/category_repository_imp.dart';
+import 'package:vally_app/app/domain/entities/course.dart';
+import 'package:vally_app/app/data/repositories/course/category_repository_imp.dart';
 
 class CategoryManagementController extends GetxController {
   final String courseId; // cada curso maneja sus categorías

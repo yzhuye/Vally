@@ -1,4 +1,4 @@
-import '../../../data/repositories/category_repository.dart';
+import 'package:vally_app/app/data/repositories/course/category_repository.dart';
 
 class DeleteCategory {
   final CategoryRepository repository;

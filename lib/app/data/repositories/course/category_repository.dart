@@ -1,4 +1,4 @@
-import '../../domain/entities/course.dart';
+import 'package:vally_app/app/domain/entities/course.dart';
 
 abstract class CategoryRepository {
   List<Category> getCategoriesForCourse(String courseId);

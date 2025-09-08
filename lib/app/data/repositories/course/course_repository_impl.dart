@@ -1,4 +1,4 @@
-import '../../domain/entities/course.dart';
+import 'package:vally_app/app/domain/entities/course.dart';
 import 'course_repository.dart';
 import 'dart:math';
 

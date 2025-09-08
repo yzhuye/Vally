@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/home_controller.dart';
+import 'package:vally_app/app/presentation/controllers/home/home_controller.dart';
 
 class CourseDialogs {
   // Hacemos el constructor privado para que nadie pueda instanciar esta clase.
@@ -18,13 +18,13 @@ class CourseDialogs {
         backgroundColor: Colors.white,
         title: Row(
           children: const [
-            Icon(Icons.add_circle_outline, color: Colors.blueAccent),
+            Icon(Icons.add_circle_outline, color: Color(0xFF00A4BD)),
             SizedBox(width: 8),
             Text(
               'Crear Nuevo Curso',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
+                color: Color(0xFF00A4BD),
               ),
             ),
           ],
@@ -95,7 +95,7 @@ class CourseDialogs {
             icon: const Icon(Icons.check),
             label: const Text('Crear',),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: Color(0xFF00A4BD),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -119,13 +119,13 @@ class CourseDialogs {
         backgroundColor: Colors.white,
         title: Row(
           children: const [
-            Icon(Icons.school, color: Colors.blueAccent),
+            Icon(Icons.school, color: Color(0xFF00A4BD)),
             SizedBox(width: 8),
             Text(
               'Unirse a Curso',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
+                color: Color(0xFF00A4BD),
               ),
             ),
           ],
@@ -182,7 +182,7 @@ class CourseDialogs {
             icon: const Icon(Icons.check),
             label: const Text('Unirse'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: Color(0xFF00A4BD),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),

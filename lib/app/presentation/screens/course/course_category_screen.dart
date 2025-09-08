@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/course.dart';
-import '../widgets/course_card.dart';
-import '../../data/repositories/category_repository_imp.dart';
+import '../../../domain/entities/course.dart';
+import '../../widgets/course/course_card.dart';
+import '../../../data/repositories/course/category_repository_imp.dart';
 
 class CourseCategoryScreen extends StatelessWidget {
   final Course course;

@@ -1,5 +1,5 @@
-import '../../entities/course.dart';
-import '../../../data/repositories/category_repository.dart';
+import 'package:vally_app/app/domain/entities/course.dart';
+import 'package:vally_app/app/data/repositories/course/category_repository.dart';
 
 class AddCategory {
   final CategoryRepository repository;

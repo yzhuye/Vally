@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/course.dart';
-import '../../data/repositories/course_repository_impl.dart';
-import 'home_controller.dart';
+import 'package:vally_app/app/domain/entities/course.dart';
+import 'package:vally_app/app/data/repositories/course/course_repository_impl.dart';
+import 'package:vally_app/app/presentation/controllers/home/home_controller.dart';
 import 'dart:math';
 
 class CourseManagementController extends GetxController {

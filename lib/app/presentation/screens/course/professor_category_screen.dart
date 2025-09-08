@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/course.dart';
-import '../widgets/course_card.dart';
-import '../../data/repositories/category_repository_imp.dart';
+import 'package:vally_app/app/domain/entities/course.dart';
+import 'package:vally_app/app/presentation/widgets/course/course_card.dart';
+import 'package:vally_app/app/data/repositories/course/category_repository_imp.dart';
 
 class ProfessorCategoryScreen extends StatefulWidget {
   final Course course;

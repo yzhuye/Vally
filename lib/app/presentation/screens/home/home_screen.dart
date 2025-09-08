@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
-import '../widgets/course_card.dart';
-import '../widgets/dialogs/course_dialogs.dart';
+import 'package:vally_app/app/presentation/controllers/home/home_controller.dart';
+import 'package:vally_app/app/presentation//widgets/course/course_card.dart';
+import 'package:vally_app/app/presentation//widgets/dialogs/course_dialogs.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,7 +16,6 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Icon(Icons.arrow_back_ios, color: Color(0xFF757575)),
         actions: [
           IconButton(
             icon:
@@ -49,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               controller.selectedUserType.value == 'Estudiante'
-                                  ? Colors.blue
+                                  ? Color(0xFF00A4BD)
                                   : Colors.grey[200],
                           foregroundColor:
                               controller.selectedUserType.value == 'Estudiante'
@@ -70,7 +69,7 @@ class HomeScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               controller.selectedUserType.value == 'Profesor'
-                                  ? Colors.blue
+                                  ? Color(0xFF00A4BD)
                                   : Colors.grey[200],
                           foregroundColor:
                               controller.selectedUserType.value == 'Profesor'
@@ -143,14 +142,14 @@ class HomeScreen extends StatelessWidget {
                       controller.selectedUserType.value == 'Profesor'
                           ? Icons.add
                           : Icons.group_add,
-                      color: Colors.blue),
+                      color: Color(0xFF00A4BD)),
                   label: Text(
                       controller.selectedUserType.value == 'Profesor'
                           ? 'Crear Curso'
                           : 'Unirse a Curso',
-                      style: const TextStyle(color: Colors.blue)),
+                      style: const TextStyle(color: Color(0xFF00A4BD))),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[50],
+                    backgroundColor: Colors.cyan[50],
                     minimumSize: const Size(double.infinity, 60),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
