@@ -2,7 +2,7 @@ import 'package:vally_app/app/domain/entities/course.dart';
 import 'course_repository.dart';
 import 'dart:math';
 import 'package:hive/hive.dart';
-import '../models/course_hive_model.dart';
+import '../../models/course_hive_model.dart';
 
 class CourseRepositoryImpl implements CourseRepository {
   static const String _currentStudentName = 'Estudiante Actual';

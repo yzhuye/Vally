@@ -1,7 +1,7 @@
 import 'package:vally_app/app/domain/entities/course.dart';
 import 'category_repository.dart';
 import 'package:hive/hive.dart';
-import '../models/category_hive_model.dart';
+import '../../models/category_hive_model.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
   static const _boxName = 'categories';
