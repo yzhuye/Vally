@@ -1,11 +1,21 @@
 import 'package:vally_app/app/domain/entities/course.dart';
 import 'course_repository.dart';
 import 'dart:math';
+import 'package:hive/hive.dart';
+import '../models/course_hive_model.dart';
 
 class CourseRepositoryImpl implements CourseRepository {
-  void _initializeData() {
-    if (!_isInitialized) {
-      _allCourses.addAll([
+  static const String _currentStudentName = 'Estudiante Actual';
+  late final Box<CourseHiveModel> _courseBox;
+  bool _isInitialized = false;
+
+  CourseRepositoryImpl() {
+    _courseBox = Hive.box<CourseHiveModel>('courses');
+  }
+
+  Future<void> _initializeData() async {
+    if (!_isInitialized && _courseBox.isEmpty) {
+      final initialCourses = [
         Course(
             id: '1',
             title: 'Curso 1: UI Móvil',
@@ -80,46 +90,38 @@ class CourseRepositoryImpl implements CourseRepository {
             enrolledStudents: ['Roberto Kim'],
             invitationCode: 'BCKND5',
             imageUrl: 'assets/images/1.jpg'),
-      ]);
-
-      // Inicializar cursos inscritos para el estudiante
-      _enrolledCourses.addAll(_allCourses
-          .where(
-              (course) => course.enrolledStudents.contains(_currentStudentName))
-          .toList());
-
+      ];
+      for (var course in initialCourses) {
+        await _courseBox.put(course.id, CourseHiveModel.fromCourse(course));
+      }
       _isInitialized = true;
     }
   }
 
   @override
   Future<List<Course>> getCourses(String userType) async {
-    _initializeData();
-
-    // Simula una llamada a una API
+    await _initializeData();
     await Future.delayed(const Duration(seconds: 1));
-
+    final allCourses =
+        _courseBox.values.map((e) => e.toCourse()).whereType<Course>().toList();
     if (userType == 'Estudiante') {
-      return _enrolledCourses;
+      return allCourses
+          .where((c) => c.enrolledStudents.contains(_currentStudentName))
+          .toList();
     } else if (userType == 'Profesor') {
-      return _allCourses;
+      return allCourses;
     } else {
-      // Devolver una lista vacía o lanzar un error si el tipo de usuario no es válido
       return [];
     }
   }
 
-  // Funcionalidades adicionales para gestión de cursos
-  static final List<Course> _allCourses = [];
-  static final List<Course> _enrolledCourses = [];
-  static const String _currentStudentName = 'Estudiante Actual';
-  static bool _isInitialized = false;
+  // ...resto de métodos deben migrar a usar _courseBox en vez de listas estáticas...
 
   Future<Course> createCourse({
     required String title,
     required String description,
   }) async {
-    _initializeData();
+    await _initializeData();
 
     final course = Course(
       id: _generateId(),
@@ -130,55 +132,33 @@ class CourseRepositoryImpl implements CourseRepository {
       imageUrl: 'assets/images/course_placeholder.png',
     );
 
-    _allCourses.add(course);
+    await _courseBox.put(course.id, CourseHiveModel.fromCourse(course));
     return course;
   }
 
   Future<bool> joinCourseWithCode(String invitationCode) async {
-    _initializeData();
+    await _initializeData();
 
-    // Buscar el curso en la lista principal
-    final courseIndex = _allCourses.indexWhere(
-      (course) => course.invitationCode == invitationCode,
+    final allCourses =
+        _courseBox.values.map((e) => e.toCourse()).whereType<Course>().toList();
+    final course = allCourses.firstWhere(
+      (c) => c.invitationCode == invitationCode,
+      orElse: () => throw Exception('Código de invitación inválido'),
     );
 
-    if (courseIndex == -1) {
-      throw Exception('Código de invitación inválido');
-    }
-
-    final targetCourse = _allCourses[courseIndex];
-
-    if (!targetCourse.enrolledStudents.contains(_currentStudentName)) {
-      // Actualizar el curso en la lista principal
+    if (!course.enrolledStudents.contains(_currentStudentName)) {
       final updatedCourse = Course(
-        id: targetCourse.id,
-        title: targetCourse.title,
-        description: targetCourse.description,
-        enrolledStudents: [
-          ...targetCourse.enrolledStudents,
-          _currentStudentName
-        ],
-        categories: targetCourse.categories,
-        groups: targetCourse.groups,
-        invitationCode: targetCourse.invitationCode,
-        imageUrl: targetCourse.imageUrl,
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        enrolledStudents: [...course.enrolledStudents, _currentStudentName],
+        categories: course.categories,
+        groups: course.groups,
+        invitationCode: course.invitationCode,
+        imageUrl: course.imageUrl,
       );
-
-      // Actualizar en la lista principal
-      _allCourses[courseIndex] = updatedCourse;
-
-      // Agregar a la lista de cursos inscritos del estudiante
-      if (!_enrolledCourses.any((c) => c.id == targetCourse.id)) {
-        _enrolledCourses.add(updatedCourse);
-      } else {
-        // Actualizar en la lista de inscritos también
-        final enrolledIndex =
-            _enrolledCourses.indexWhere((c) => c.id == targetCourse.id);
-        if (enrolledIndex != -1) {
-          _enrolledCourses[enrolledIndex] = updatedCourse;
-        }
-      }
-
+      await _courseBox.put(
+          updatedCourse.id, CourseHiveModel.fromCourse(updatedCourse));
       return true;
     }
     return false;
@@ -189,15 +169,11 @@ class CourseRepositoryImpl implements CourseRepository {
   }
 
   Future<Course> updateInvitationCode(String courseId) async {
-    _initializeData();
-
-    final courseIndex =
-        _allCourses.indexWhere((course) => course.id == courseId);
-    if (courseIndex == -1) throw Exception('Curso no encontrado');
-
-    final course = _allCourses[courseIndex];
+    await _initializeData();
+    final courseHive = _courseBox.get(courseId);
+    if (courseHive == null) throw Exception('Curso no encontrado');
+    final course = courseHive.toCourse();
     final newCode = _generateInvitationCode();
-
     final updatedCourse = Course(
       id: course.id,
       title: course.title,
@@ -208,26 +184,17 @@ class CourseRepositoryImpl implements CourseRepository {
       invitationCode: newCode,
       imageUrl: course.imageUrl,
     );
-
-    // Actualizar en la lista principal
-    _allCourses[courseIndex] = updatedCourse;
-
-    // Actualizar también en cursos inscritos si existe
-    final enrolledIndex = _enrolledCourses.indexWhere((c) => c.id == courseId);
-    if (enrolledIndex != -1) {
-      _enrolledCourses[enrolledIndex] = updatedCourse;
-    }
-
+    await _courseBox.put(
+        updatedCourse.id, CourseHiveModel.fromCourse(updatedCourse));
     return updatedCourse;
   }
 
   Course? getCourseById(String courseId) {
-    _initializeData();
-    try {
-      return _allCourses.firstWhere((course) => course.id == courseId);
-    } catch (e) {
-      return null;
+    final courseHive = _courseBox.get(courseId);
+    if (courseHive != null) {
+      return courseHive.toCourse();
     }
+    return null;
   }
 
   String _generateInvitationCode() {
