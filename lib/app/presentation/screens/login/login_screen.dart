@@ -61,8 +61,24 @@ class LoginScreen extends StatelessWidget {
                         isPasswordVisible: controller.isPasswordVisible.value,
                         onVisibilityToggle: controller.togglePasswordVisibility,
                       )),
-                  const SizedBox(height: 32.0),
+                  const SizedBox(height: 20.0),
                   
+                  // Checkbox
+                  Obx(() => Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Checkbox(
+                            value: controller.isRememberMeChecked.value,
+                            onChanged: (value) => controller.toggleRememberMe(value),
+                          ),
+                          const Text(
+                            'Recuérdame',
+                            style: TextStyle(fontSize: 16.0, color: Colors.black54),
+                          ),
+                        ],
+                      )),
+                  const SizedBox(height: 32.0),
+
                   // Usamos Obx para reconstruir solo el botón
                   Obx(() => LoginButton(
                         isLoading: controller.isLoading.value,
