@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:hive/hive.dart';
 import 'package:vally_app/app/domain/usecases/login/login_user.dart'; 
 import 'package:vally_app/app/data/repositories/auth/auth_repository_impl.dart'; 
 import 'package:vally_app/app/presentation/screens/home/home_screen.dart';
@@ -13,11 +14,24 @@ class LoginController extends GetxController {
   final passwordController = TextEditingController();
   var isPasswordVisible = false.obs;
   var isLoading = false.obs;
-  
+  final isRememberMeChecked = false.obs;
+  final Box loginBox = Hive.box('login');
   static var logger = Logger();
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadSavedLoginData();
+  }
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
+  }
+
+  void toggleRememberMe(bool? value) {
+    if (value != null) {
+      isRememberMeChecked.value = value;
+    }
   }
 
   Future<void> login() async {
@@ -47,6 +61,9 @@ class LoginController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
+        if (isRememberMeChecked.value) {
+          _saveLoginData(usernameOrEmailController.text, passwordController.text);
+        }
         Get.offAll(() => const HomeScreen());
       } else {
         String errorMessage = response?["error"] ?? "Error desconocido";
@@ -68,6 +85,21 @@ class LoginController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void _saveLoginData(String identifier, String password) {
+    loginBox.put('identifier', identifier);
+    loginBox.put('password', password);
+    loginBox.put('rememberMe', true);
+  }
+
+  void _loadSavedLoginData() {
+    final rememberMe = loginBox.get('rememberMe', defaultValue: false);
+    if (rememberMe) {
+      usernameOrEmailController.text = loginBox.get('identifier', defaultValue: '');
+      passwordController.text = loginBox.get('password', defaultValue: '');
+      isRememberMeChecked.value = true;
     }
   }
 

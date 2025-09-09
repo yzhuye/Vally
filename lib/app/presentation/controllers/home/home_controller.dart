@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:vally_app/app/domain/entities/course.dart';
 import 'package:vally_app/app/domain/usecases/course/get_courses.dart';
 import 'package:vally_app/app/data/repositories/course/course_repository_impl.dart';
 import 'package:vally_app/app/presentation/controllers/course/course_management_controller.dart';
+import 'package:vally_app/app/presentation/screens/login/login_screen.dart';
 
 class HomeController extends GetxController {
   final GetCourses _getCourses;
   final CourseRepositoryImpl _courseRepository;
+  final RxString userIdentifier = ''.obs;
 
   HomeController() : 
     _courseRepository = CourseRepositoryImpl(),
@@ -23,6 +26,7 @@ class HomeController extends GetxController {
     // Carga los cursos iniciales para el rol por defecto
     fetchCoursesForRole(selectedUserType.value);
     super.onInit();
+    _loadUserIdentifier();
   }
 
   void fetchCoursesForRole(String userType) async {
@@ -34,6 +38,18 @@ class HomeController extends GetxController {
     } finally {
       isLoading(false);
     }
+  }
+
+  void _loadUserIdentifier() {
+    final loginBox = Hive.box('login');
+    userIdentifier.value = loginBox.get('identifier', defaultValue: 'Usuario');
+  }
+
+  void logout() {
+    final loginBox = Hive.box('login');
+    loginBox.clear();
+
+    Get.offAll(() => const LoginScreen());
   }
 
   void selectUserType(String userType) {

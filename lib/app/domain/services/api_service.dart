@@ -6,19 +6,19 @@ class ApiService {
   // "database"
   static List<Map<String, String>> users = [
     {
-      "username": "kevin123",
-      "email": "kevin@email.com",
-      "password": "password"
+      "username": "ana",
+      "email": "a@a.com",
+      "password": "123456"
     },
     {
-      "username": "daniel",
-      "email": "daniel@email.com",
-      "password": "abcd1234"
+      "username": "bruno",
+      "email": "b@a.com",
+      "password": "123456"
     },
     {
-      "username": "profesor",
-      "email": "prof@email.com",
-      "password": "lmao1234"
+      "username": "carlos",
+      "email": "c@a.com",
+      "password": "123456"
     },
   ];
 

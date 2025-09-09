@@ -13,6 +13,7 @@ void main() async {
   Hive.registerAdapter(CategoryHiveModelAdapter());
   await Hive.openBox<CourseHiveModel>('courses');
   await Hive.openBox('categories');
+  await Hive.openBox('login');
   runApp(const MyApp());
 }
 
