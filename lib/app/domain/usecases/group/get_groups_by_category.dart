@@ -1,5 +1,5 @@
 import '../../entities/course.dart';
-import '../../services/group_repository.dart';
+import '../../../data/repositories/group/group_repository_impl.dart';
 
 class GetGroupsByCategory {
   final GroupRepository repository;

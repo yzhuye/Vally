@@ -23,7 +23,8 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {},
           ),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.account_circle_outlined, color: Color(0xFF757575)),
+            icon: const Icon(Icons.account_circle_outlined,
+                color: Color(0xFF757575)),
             onSelected: (value) {
               if (value == 'logout') {
                 controller.logout();
@@ -44,7 +45,7 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hola,\n${controller.userIdentifier.value}',
+              'Hola,\n${controller.currentUser.value?.email ?? ''}',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),

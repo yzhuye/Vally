@@ -15,19 +15,15 @@ class CourseManagementController extends GetxController {
   @override
   void onInit() {
     course = _initialCourse.obs;
-    // Load the latest version from the repository (Hive) so enrolled students and other
-    // dynamic data are up-to-date when the screen opens.
     refreshCourse();
     super.onInit();
   }
 
   Future<void> generateNewInvitationCode() async {
     try {
-      // Usar el repository para actualizar el código
       final updatedCourse =
           await _repository.updateInvitationCode(course.value.id);
 
-      // Actualizar el estado local
       course.value = updatedCourse;
 
       Get.snackbar(
@@ -39,13 +35,12 @@ class CourseManagementController extends GetxController {
         icon: const Icon(Icons.check_circle, color: Colors.white),
       );
 
-      // Actualizar también el HomeController si está activo
+      // ✅ actualizar el HomeController (versión nueva)
       try {
         final homeController = Get.find<HomeController>();
-        homeController
-            .fetchCoursesForRole(homeController.selectedUserType.value);
+        await homeController.loadUserCourses();
       } catch (e) {
-        // HomeController no está activo, no hacer nada
+        // si HomeController no está en memoria, no pasa nada
       }
     } catch (e) {
       Get.snackbar(
@@ -65,10 +60,15 @@ class CourseManagementController extends GetxController {
   }
 
   void refreshCourse() async {
-    // Obtener la versión más actualizada del curso
     final updatedCourse = _repository.getCourseById(course.value.id);
     if (updatedCourse != null) {
       course.value = updatedCourse;
+
+      // ✅ actualizar también HomeController
+      try {
+        final homeController = Get.find<HomeController>();
+        await homeController.loadUserCourses();
+      } catch (_) {}
     }
   }
 
