@@ -6,6 +6,7 @@ import 'package:vally_app/app/domain/usecases/course/get_courses.dart';
 import 'package:vally_app/app/data/repositories/course/course_repository_impl.dart';
 import 'package:vally_app/app/presentation/controllers/course/course_management_controller.dart';
 import 'package:vally_app/app/presentation/screens/login/login_screen.dart';
+import 'package:vally_app/app/presentation/controllers/login/login_controller.dart';
 
 class HomeController extends GetxController {
   final GetCourses _getCourses;
@@ -48,7 +49,7 @@ class HomeController extends GetxController {
   void logout() {
     final loginBox = Hive.box('login');
     loginBox.clear();
-
+    Get.delete<LoginController>();
     Get.offAll(() => const LoginScreen());
   }
 
