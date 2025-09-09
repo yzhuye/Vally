@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../domain/entities/course.dart';
 import '../../widgets/course/course_card.dart';
 import '../../../data/repositories/course/category_repository_imp.dart';
+import '../activity/category_activity_screen.dart';
 
 class CourseCategoryScreen extends StatelessWidget {
   final Course course;
@@ -64,7 +65,15 @@ class CourseCategoryScreen extends StatelessWidget {
                       return ListTile(
                         title: Text(category.name),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CategoryActivityScreen(
+                                  course: course, category: category.name),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
