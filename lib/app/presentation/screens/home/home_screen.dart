@@ -22,10 +22,19 @@ class HomeScreen extends StatelessWidget {
                 const Icon(Icons.notifications_none, color: Color(0xFF757575)),
             onPressed: () {},
           ),
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined,
-                color: Color(0xFF757575)),
-            onPressed: () {},
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.account_circle_outlined, color: Color(0xFF757575)),
+            onSelected: (value) {
+              if (value == 'logout') {
+                controller.logout();
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'logout',
+                child: Text('Cerrar sesión'),
+              ),
+            ],
           ),
         ],
       ),
@@ -34,8 +43,8 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Hola,\nDaniel A',
+            Text(
+              'Hola,\n${controller.userIdentifier.value}',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
@@ -163,6 +172,4 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  
 }
