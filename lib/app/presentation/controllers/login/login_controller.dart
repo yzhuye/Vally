@@ -61,10 +61,11 @@ class LoginController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-        if (isRememberMeChecked.value) {
-          _saveLoginData(
-              usernameOrEmailController.text, passwordController.text);
-        }
+        _saveLoginData(
+          usernameOrEmailController.text,
+          passwordController.text,
+          isRememberMeChecked.value,
+        );
         Get.offAll(() => const HomeScreen());
       } else {
         String errorMessage = response?["error"] ?? "Error desconocido";
@@ -89,10 +90,10 @@ class LoginController extends GetxController {
     }
   }
 
-  void _saveLoginData(String identifier, String password) {
+  void _saveLoginData(String identifier, String password, bool rememberMe) {
     loginBox.put('identifier', identifier);
     loginBox.put('password', password);
-    loginBox.put('rememberMe', true);
+    loginBox.put('rememberMe', rememberMe);
   }
 
   void _loadSavedLoginData() {
@@ -102,7 +103,11 @@ class LoginController extends GetxController {
           loginBox.get('identifier', defaultValue: '');
       passwordController.text = loginBox.get('password', defaultValue: '');
       isRememberMeChecked.value = true;
-    }
+    } else {
+    usernameOrEmailController.clear();
+    passwordController.clear();
+    isRememberMeChecked.value = false;
+  }
   }
 
   @override
