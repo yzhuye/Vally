@@ -1,10 +1,10 @@
 import '../../entities/course.dart';
 import '../../../data/repositories/course/category_repository.dart';
 
-class GetCategories {
+class GetCategoriesForCourse {
   final CategoryRepository repository;
 
-  GetCategories(this.repository);
+  GetCategoriesForCourse(this.repository);
 
   List<Category> call(String courseId) {
     return repository.getCategoriesForCourse(courseId);

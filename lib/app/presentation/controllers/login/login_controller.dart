@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:hive/hive.dart';
-import 'package:vally_app/app/domain/usecases/login/login_user.dart'; 
-import 'package:vally_app/app/data/repositories/auth/auth_repository_impl.dart'; 
+import 'package:vally_app/app/domain/usecases/login/login_user.dart';
+import 'package:vally_app/app/data/repositories/auth/auth_repository_impl.dart';
 import 'package:vally_app/app/presentation/screens/home/home_screen.dart';
 
 class LoginController extends GetxController {
   final LoginUser _loginUser = LoginUser(AuthRepositoryImpl());
-  
+
   // Controladores y estado reactivo
   final usernameOrEmailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -35,7 +35,8 @@ class LoginController extends GetxController {
   }
 
   Future<void> login() async {
-    if (usernameOrEmailController.text.isEmpty || passwordController.text.isEmpty) {
+    if (usernameOrEmailController.text.isEmpty ||
+        passwordController.text.isEmpty) {
       Get.snackbar(
         'Campos Vacíos',
         'Por favor, llena ambos campos.',
@@ -47,7 +48,7 @@ class LoginController extends GetxController {
 
     try {
       isLoading.value = true;
-      
+
       final response = await _loginUser(
         usernameOrEmailController.text,
         passwordController.text,
@@ -62,7 +63,8 @@ class LoginController extends GetxController {
           colorText: Colors.white,
         );
         if (isRememberMeChecked.value) {
-          _saveLoginData(usernameOrEmailController.text, passwordController.text);
+          _saveLoginData(
+              usernameOrEmailController.text, passwordController.text);
         }
         Get.offAll(() => const HomeScreen());
       } else {
@@ -97,7 +99,8 @@ class LoginController extends GetxController {
   void _loadSavedLoginData() {
     final rememberMe = loginBox.get('rememberMe', defaultValue: false);
     if (rememberMe) {
-      usernameOrEmailController.text = loginBox.get('identifier', defaultValue: '');
+      usernameOrEmailController.text =
+          loginBox.get('identifier', defaultValue: '');
       passwordController.text = loginBox.get('password', defaultValue: '');
       isRememberMeChecked.value = true;
     }

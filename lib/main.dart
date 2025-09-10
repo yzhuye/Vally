@@ -14,18 +14,15 @@ void main() async {
 
   await Hive.initFlutter();
 
-  // 🔹 Registrar adapters
   Hive.registerAdapter(CourseHiveModelAdapter());
   Hive.registerAdapter(CategoryHiveModelAdapter());
-  Hive.registerAdapter(UserHiveModelAdapter()); // <-- nuevo
+  Hive.registerAdapter(UserHiveModelAdapter());
 
-  // 🔹 Abrir boxes
   await Hive.openBox<CourseHiveModel>('courses');
   await Hive.openBox('categories');
-  await Hive.openBox<UserHiveModel>('users'); // <-- nuevo
+  await Hive.openBox<UserHiveModel>('users');
   await Hive.openBox('login');
 
-  // 🔹 Precargar datos de prueba
   await preloadData();
 
   runApp(const MyApp());
