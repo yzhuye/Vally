@@ -1,5 +1,5 @@
 import 'package:vally_app/app/domain/entities/course.dart';
-import 'course_repository.dart';
+import '../../../domain/repositories/course_repository.dart';
 import 'dart:math';
 import 'package:hive/hive.dart';
 import '../../models/course_hive_model.dart';
@@ -14,86 +14,8 @@ class CourseRepositoryImpl implements CourseRepository {
   }
 
   Future<void> _initializeData() async {
-    if (!_isInitialized && _courseBox.isEmpty) {
-      final initialCourses = [
-        Course(
-            id: '1',
-            title: 'Curso 1: UI Móvil',
-            description: 'Aprende desarrollo de interfaces móviles',
-            enrolledStudents: ['Estudiante Actual'],
-            invitationCode: 'UIMVL1',
-            imageUrl: 'assets/images/1.jpg'),
-        Course(
-            id: '2',
-            title: 'Curso 2: UI Móvil',
-            description: 'Desarrollo avanzado de UI',
-            enrolledStudents: ['Estudiante Actual', 'Juan Pérez'],
-            invitationCode: 'UIMVL2',
-            imageUrl: 'assets/images/2.jpg'),
-        Course(
-            id: '3',
-            title: 'Curso 3: UI Móvil',
-            description: 'Patrones de diseño móvil',
-            enrolledStudents: ['Estudiante Actual'],
-            invitationCode: 'UIMVL3',
-            imageUrl: 'assets/images/1.jpg'),
-        Course(
-            id: '4',
-            title: 'Curso 4: UI Móvil',
-            description: 'Animaciones y transiciones',
-            enrolledStudents: [
-              'Estudiante Actual',
-              'María García',
-              'Carlos López'
-            ],
-            invitationCode: 'UIMVL4',
-            imageUrl: 'assets/images/1.jpg'),
-        Course(
-            id: '5',
-            title: 'Curso 5: UI Móvil',
-            description: 'Responsive design',
-            enrolledStudents: ['Estudiante Actual'],
-            invitationCode: 'UIMVL5',
-            imageUrl: 'assets/images/1.jpg'),
-        Course(
-            id: '6',
-            title: 'Curso A: Backend',
-            description: 'Desarrollo de APIs y servicios backend',
-            enrolledStudents: ['Ana Martín', 'Pedro Sánchez'],
-            invitationCode: 'BCKND1',
-            imageUrl: 'assets/images/1.jpg'),
-        Course(
-            id: '7',
-            title: 'Curso B: Backend',
-            description: 'Bases de datos y arquitectura',
-            enrolledStudents: ['Luis Fernández'],
-            invitationCode: 'BCKND2',
-            imageUrl: 'assets/images/1.jpg'),
-        Course(
-            id: '8',
-            title: 'Curso C: Backend',
-            description: 'Microservicios y DevOps',
-            enrolledStudents: ['Elena Ruiz', 'Miguel Torres', 'Sofia Mendez'],
-            invitationCode: 'BCKND3',
-            imageUrl: 'assets/images/1.jpg'),
-        Course(
-            id: '9',
-            title: 'Curso D: Backend',
-            description: 'Seguridad y autenticación',
-            enrolledStudents: [],
-            invitationCode: 'BCKND4',
-            imageUrl: 'assets/images/1.jpg'),
-        Course(
-            id: '10',
-            title: 'Curso E: Backend',
-            description: 'Optimización y performance',
-            enrolledStudents: ['Roberto Kim'],
-            invitationCode: 'BCKND5',
-            imageUrl: 'assets/images/1.jpg'),
-      ];
-      for (var course in initialCourses) {
-        await _courseBox.put(course.id, CourseHiveModel.fromCourse(course));
-      }
+    if (!_isInitialized) {
+      // Ya no necesitamos cursos de prueba - usamos preload_data.dart para datos iniciales
       _isInitialized = true;
     }
   }
@@ -130,6 +52,8 @@ class CourseRepositoryImpl implements CourseRepository {
       enrolledStudents: [],
       invitationCode: _generateInvitationCode(),
       imageUrl: 'assets/images/course_placeholder.png',
+      createdBy:
+          'system', // Placeholder - este método no se usa en el home controller
     );
 
     await _courseBox.put(course.id, CourseHiveModel.fromCourse(course));
@@ -156,6 +80,7 @@ class CourseRepositoryImpl implements CourseRepository {
         groups: course.groups,
         invitationCode: course.invitationCode,
         imageUrl: course.imageUrl,
+        createdBy: course.createdBy,
       );
       await _courseBox.put(
           updatedCourse.id, CourseHiveModel.fromCourse(updatedCourse));
@@ -183,6 +108,7 @@ class CourseRepositoryImpl implements CourseRepository {
       groups: course.groups,
       invitationCode: newCode,
       imageUrl: course.imageUrl,
+      createdBy: course.createdBy,
     );
     await _courseBox.put(
         updatedCourse.id, CourseHiveModel.fromCourse(updatedCourse));

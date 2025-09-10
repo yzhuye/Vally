@@ -16,7 +16,8 @@ class CourseHiveModel extends HiveObject {
   String invitationCode;
   @HiveField(5)
   String imageUrl;
-  // Puedes agregar más campos si tu entidad Course tiene más propiedades
+  @HiveField(6)
+  String? createdBy;
 
   CourseHiveModel({
     required this.id,
@@ -25,9 +26,9 @@ class CourseHiveModel extends HiveObject {
     required this.enrolledStudents,
     required this.invitationCode,
     required this.imageUrl,
+    this.createdBy,
   });
 
-  // Métodos de conversión para facilitar el mapeo entre Course y CourseHiveModel
   factory CourseHiveModel.fromCourse(Course course) => CourseHiveModel(
         id: course.id,
         title: course.title,
@@ -35,6 +36,7 @@ class CourseHiveModel extends HiveObject {
         enrolledStudents: List<String>.from(course.enrolledStudents),
         invitationCode: course.invitationCode,
         imageUrl: course.imageUrl ?? '',
+        createdBy: course.createdBy,
       );
 
   Course toCourse() => Course(
@@ -44,5 +46,6 @@ class CourseHiveModel extends HiveObject {
         enrolledStudents: List<String>.from(enrolledStudents),
         invitationCode: invitationCode,
         imageUrl: imageUrl.isEmpty ? null : imageUrl,
+        createdBy: createdBy ?? 'unknown',
       );
 }

@@ -1,12 +1,12 @@
 import '../../entities/course.dart';
-import '../../../data/repositories/course/category_repository.dart';
+import '../../repositories/category_repository.dart';
 
-class GetCategories {
-  final CategoryRepository repository;
+class GetCategoriesUseCase {
+  final CategoryRepository _repository;
 
-  GetCategories(this.repository);
+  GetCategoriesUseCase(this._repository);
 
   List<Category> call(String courseId) {
-    return repository.getCategoriesForCourse(courseId);
+    return _repository.getCategoriesByCourse(courseId);
   }
 }

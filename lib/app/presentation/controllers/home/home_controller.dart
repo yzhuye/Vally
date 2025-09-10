@@ -1,49 +1,102 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/material.dart';
+
 import 'package:vally_app/app/domain/entities/course.dart';
-import 'package:vally_app/app/domain/usecases/course/get_courses.dart';
-import 'package:vally_app/app/data/repositories/course/course_repository_impl.dart';
-import 'package:vally_app/app/presentation/controllers/course/course_management_controller.dart';
+import 'package:vally_app/app/domain/entities/user.dart';
+
+import 'package:vally_app/app/data/models/course_hive_model.dart';
+import 'package:vally_app/app/data/models/user_hive_model.dart';
+
 import 'package:vally_app/app/presentation/screens/login/login_screen.dart';
 import 'package:vally_app/app/presentation/controllers/login/login_controller.dart';
 
 class HomeController extends GetxController {
-  final GetCourses _getCourses;
-  final CourseRepositoryImpl _courseRepository;
-  final RxString userIdentifier = ''.obs;
+  var currentUser = Rx<User?>(null);
 
-  HomeController() : 
-    _courseRepository = CourseRepositoryImpl(),
-    _getCourses = GetCourses(CourseRepositoryImpl());
+  var professorCourses = <Course>[].obs;
+  var studentCourses = <Course>[].obs;
 
-  var courses = <Course>[].obs;
-  var isLoading = true.obs;
-  var selectedUserType = 'Estudiante'.obs; // 'Estudiante' o 'Profesor'
+  var _originalProfessorCourses = <Course>[];
+  var _originalStudentCourses = <Course>[];
+
+  var isLoading = false.obs;
   var searchText = ''.obs;
+
+  var selectedUserType = 'Estudiante'.obs;
 
   @override
   void onInit() {
-    // Carga los cursos iniciales para el rol por defecto
-    fetchCoursesForRole(selectedUserType.value);
     super.onInit();
-    _loadUserIdentifier();
+    _loadUserFromLoginBox();
   }
 
-  void fetchCoursesForRole(String userType) async {
-    try {
-      isLoading(true);
-      // Pasa el tipo de usuario al caso de uso
-      var courseList = await _getCourses(userType);
-      courses.assignAll(courseList);
-    } finally {
-      isLoading(false);
+  void _loadUserFromLoginBox() {
+    final loginBox = Hive.box('login');
+    final email = loginBox.get('identifier');
+
+    if (email != null) {
+      final userBox = Hive.box<UserHiveModel>('users');
+      final userHive = userBox.values.firstWhere((u) => u.email == email);
+      currentUser.value = userHive.toUser();
+
+      loadUserCourses();
     }
   }
 
-  void _loadUserIdentifier() {
-    final loginBox = Hive.box('login');
-    userIdentifier.value = loginBox.get('identifier', defaultValue: 'Usuario');
+  Future<void> loadUserCourses() async {
+    if (currentUser.value == null) return;
+
+    isLoading(true);
+    final courseBox = Hive.box<CourseHiveModel>('courses');
+    final allCourses = courseBox.values.map((c) => c.toCourse()).toList();
+    if (currentUser.value!.isTeacher) {
+      _originalProfessorCourses = allCourses.where((c) {
+        final isCreatedByUser = c.createdBy == currentUser.value!.email;
+        return isCreatedByUser;
+      }).toList();
+    } else {
+      _originalProfessorCourses = [];
+    }
+
+    _originalStudentCourses = allCourses
+        .where((c) => c.enrolledStudents.contains(currentUser.value!.email))
+        .toList();
+
+    professorCourses.assignAll(_originalProfessorCourses);
+    studentCourses.assignAll(_originalStudentCourses);
+
+    applySearch();
+    isLoading(false);
+  }
+
+  void selectUserType(String userType) {
+    selectedUserType.value = userType;
+  }
+
+  void updateSearchText(String text) {
+    searchText.value = text;
+    applySearch();
+  }
+
+  void applySearch() {
+    if (searchText.value.isEmpty) {
+      professorCourses.assignAll(_originalProfessorCourses);
+      studentCourses.assignAll(_originalStudentCourses);
+      return;
+    }
+
+    final query = searchText.value.toLowerCase();
+    final filteredProfessor = _originalProfessorCourses
+        .where((c) => c.title.toLowerCase().contains(query))
+        .toList();
+
+    final filteredStudent = _originalStudentCourses
+        .where((c) => c.title.toLowerCase().contains(query))
+        .toList();
+
+    professorCourses.assignAll(filteredProfessor);
+    studentCourses.assignAll(filteredStudent);
   }
 
   void logout() {
@@ -53,31 +106,60 @@ class HomeController extends GetxController {
     Get.offAll(() => const LoginScreen());
   }
 
-  void selectUserType(String userType) {
-    //Actualiza el estado del tipo de usuario seleccionado
-    selectedUserType.value = userType;
-    //Vuelve a cargar los cursos para el nuevo rol seleccionado
-    fetchCoursesForRole(userType);
+  List<Course> get filteredCourses {
+    if (selectedUserType.value == 'Profesor') {
+      return professorCourses;
+    } else {
+      return studentCourses;
+    }
   }
 
   Future<void> createCourse(String title, String description) async {
+    if (currentUser.value == null) return;
+
     try {
       isLoading(true);
-      await _courseRepository.createCourse(
+
+      final courseBox = Hive.box<CourseHiveModel>('courses');
+      final userBox = Hive.box<UserHiveModel>('users');
+
+      final newCourse = Course(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: title,
         description: description,
+        enrolledStudents: [],
+        invitationCode: "CODE${DateTime.now().millisecondsSinceEpoch % 10000}",
+        imageUrl: null,
+        createdBy: currentUser.value!.email,
       );
-      // Refrescar la lista de cursos después de crear uno nuevo
-      fetchCoursesForRole(selectedUserType.value);
+
+      await courseBox.put(newCourse.id, CourseHiveModel.fromCourse(newCourse));
+
+      final oldUser = currentUser.value!;
+
+      final updatedUser = User(
+        id: oldUser.id,
+        username: oldUser.username,
+        email: oldUser.email,
+        password: oldUser.password,
+        isTeacher: true,
+        courseIds: [...oldUser.courseIds, newCourse.id],
+      );
+
+      await userBox.put(updatedUser.id, UserHiveModel.fromUser(updatedUser));
+      currentUser.value = updatedUser;
+
+      await loadUserCourses();
+
       Get.snackbar(
-        'Éxito', 
+        'Éxito',
         'Curso creado exitosamente',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
     } catch (e) {
       Get.snackbar(
-        'Error', 
+        'Error',
         'Error al crear el curso: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -88,30 +170,35 @@ class HomeController extends GetxController {
   }
 
   Future<void> joinCourseWithCode(String invitationCode) async {
+    if (currentUser.value == null) return;
+
     try {
       isLoading(true);
-      bool success = await _courseRepository.joinCourseWithCode(invitationCode);
-      if (success) {
-        // Refrescar la lista de cursos después de unirse
-        fetchCoursesForRole(selectedUserType.value);
-        
-        // Actualizar cualquier CourseManagementController que esté activo
-        try {
-          final courseManagementController = Get.find<CourseManagementController>();
-          courseManagementController.refreshCourse();
-        } catch (e) {
-          // CourseManagementController no está activo, no hacer nada
-        }
-        
+      final courseBox = Hive.box<CourseHiveModel>('courses');
+
+      final courseHive = courseBox.values.firstWhere(
+        (c) => c.invitationCode == invitationCode,
+        orElse: () => throw Exception("Curso no encontrado"),
+      );
+
+      final course = courseHive.toCourse();
+
+      if (!course.enrolledStudents.contains(currentUser.value!.email)) {
+        course.enrolledStudents.add(currentUser.value!.email);
+
+        await courseBox.put(course.id, CourseHiveModel.fromCourse(course));
+
+        await loadUserCourses();
+
         Get.snackbar(
-          'Éxito', 
+          'Éxito',
           'Te has unido al curso exitosamente',
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
       } else {
         Get.snackbar(
-          'Info', 
+          'Info',
           'Ya estás inscrito en este curso',
           backgroundColor: Colors.orange,
           colorText: Colors.white,
@@ -119,7 +206,7 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error', 
+        'Error',
         'Error al unirse al curso: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -127,19 +214,5 @@ class HomeController extends GetxController {
     } finally {
       isLoading(false);
     }
-  }
-
-  void updateSearchText(String text) {
-    searchText.value = text;
-  }
-
-  List<Course> get filteredCourses {
-    if (searchText.value.isEmpty) {
-      return courses;
-    }
-    return courses.where((course) => 
-      course.title.toLowerCase().contains(searchText.value.toLowerCase()) ||
-      course.description.toLowerCase().contains(searchText.value.toLowerCase())
-    ).toList();
   }
 }

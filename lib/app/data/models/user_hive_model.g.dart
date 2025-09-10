@@ -1,50 +1,47 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'course_hive_model.dart';
+part of 'user_hive_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class CourseHiveModelAdapter extends TypeAdapter<CourseHiveModel> {
+class UserHiveModelAdapter extends TypeAdapter<UserHiveModel> {
   @override
-  final int typeId = 0;
+  final int typeId = 2;
 
   @override
-  CourseHiveModel read(BinaryReader reader) {
+  UserHiveModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return CourseHiveModel(
+    return UserHiveModel(
       id: fields[0] as String,
-      title: fields[1] as String,
-      description: fields[2] as String,
-      enrolledStudents: (fields[3] as List).cast<String>(),
-      invitationCode: fields[4] as String,
-      imageUrl: fields[5] as String,
-      createdBy: fields[6] as String?,
+      email: fields[1] as String,
+      password: fields[2] as String,
+      username: fields[3] as String?,
+      isTeacher: fields[4] as bool,
+      courseIds: (fields[5] as List).cast<String>(),
     );
   }
 
   @override
-  void write(BinaryWriter writer, CourseHiveModel obj) {
+  void write(BinaryWriter writer, UserHiveModel obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.title)
+      ..write(obj.email)
       ..writeByte(2)
-      ..write(obj.description)
+      ..write(obj.password)
       ..writeByte(3)
-      ..write(obj.enrolledStudents)
+      ..write(obj.username)
       ..writeByte(4)
-      ..write(obj.invitationCode)
+      ..write(obj.isTeacher)
       ..writeByte(5)
-      ..write(obj.imageUrl)
-      ..writeByte(6)
-      ..write(obj.createdBy);
+      ..write(obj.courseIds);
   }
 
   @override
@@ -53,7 +50,7 @@ class CourseHiveModelAdapter extends TypeAdapter<CourseHiveModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CourseHiveModelAdapter &&
+      other is UserHiveModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

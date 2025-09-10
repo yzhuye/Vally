@@ -3,10 +3,10 @@ import 'package:get/get.dart';
 import 'package:vally_app/app/presentation/controllers/home/home_controller.dart';
 
 class CourseDialogs {
-  // Hacemos el constructor privado para que nadie pueda instanciar esta clase.
   CourseDialogs._();
 
-  static void showCreateCourse(BuildContext context, HomeController controller) {
+  static void showCreateCourse(
+      BuildContext context, HomeController controller) {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
 
@@ -93,7 +93,9 @@ class CourseDialogs {
               }
             },
             icon: const Icon(Icons.check),
-            label: const Text('Crear',),
+            label: const Text(
+              'Crear',
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF00A4BD),
               foregroundColor: Colors.white,
