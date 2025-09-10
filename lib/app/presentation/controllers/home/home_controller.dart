@@ -17,10 +17,13 @@ class HomeController extends GetxController {
   var professorCourses = <Course>[].obs;
   var studentCourses = <Course>[].obs;
 
+  var _originalProfessorCourses = <Course>[];
+  var _originalStudentCourses = <Course>[];
+
   var isLoading = false.obs;
   var searchText = ''.obs;
 
-  var selectedUserType = 'Estudiante'.obs; // 👈 solo para la UI
+  var selectedUserType = 'Estudiante'.obs;
 
   @override
   void onInit() {
@@ -47,20 +50,21 @@ class HomeController extends GetxController {
     isLoading(true);
     final courseBox = Hive.box<CourseHiveModel>('courses');
     final allCourses = courseBox.values.map((c) => c.toCourse()).toList();
+    if (currentUser.value!.isTeacher) {
+      _originalProfessorCourses = allCourses.where((c) {
+        final isCreatedByUser = c.createdBy == currentUser.value!.email;
+        return isCreatedByUser;
+      }).toList();
+    } else {
+      _originalProfessorCourses = [];
+    }
 
-    professorCourses.assignAll(
-      currentUser.value!.isTeacher
-          ? allCourses
-              .where((c) => currentUser.value!.courseIds.contains(c.id))
-              .toList()
-          : [],
-    );
+    _originalStudentCourses = allCourses
+        .where((c) => c.enrolledStudents.contains(currentUser.value!.email))
+        .toList();
 
-    studentCourses.assignAll(
-      allCourses
-          .where((c) => c.enrolledStudents.contains(currentUser.value!.email))
-          .toList(),
-    );
+    professorCourses.assignAll(_originalProfessorCourses);
+    studentCourses.assignAll(_originalStudentCourses);
 
     applySearch();
     isLoading(false);
@@ -76,21 +80,23 @@ class HomeController extends GetxController {
   }
 
   void applySearch() {
-    if (searchText.value.isEmpty) return;
+    if (searchText.value.isEmpty) {
+      professorCourses.assignAll(_originalProfessorCourses);
+      studentCourses.assignAll(_originalStudentCourses);
+      return;
+    }
 
     final query = searchText.value.toLowerCase();
+    final filteredProfessor = _originalProfessorCourses
+        .where((c) => c.title.toLowerCase().contains(query))
+        .toList();
 
-    professorCourses.assignAll(
-      professorCourses
-          .where((c) => c.title.toLowerCase().contains(query))
-          .toList(),
-    );
+    final filteredStudent = _originalStudentCourses
+        .where((c) => c.title.toLowerCase().contains(query))
+        .toList();
 
-    studentCourses.assignAll(
-      studentCourses
-          .where((c) => c.title.toLowerCase().contains(query))
-          .toList(),
-    );
+    professorCourses.assignAll(filteredProfessor);
+    studentCourses.assignAll(filteredStudent);
   }
 
   void logout() {
@@ -100,7 +106,6 @@ class HomeController extends GetxController {
     Get.offAll(() => const LoginScreen());
   }
 
-  /// Retorna la lista que corresponde al tipo seleccionado
   List<Course> get filteredCourses {
     if (selectedUserType.value == 'Profesor') {
       return professorCourses;
@@ -125,25 +130,25 @@ class HomeController extends GetxController {
         enrolledStudents: [],
         invitationCode: "CODE${DateTime.now().millisecondsSinceEpoch % 10000}",
         imageUrl: null,
+        createdBy: currentUser.value!.email,
       );
 
-      // Guardar curso
       await courseBox.put(newCourse.id, CourseHiveModel.fromCourse(newCourse));
 
-      // Asociar curso al usuario actual como profesor
       final oldUser = currentUser.value!;
+
       final updatedUser = User(
         id: oldUser.id,
         username: oldUser.username,
         email: oldUser.email,
         password: oldUser.password,
+        isTeacher: true,
         courseIds: [...oldUser.courseIds, newCourse.id],
       );
 
       await userBox.put(updatedUser.id, UserHiveModel.fromUser(updatedUser));
       currentUser.value = updatedUser;
 
-      // Refrescar cursos
       await loadUserCourses();
 
       Get.snackbar(
@@ -171,7 +176,6 @@ class HomeController extends GetxController {
       isLoading(true);
       final courseBox = Hive.box<CourseHiveModel>('courses');
 
-      // Buscar curso por código de invitación
       final courseHive = courseBox.values.firstWhere(
         (c) => c.invitationCode == invitationCode,
         orElse: () => throw Exception("Curso no encontrado"),
@@ -179,14 +183,11 @@ class HomeController extends GetxController {
 
       final course = courseHive.toCourse();
 
-      // Si el usuario no está inscrito aún, lo agregamos
       if (!course.enrolledStudents.contains(currentUser.value!.email)) {
         course.enrolledStudents.add(currentUser.value!.email);
 
-        // Guardar curso actualizado en Hive
         await courseBox.put(course.id, CourseHiveModel.fromCourse(course));
 
-        // Refrescar cursos
         await loadUserCourses();
 
         Get.snackbar(

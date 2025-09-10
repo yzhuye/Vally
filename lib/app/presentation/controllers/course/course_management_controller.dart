@@ -35,7 +35,6 @@ class CourseManagementController extends GetxController {
         icon: const Icon(Icons.check_circle, color: Colors.white),
       );
 
-      // ✅ actualizar el HomeController (versión nueva)
       try {
         final homeController = Get.find<HomeController>();
         await homeController.loadUserCourses();
@@ -64,7 +63,6 @@ class CourseManagementController extends GetxController {
     if (updatedCourse != null) {
       course.value = updatedCourse;
 
-      // ✅ actualizar también HomeController
       try {
         final homeController = Get.find<HomeController>();
         await homeController.loadUserCourses();

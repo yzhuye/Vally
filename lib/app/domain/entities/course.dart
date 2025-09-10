@@ -7,6 +7,7 @@ class Course {
   final List<Group> groups;
   final String invitationCode;
   final String? imageUrl; // Mantener compatibilidad con la versión anterior
+  final String createdBy; // Email del usuario que creó el curso
 
   Course({
     required this.id,
@@ -17,6 +18,7 @@ class Course {
     this.groups = const [],
     required this.invitationCode,
     this.imageUrl,
+    required this.createdBy,
   });
 }
 

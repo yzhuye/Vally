@@ -9,7 +9,6 @@ import 'package:vally_app/app/presentation/screens/home/home_screen.dart';
 class LoginController extends GetxController {
   final LoginUser _loginUser = LoginUser(AuthRepositoryImpl());
 
-  // Controladores y estado reactivo
   final usernameOrEmailController = TextEditingController();
   final passwordController = TextEditingController();
   var isPasswordVisible = false.obs;

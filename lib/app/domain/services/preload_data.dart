@@ -5,19 +5,20 @@ import 'package:vally_app/app/data/models/user_hive_model.dart';
 import 'package:vally_app/app/data/models/course_hive_model.dart';
 
 Future<void> preloadData() async {
-  print("🚀 preloadData ejecutándose...");
-
   final userBox = Hive.box<UserHiveModel>('users');
   final courseBox = Hive.box<CourseHiveModel>('courses');
 
-  // 🔹 Definir curso1 fijo
+  await userBox.clear();
+  await courseBox.clear();
+
   final course1 = Course(
     id: 'c1',
     title: 'curso1',
     description: 'Curso de prueba',
-    enrolledStudents: ['b@a.com'], // Solo B inscrito
+    enrolledStudents: ['b@a.com'],
     invitationCode: 'INV123',
     imageUrl: null,
+    createdBy: 'a@a.com',
   );
   await courseBox.put(course1.id, CourseHiveModel.fromCourse(course1));
 
@@ -50,18 +51,4 @@ Future<void> preloadData() async {
     courseIds: [],
   );
   await userBox.put(userC.id, UserHiveModel.fromUser(userC));
-
-  // -------------------------------
-  // Debug final
-  // -------------------------------
-  print("=== Usuarios en Hive ===");
-  for (var u in userBox.values) {
-    print(
-        "id: ${u.id}, email: ${u.email}, cursos: ${u.courseIds}, isTeacher: ${u.isTeacher}");
-  }
-
-  print("=== Cursos en Hive ===");
-  for (var c in courseBox.values) {
-    print("id: ${c.id}, title: ${c.title}, estudiantes: ${c.enrolledStudents}");
-  }
 }

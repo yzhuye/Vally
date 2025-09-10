@@ -12,7 +12,7 @@ class CourseCategoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories =
-        CategoryRepositoryImpl().getCategoriesForCourse(course.id);
+        CategoryRepositoryImpl().getCategoriesByCourse(course.id);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Categorías del Curso'),
@@ -62,18 +62,34 @@ class CourseCategoryScreen extends StatelessWidget {
                     separatorBuilder: (_, __) => const Divider(),
                     itemBuilder: (context, index) {
                       final category = categories[index];
-                      return ListTile(
-                        title: Text(category.name),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CategoryActivityScreen(
-                                  course: course, category: category.name),
-                            ),
-                          );
-                        },
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: ListTile(
+                          leading: Icon(
+                            category.groupingMethod == 'self-assigned'
+                                ? Icons.group_add
+                                : Icons.assignment,
+                            color: const Color(0xFF00A4BD),
+                          ),
+                          title: Text(category.name),
+                          subtitle: Text(
+                            category.groupingMethod == 'self-assigned'
+                                ? 'Auto-asignación de grupos'
+                                : 'Actividades y tareas',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          trailing:
+                              const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CategoryActivityScreen(
+                                    course: course, category: category),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   ),

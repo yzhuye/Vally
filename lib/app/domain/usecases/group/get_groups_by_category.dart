@@ -1,12 +1,15 @@
 import '../../entities/course.dart';
-import '../../../data/repositories/group/group_repository_impl.dart';
+import '../../repositories/group_repository.dart';
 
-class GetGroupsByCategory {
-  final GroupRepository repository;
+class GetGroupsByCategoryUseCase {
+  final GroupRepository _repository;
 
-  GetGroupsByCategory(this.repository);
+  GetGroupsByCategoryUseCase(this._repository);
 
-  Future<List<Group>> call(String categoryId) {
-    return repository.getGroupsByCategory(categoryId);
+  List<Group> call({
+    required String courseId,
+    required String categoryId,
+  }) {
+    return _repository.getGroupsByCategory(courseId, categoryId);
   }
 }

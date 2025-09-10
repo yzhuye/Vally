@@ -23,13 +23,14 @@ class CourseHiveModelAdapter extends TypeAdapter<CourseHiveModel> {
       enrolledStudents: (fields[3] as List).cast<String>(),
       invitationCode: fields[4] as String,
       imageUrl: fields[5] as String,
+      createdBy: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, CourseHiveModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class CourseHiveModelAdapter extends TypeAdapter<CourseHiveModel> {
       ..writeByte(4)
       ..write(obj.invitationCode)
       ..writeByte(5)
-      ..write(obj.imageUrl);
+      ..write(obj.imageUrl)
+      ..writeByte(6)
+      ..write(obj.createdBy);
   }
 
   @override

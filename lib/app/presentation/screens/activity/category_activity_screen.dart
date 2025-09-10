@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
 import '../../widgets/course/course_card.dart';
 import '../../widgets/group/group_card.dart';
+import '../../controllers/group/group_controller.dart';
+import '../../controllers/home/home_controller.dart';
 
 class CategoryActivityScreen extends StatefulWidget {
   final Course course;
-  final String category;
+  final Category category;
 
   const CategoryActivityScreen({
     super.key,
@@ -19,34 +22,69 @@ class CategoryActivityScreen extends StatefulWidget {
 
 class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   bool showActivities = true;
-  bool isInGroup = false;
+  GroupController? groupController;
+  late String studentEmail;
+  late String controllerTag;
 
-  List<Group> groups = [
-    Group(
-      id: 'a',
-      name: 'Grupo A',
-      maxCapacity: 3,
-      members: [
-        'Juan Pérez Gómez',
-        'Ana María Rodríguez',
-        'Pedro Antonio Ramírez'
-      ],
-      categoryId: 'cat1',
-    ),
-    Group(
-      id: 'b',
-      name: 'Grupo B',
-      maxCapacity: 3,
-      members: ['Luis Fernando Herrera', 'María José Castillo'],
-      categoryId: 'cat1',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    final homeController = Get.find<HomeController>();
+    studentEmail = homeController.currentUser.value?.email ?? '';
+
+    if (widget.category.groupingMethod == 'self-assigned') {
+      controllerTag = '${widget.course.id}_${widget.category.id}_$studentEmail';
+
+      if (Get.isRegistered<GroupController>(tag: controllerTag)) {
+        Get.delete<GroupController>(tag: controllerTag);
+      }
+
+      groupController = Get.put(
+        GroupController(
+          courseId: widget.course.id,
+          categoryId: widget.category.id,
+          studentEmail: studentEmail,
+        ),
+        tag: controllerTag,
+      );
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (groupController != null) {
+      groupController!.loadGroups();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (groupController != null &&
+        Get.isRegistered<GroupController>(tag: controllerTag)) {
+      Get.delete<GroupController>(tag: controllerTag);
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.category),
+        title: Text(widget.category.name),
+        actions: [
+          if (widget.category.groupingMethod == 'self-assigned')
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                if (groupController != null) {
+                  groupController!.loadGroups();
+                }
+              },
+              tooltip: 'Actualizar grupos',
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -54,8 +92,6 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
             padding: const EdgeInsets.all(16.0),
             child: CourseCard(course: widget.course),
           ),
-
-          // 🔹 Selector de vista con botones grandes
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -79,7 +115,19 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
-                    child: const Text("Actividades"),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Actividades"),
+                        if (widget.category.groupingMethod ==
+                            'self-assigned') ...[
+                          const SizedBox(width: 4),
+                          Obx(() => groupController?.currentGroup != null
+                              ? const Icon(Icons.check_circle, size: 16)
+                              : const SizedBox.shrink()),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -102,15 +150,28 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
-                    child: const Text("Grupos"),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Grupos"),
+                        if (widget.category.groupingMethod ==
+                            'self-assigned') ...[
+                          const SizedBox(width: 4),
+                          Obx(() => Icon(
+                                groupController?.currentGroup != null
+                                    ? Icons.group
+                                    : Icons.group_outlined,
+                                size: 16,
+                              )),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
           Expanded(
             child: showActivities ? _buildActivitiesView() : _buildGroupsView(),
           ),
@@ -120,50 +181,126 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   }
 
   Widget _buildActivitiesView() {
-    if (!isInGroup) {
-      return const Center(
-        child: Text(
-          "Debes unirte a un grupo para ver las actividades.",
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-          textAlign: TextAlign.center,
-        ),
-      );
-    } else {
-      return const Center(
-        child: Text(
-          "Todavía no hay actividades disponibles.",
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-          textAlign: TextAlign.center,
-        ),
-      );
+    if (widget.category.groupingMethod == 'self-assigned') {
+      if (groupController?.currentGroup == null) {
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.group_off,
+                size: 64,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Debes unirte a un grupo para ver las actividades.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }
     }
+
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.assignment_outlined,
+            size: 64,
+            color: Colors.grey,
+          ),
+          SizedBox(height: 16),
+          Text(
+            "Todavía no hay actividades disponibles.",
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildGroupsView() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: groups.length,
-      itemBuilder: (context, index) {
-        final group = groups[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: GroupCard(
-            group: group,
-            onJoin: () {
-              setState(() {
-                // Aquí agregas lógica para unirte al grupo
-                isInGroup = true;
-                showActivities = true;
+    if (widget.category.groupingMethod != 'self-assigned') {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.info_outline,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Esta categoría usa método "${widget.category.groupingMethod}".\nLos grupos no están disponibles para auto-asignación.',
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
 
-                // Ejemplo: agregamos un miembro (puedes reemplazar con usuario real)
-                if (!group.isFull) {
-                  group.members.add('Mi Nombre');
-                }
-              });
-            },
+    if (groupController == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Obx(() {
+      if (groupController!.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (groupController!.groups.isEmpty) {
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.group_off,
+                size: 64,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'No hay grupos disponibles para esta categoría.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         );
-      },
-    );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: groupController!.groups.length,
+        itemBuilder: (context, index) {
+          final group = groupController!.groups[index];
+          final isCurrentGroup = groupController!.currentGroup?.id == group.id;
+          final canJoin = groupController!.canJoinGroup(group);
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: GroupCard(
+              group: group,
+              currentUserEmail: studentEmail,
+              canJoin: canJoin,
+              onJoin: () async {
+                if (isCurrentGroup) {
+                  await groupController!.leaveGroup(group.id);
+                } else if (canJoin) {
+                  await groupController!.joinGroup(group.id);
+                }
+              },
+            ),
+          );
+        },
+      );
+    });
   }
 }

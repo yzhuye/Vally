@@ -1,47 +1,47 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user_hive_model.dart';
+part of 'group_hive_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class UserHiveModelAdapter extends TypeAdapter<UserHiveModel> {
+class GroupHiveModelAdapter extends TypeAdapter<GroupHiveModel> {
   @override
-  final int typeId = 2;
+  final int typeId = 3;
 
   @override
-  UserHiveModel read(BinaryReader reader) {
+  GroupHiveModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return UserHiveModel(
+    return GroupHiveModel(
       id: fields[0] as String,
-      email: fields[1] as String,
-      password: fields[2] as String,
-      username: fields[3] as String?,
-      isTeacher: fields[4] as bool,
-      courseIds: (fields[5] as List).cast<String>(),
+      name: fields[1] as String,
+      maxCapacity: fields[2] as int,
+      members: (fields[3] as List).cast<String>(),
+      categoryId: fields[4] as String,
+      courseId: fields[5] as String,
     );
   }
 
   @override
-  void write(BinaryWriter writer, UserHiveModel obj) {
+  void write(BinaryWriter writer, GroupHiveModel obj) {
     writer
       ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.email)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.password)
+      ..write(obj.maxCapacity)
       ..writeByte(3)
-      ..write(obj.username)
+      ..write(obj.members)
       ..writeByte(4)
-      ..write(obj.isTeacher)
+      ..write(obj.categoryId)
       ..writeByte(5)
-      ..write(obj.courseIds);
+      ..write(obj.courseId);
   }
 
   @override
@@ -50,7 +50,7 @@ class UserHiveModelAdapter extends TypeAdapter<UserHiveModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UserHiveModelAdapter &&
+      other is GroupHiveModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

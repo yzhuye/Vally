@@ -1,20 +1,22 @@
 import 'package:vally_app/app/domain/entities/course.dart';
-import 'category_repository.dart';
+import '../../../domain/repositories/category_repository.dart';
 import 'package:hive/hive.dart';
 import '../../models/category_hive_model.dart';
+import '../group/group_repository_impl.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
   static const _boxName = 'categories';
   late final Box _box;
+  late final GroupRepositoryImpl _groupRepository;
   bool _isInitialized = false;
 
   CategoryRepositoryImpl() {
     _box = Hive.box(_boxName);
+    _groupRepository = GroupRepositoryImpl();
   }
 
   Future<void> _initializeData() async {
     if (!_isInitialized && _box.isEmpty) {
-      // Guardar datos iniciales para el curso '1'
       final initial = [
         Category(
           id: 'cat1',
@@ -38,7 +40,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  List<Category> getCategoriesForCourse(String courseId) {
+  List<Category> getCategoriesByCourse(String courseId) {
     _initializeData();
     final raw = _box.get(courseId) as List<dynamic>?;
     if (raw == null) return [];
@@ -49,34 +51,38 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  void addCategory(String courseId, Category category) async {
+  Future<void> addCategory(String courseId, Category category) async {
     await _initializeData();
     final raw = _box.get(courseId) as List<dynamic>? ?? [];
     final list = raw.whereType<CategoryHiveModel>().map((h) => h).toList();
     list.add(CategoryHiveModel.fromCategory(category));
     await _box.put(courseId, list);
+
+    await _groupRepository.createGroupsForCategory(
+        courseId, category.id, category.groupCount, category.studentsPerGroup,
+        categoryName: category.name);
   }
 
   @override
-  void updateCategory(String courseId, Category category) async {
-    await _initializeData();
+  void updateCategory(String courseId, Category category) {
+    _initializeData();
     final raw = _box.get(courseId) as List<dynamic>?;
     if (raw == null) return;
     final list = raw.whereType<CategoryHiveModel>().toList();
     final index = list.indexWhere((c) => c.id == category.id);
     if (index != -1) {
       list[index] = CategoryHiveModel.fromCategory(category);
-      await _box.put(courseId, list);
+      _box.put(courseId, list);
     }
   }
 
   @override
-  void deleteCategory(String courseId, String categoryId) async {
-    await _initializeData();
+  void deleteCategory(String courseId, String categoryId) {
+    _initializeData();
     final raw = _box.get(courseId) as List<dynamic>?;
     if (raw == null) return;
     final list = raw.whereType<CategoryHiveModel>().toList();
     list.removeWhere((c) => c.id == categoryId);
-    await _box.put(courseId, list);
+    _box.put(courseId, list);
   }
 }
