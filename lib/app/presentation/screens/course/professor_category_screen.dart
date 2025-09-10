@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vally_app/app/domain/entities/course.dart';
 import 'package:vally_app/app/presentation/widgets/course/course_card.dart';
-import 'package:vally_app/app/data/repositories/course/category_repository_imp.dart';
+import '../../controllers/category/category_controller.dart';
+import '../professor/professor_groups_screen.dart';
 
 class ProfessorCategoryScreen extends StatefulWidget {
   final Course course;
@@ -14,6 +16,23 @@ class ProfessorCategoryScreen extends StatefulWidget {
 }
 
 class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
+  late CategoryController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(
+      CategoryController(courseId: widget.course.id),
+      tag: 'category_${widget.course.id}',
+    );
+  }
+
+  @override
+  void dispose() {
+    Get.delete<CategoryController>(tag: 'category_${widget.course.id}');
+    super.dispose();
+  }
+
   void _showAddCategoryDialog(BuildContext context) {
     final nameController = TextEditingController();
     final groupCountController = TextEditingController();
@@ -75,7 +94,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                 ),
                 ElevatedButton(
                   child: const Text('Agregar'),
-                  onPressed: () {
+                  onPressed: () async {
                     final name = nameController.text.trim();
                     final groupCount =
                         int.tryParse(groupCountController.text.trim()) ?? 1;
@@ -84,18 +103,19 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                             1;
 
                     if (name.isNotEmpty && selectedMethod.isNotEmpty) {
-                      CategoryRepositoryImpl().addCategory(
-                        widget.course.id,
-                        Category(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          name: name,
-                          groupingMethod: selectedMethod,
-                          groupCount: groupCount,
-                          studentsPerGroup: studentsPerGroup,
-                        ),
+                      await controller.addCategory(
+                        name: name,
+                        groupingMethod: selectedMethod,
+                        groupCount: groupCount,
+                        studentsPerGroup: studentsPerGroup,
                       );
-                      this.setState(() {});
                       Navigator.of(context).pop();
+                    } else {
+                      Get.snackbar(
+                        'Error',
+                        'Por favor, completa todos los campos',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
                     }
                   },
                 ),
@@ -170,7 +190,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                 ),
                 ElevatedButton(
                   child: const Text('Guardar'),
-                  onPressed: () {
+                  onPressed: () async {
                     final name = nameController.text.trim();
                     final groupCount =
                         int.tryParse(groupCountController.text.trim()) ?? 1;
@@ -179,8 +199,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                             1;
 
                     if (name.isNotEmpty && selectedMethod.isNotEmpty) {
-                      CategoryRepositoryImpl().updateCategory(
-                        widget.course.id,
+                      await controller.updateCategory(
                         Category(
                           id: category.id,
                           name: name,
@@ -189,8 +208,13 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                           studentsPerGroup: studentsPerGroup,
                         ),
                       );
-                      this.setState(() {});
                       Navigator.of(context).pop();
+                    } else {
+                      Get.snackbar(
+                        'Error',
+                        'Por favor, completa todos los campos',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
                     }
                   },
                 ),
@@ -216,10 +240,8 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              CategoryRepositoryImpl()
-                  .deleteCategory(widget.course.id, category.id);
-              setState(() {});
+            onPressed: () async {
+              await controller.deleteCategory(category.id);
               Navigator.of(context).pop();
             },
             child: const Text('Eliminar'),
@@ -231,9 +253,6 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final categories =
-        CategoryRepositoryImpl().getCategoriesForCourse(widget.course.id);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Categorías del Curso'),
@@ -256,54 +275,79 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              itemCount: categories.length + 1,
-              separatorBuilder: (_, __) => const Divider(),
-              itemBuilder: (context, index) {
-                if (index < categories.length) {
-                  final category = categories[index];
-                  return ListTile(
-                    title: Text(category.name),
-                    subtitle: Text(
-                      'Método: ${category.groupingMethod}',
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () {
-                            _showEditCategoryDialog(context, category);
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            _confirmDeleteCategory(context, category);
-                          },
-                        ),
-                        const Icon(Icons.arrow_forward_ios, size: 16),
-                      ],
-                    ),
-                    onTap: () {},
-                  );
-                } else {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
-                    child: Center(
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.add),
-                        label: const Text('Agregar categoría'),
-                        onPressed: () {
-                          _showAddCategoryDialog(context);
-                        },
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                itemCount: controller.categories.length + 1,
+                separatorBuilder: (_, __) => const Divider(),
+                itemBuilder: (context, index) {
+                  if (index < controller.categories.length) {
+                    final category = controller.categories[index];
+                    return ListTile(
+                      leading: Icon(
+                          controller.getMethodIcon(category.groupingMethod)),
+                      title: Text(category.name),
+                      subtitle: Text(
+                        'Método: ${controller.getMethodDisplayName(category.groupingMethod)}',
                       ),
-                    ),
-                  );
-                }
-              },
-            ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.group, color: Colors.green),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProfessorGroupsScreen(
+                                    course: widget.course,
+                                    category: category,
+                                  ),
+                                ),
+                              );
+                            },
+                            tooltip: 'Ver grupos',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              _showEditCategoryDialog(context, category);
+                            },
+                            tooltip: 'Editar categoría',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              _confirmDeleteCategory(context, category);
+                            },
+                            tooltip: 'Eliminar categoría',
+                          ),
+                          const Icon(Icons.arrow_forward_ios, size: 16),
+                        ],
+                      ),
+                      onTap: () {},
+                    );
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: Center(
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.add),
+                          label: const Text('Agregar categoría'),
+                          onPressed: () {
+                            _showAddCategoryDialog(context);
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                },
+              );
+            }),
           ),
         ],
       ),

@@ -1,50 +1,47 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'course_hive_model.dart';
+part of 'group_hive_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class CourseHiveModelAdapter extends TypeAdapter<CourseHiveModel> {
+class GroupHiveModelAdapter extends TypeAdapter<GroupHiveModel> {
   @override
-  final int typeId = 0;
+  final int typeId = 3;
 
   @override
-  CourseHiveModel read(BinaryReader reader) {
+  GroupHiveModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return CourseHiveModel(
+    return GroupHiveModel(
       id: fields[0] as String,
-      title: fields[1] as String,
-      description: fields[2] as String,
-      enrolledStudents: (fields[3] as List).cast<String>(),
-      invitationCode: fields[4] as String,
-      imageUrl: fields[5] as String,
-      createdBy: fields[6] as String?,
+      name: fields[1] as String,
+      maxCapacity: fields[2] as int,
+      members: (fields[3] as List).cast<String>(),
+      categoryId: fields[4] as String,
+      courseId: fields[5] as String,
     );
   }
 
   @override
-  void write(BinaryWriter writer, CourseHiveModel obj) {
+  void write(BinaryWriter writer, GroupHiveModel obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.title)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.description)
+      ..write(obj.maxCapacity)
       ..writeByte(3)
-      ..write(obj.enrolledStudents)
+      ..write(obj.members)
       ..writeByte(4)
-      ..write(obj.invitationCode)
+      ..write(obj.categoryId)
       ..writeByte(5)
-      ..write(obj.imageUrl)
-      ..writeByte(6)
-      ..write(obj.createdBy);
+      ..write(obj.courseId);
   }
 
   @override
@@ -53,7 +50,7 @@ class CourseHiveModelAdapter extends TypeAdapter<CourseHiveModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CourseHiveModelAdapter &&
+      other is GroupHiveModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
