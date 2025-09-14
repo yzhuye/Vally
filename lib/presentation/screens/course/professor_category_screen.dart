@@ -57,7 +57,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                       decoration: const InputDecoration(labelText: 'Nombre'),
                     ),
                     DropdownButtonFormField<String>(
-                      value: selectedMethod,
+                      initialValue: selectedMethod,
                       decoration: const InputDecoration(
                           labelText: 'Método de agrupación'),
                       items: methods
@@ -109,7 +109,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                         groupCount: groupCount,
                         studentsPerGroup: studentsPerGroup,
                       );
-                      Navigator.of(context).pop();
+                      Get.back();
                     } else {
                       Get.snackbar(
                         'Error',
@@ -153,7 +153,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                       decoration: const InputDecoration(labelText: 'Nombre'),
                     ),
                     DropdownButtonFormField<String>(
-                      value: selectedMethod,
+                      initialValue: selectedMethod,
                       decoration: const InputDecoration(
                           labelText: 'Método de agrupación'),
                       items: methods
@@ -208,7 +208,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                           studentsPerGroup: studentsPerGroup,
                         ),
                       );
-                      Navigator.of(context).pop();
+                      Get.back();
                     } else {
                       Get.snackbar(
                         'Error',
@@ -242,7 +242,7 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
               await controller.deleteCategory(category.id);
-              Navigator.of(context).pop();
+              Get.back();
             },
             child: const Text('Eliminar'),
           ),

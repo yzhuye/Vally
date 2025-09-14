@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:logger/logger.dart';
 
 import 'presentation/screens/login/login_screen.dart';
 import 'data/models/course_hive_model.dart';
@@ -26,7 +27,9 @@ void main() async {
     await Hive.deleteBoxFromDisk('categories');
     await Hive.deleteBoxFromDisk('groups');
     await Hive.deleteBoxFromDisk('login');
-  } catch (e) {}
+  } catch (e) {
+    Logger().e("Error deleting boxes: $e");
+  }
 
   await Hive.openBox<CourseHiveModel>('courses');
   await Hive.openBox('categories');

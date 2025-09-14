@@ -1,7 +1,10 @@
 import '../../../domain/repositories/auth_repository.dart';
 import 'package:vally_app/domain/services/api_service.dart';
+import 'package:logger/logger.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
+  static var logger = Logger();
+
   @override
   Future<Map<String, dynamic>?> login(
       String usernameOrEmail, String password) async {
@@ -10,7 +13,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await ApiService.loginUser(usernameOrEmail, password);
       return response;
     } catch (e) {
-      print('Error en AuthRepositoryImpl: $e');
+      logger.e('Error en AuthRepositoryImpl: $e');
       return null;
     }
   }

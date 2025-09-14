@@ -9,10 +9,10 @@ class ProfessorGroupsScreen extends StatefulWidget {
   final Category category;
 
   const ProfessorGroupsScreen({
-    Key? key,
+    super.key,
     required this.course,
     required this.category,
-  }) : super(key: key);
+  });
 
   @override
   State<ProfessorGroupsScreen> createState() => _ProfessorGroupsScreenState();
@@ -103,9 +103,9 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF00A4BD).withOpacity(0.1),
+        color: const Color(0xFF00A4BD).withAlpha(25),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF00A4BD).withOpacity(0.3)),
+        border: Border.all(color: const Color(0xFF00A4BD).withAlpha(76)),
       ),
       child: Obx(() => Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -193,7 +193,7 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
             Text(label),
           ],
         ),
-        selectedColor: const Color(0xFF00A4BD).withOpacity(0.2),
+        selectedColor: const Color(0xFF00A4BD).withAlpha(51),
         checkmarkColor: const Color(0xFF00A4BD),
       ),
     );

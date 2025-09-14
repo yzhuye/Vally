@@ -34,7 +34,7 @@ class CourseCard extends StatelessWidget {
         },
         child: Column(
           children: [
-            Container(
+            SizedBox(
               height: 120,
               width: double.infinity,
               child: course.imageUrl != null

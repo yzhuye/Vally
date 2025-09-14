@@ -104,12 +104,12 @@ class GroupCard extends StatelessWidget {
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: isCurrentUser
-                            ? const Color(0xFF00A4BD).withOpacity(0.1)
-                            : Colors.grey.withOpacity(0.1),
+                            ? const Color(0xFF00A4BD).withAlpha(25)
+                            : Colors.grey.withAlpha(25),
                         borderRadius: BorderRadius.circular(8),
                         border: isCurrentUser
                             ? Border.all(
-                                color: const Color(0xFF00A4BD).withOpacity(0.3))
+                                color: const Color(0xFF00A4BD).withAlpha(76))
                             : null,
                       ),
                       child: Text(
