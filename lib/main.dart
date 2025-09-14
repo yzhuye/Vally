@@ -3,12 +3,12 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'app/presentation/screens/login/login_screen.dart';
-import 'app/data/models/course_hive_model.dart';
-import 'app/data/models/category_hive_model.dart';
-import 'app/data/models/user_hive_model.dart';
-import 'app/data/models/group_hive_model.dart';
-import 'app/domain/services/preload_data.dart';
+import 'presentation/screens/login/login_screen.dart';
+import 'data/models/course_hive_model.dart';
+import 'data/models/category_hive_model.dart';
+import 'data/models/user_hive_model.dart';
+import 'data/models/group_hive_model.dart';
+import 'domain/services/preload_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
