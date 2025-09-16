@@ -11,6 +11,8 @@ import 'package:vally_app/data/models/user_hive_model.dart';
 import 'package:vally_app/presentation/screens/login/login_screen.dart';
 import 'package:vally_app/presentation/controllers/login/login_controller.dart';
 
+import 'package:vally_app/domain/services/api_service.dart';
+
 class HomeController extends GetxController {
   var currentUser = Rx<User?>(null);
 
@@ -99,11 +101,26 @@ class HomeController extends GetxController {
     studentCourses.assignAll(filteredStudent);
   }
 
-  void logout() {
-    final loginBox = Hive.box('login');
-    loginBox.clear();
-    Get.delete<LoginController>();
-    Get.offAll(() => const LoginScreen());
+  void logout() async{
+    try {
+      await ApiService.logout();
+      Get.delete<LoginController>();
+      Get.offAll(() => const LoginScreen());
+      
+      Get.snackbar(
+        'Éxito',
+        'Has cerrado sesión exitosamente',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error al cerrar sesión: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   List<Course> get filteredCourses {
