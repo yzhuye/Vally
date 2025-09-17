@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
 import '../../controllers/professor/professor_group_controller.dart';
 import '../../widgets/course/course_card.dart';
+import '../../../domain/usecases/group/get_groups_by_category.dart';
 
 class ProfessorGroupsScreen extends StatefulWidget {
   final Course course;
@@ -29,6 +30,7 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
       ProfessorGroupController(
         courseId: widget.course.id,
         categoryId: widget.category.id,
+        getGroupsByCategory: Get.find<GetGroupsByCategory>(),
       ),
       tag: 'professor_groups_${widget.course.id}_${widget.category.id}',
     );

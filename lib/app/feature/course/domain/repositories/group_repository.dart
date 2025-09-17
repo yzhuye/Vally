@@ -4,8 +4,8 @@ abstract class GroupRepository {
   List<Group> getGroupsByCategory(String courseId, String categoryId);
   List<Group> getGroupsByCourse(String courseId);
   Future<void> addGroup(String courseId, Group group);
-  void updateGroup(String courseId, Group group);
-  void deleteGroup(String courseId, String groupId);
+  Future<void> updateGroup(String courseId, Group group);
+  Future<void> deleteGroup(String courseId, String groupId);
   bool joinGroup(String courseId, String groupId, String studentEmail);
   bool leaveGroup(String courseId, String groupId, String studentEmail);
   Future<void> createGroupsForCategory(

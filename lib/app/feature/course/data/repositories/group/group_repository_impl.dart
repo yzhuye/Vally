@@ -1,6 +1,6 @@
+import 'package:hive/hive.dart';
 import 'package:vally_app/app/feature/course/domain/entities/course.dart';
 import '../../../domain/repositories/group_repository.dart';
-import 'package:hive/hive.dart';
 import '../../models/group_hive_model.dart';
 
 class GroupRepositoryImpl implements GroupRepository {
@@ -34,13 +34,13 @@ class GroupRepositoryImpl implements GroupRepository {
   }
 
   @override
-  void updateGroup(String courseId, Group group) async {
+  Future<void> updateGroup(String courseId, Group group) async {
     final groupHive = GroupHiveModel.fromGroup(group, courseId);
     await _box.put(group.id, groupHive);
   }
 
   @override
-  void deleteGroup(String courseId, String groupId) async {
+  Future<void> deleteGroup(String courseId, String groupId) async {
     await _box.delete(groupId);
   }
 

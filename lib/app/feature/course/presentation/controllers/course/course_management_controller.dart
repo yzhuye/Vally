@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vally_app/app/feature/course/domain/entities/course.dart';
-import 'package:vally_app/app/feature/course/data/repositories/course/course_repository_impl.dart';
+import 'package:vally_app/app/feature/course/domain/usecases/course/update_invitation_code.dart';
+import 'package:vally_app/app/feature/course/domain/usecases/course/get_course_by_id.dart';
 import 'package:vally_app/app/feature/course/presentation/controllers/home/home_controller.dart';
-import 'dart:math';
 
 class CourseManagementController extends GetxController {
   final Course _initialCourse;
   late Rx<Course> course;
-  final CourseRepositoryImpl _repository = CourseRepositoryImpl();
+  final UpdateInvitationCode _updateInvitationCode;
+  final GetCourseById _getCourseById;
 
-  CourseManagementController(this._initialCourse);
+  CourseManagementController(
+    this._initialCourse,
+    this._updateInvitationCode,
+    this._getCourseById,
+  );
 
   @override
   void onInit() {
@@ -21,9 +26,7 @@ class CourseManagementController extends GetxController {
 
   Future<void> generateNewInvitationCode() async {
     try {
-      final updatedCourse =
-          await _repository.updateInvitationCode(course.value.id);
-
+      final updatedCourse = await _updateInvitationCode(course.value.id);
       course.value = updatedCourse;
 
       Get.snackbar(
@@ -51,22 +54,19 @@ class CourseManagementController extends GetxController {
     }
   }
 
-  String _generateInvitationCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = Random();
-    return String.fromCharCodes(Iterable.generate(
-        6, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
-  }
-
   void refreshCourse() async {
-    final updatedCourse = _repository.getCourseById(course.value.id);
-    if (updatedCourse != null) {
-      course.value = updatedCourse;
+    try {
+      final updatedCourse = await _getCourseById(course.value.id);
+      if (updatedCourse != null) {
+        course.value = updatedCourse;
+      }
 
       try {
         final homeController = Get.find<HomeController>();
         await homeController.loadUserCourses();
       } catch (_) {}
+    } catch (e) {
+      // Manejar error silenciosamente o mostrar notificación
     }
   }
 

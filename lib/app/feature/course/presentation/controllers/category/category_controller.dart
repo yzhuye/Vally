@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
-import '../../../domain/usecases/category/get_categories.dart';
+import '../../../domain/usecases/category/get_categories_by_course.dart';
 import '../../../domain/usecases/category/add_category.dart';
 import '../../../domain/usecases/category/update_category.dart';
 import '../../../domain/usecases/category/delete_category.dart';
-import '../../../data/repositories/course/category_repository_imp.dart';
-import '../../../domain/repositories/category_repository.dart';
 
 class CategoryController extends GetxController {
   final String courseId;
-
-  late final GetCategoriesUseCase _getCategoriesUseCase;
-  late final AddCategoryUseCase _addCategoryUseCase;
-  late final UpdateCategoryUseCase _updateCategoryUseCase;
-  late final DeleteCategoryUseCase _deleteCategoryUseCase;
+  final GetCategoriesByCourse _getCategoriesByCourse;
+  final AddCategory _addCategory;
+  final UpdateCategory _updateCategory;
+  final DeleteCategory _deleteCategory;
 
   var categories = <Category>[].obs;
   var isLoading = false.obs;
 
-  CategoryController({required this.courseId}) {
-    final CategoryRepository repository = CategoryRepositoryImpl();
-    _getCategoriesUseCase = GetCategoriesUseCase(repository);
-    _addCategoryUseCase = AddCategoryUseCase(repository);
-    _updateCategoryUseCase = UpdateCategoryUseCase(repository);
-    _deleteCategoryUseCase = DeleteCategoryUseCase(repository);
-  }
+  CategoryController({
+    required this.courseId,
+    required GetCategoriesByCourse getCategoriesByCourse,
+    required AddCategory addCategory,
+    required UpdateCategory updateCategory,
+    required DeleteCategory deleteCategory,
+  })  : _getCategoriesByCourse = getCategoriesByCourse,
+        _addCategory = addCategory,
+        _updateCategory = updateCategory,
+        _deleteCategory = deleteCategory;
 
   @override
   void onInit() {
@@ -36,7 +36,7 @@ class CategoryController extends GetxController {
   void loadCategories() {
     isLoading(true);
     try {
-      categories.value = _getCategoriesUseCase(courseId);
+      categories.value = _getCategoriesByCourse(courseId);
     } finally {
       isLoading(false);
     }
@@ -51,28 +51,32 @@ class CategoryController extends GetxController {
     isLoading(true);
 
     try {
-      final result = await _addCategoryUseCase(
-        courseId: courseId,
+      final category = Category(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: name,
         groupingMethod: groupingMethod,
         groupCount: groupCount,
         studentsPerGroup: studentsPerGroup,
       );
 
-      if (result.isSuccess) {
-        loadCategories();
-        Get.snackbar(
-          'Éxito',
-          result.message,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          result.message,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+      await _addCategory(courseId, category);
+      loadCategories();
+
+      Get.snackbar(
+        'Éxito',
+        'Categoría agregada correctamente',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'No se pudo agregar la categoría: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading(false);
     }
@@ -82,25 +86,24 @@ class CategoryController extends GetxController {
     isLoading(true);
 
     try {
-      final result = await _updateCategoryUseCase(
-        courseId: courseId,
-        category: category,
-      );
+      await _updateCategory(courseId, category);
+      loadCategories();
 
-      if (result.isSuccess) {
-        loadCategories();
-        Get.snackbar(
-          'Éxito',
-          result.message,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          result.message,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+      Get.snackbar(
+        'Éxito',
+        'Categoría actualizada correctamente',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'No se pudo actualizar la categoría: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading(false);
     }
@@ -110,25 +113,24 @@ class CategoryController extends GetxController {
     isLoading(true);
 
     try {
-      final result = await _deleteCategoryUseCase(
-        courseId: courseId,
-        categoryId: categoryId,
-      );
+      await _deleteCategory(courseId, categoryId);
+      loadCategories();
 
-      if (result.isSuccess) {
-        loadCategories();
-        Get.snackbar(
-          'Éxito',
-          result.message,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          result.message,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+      Get.snackbar(
+        'Éxito',
+        'Categoría eliminada correctamente',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'No se pudo eliminar la categoría: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading(false);
     }

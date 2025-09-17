@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:vally_app/app/feature/course/presentation/controllers/course/course_management_controller.dart';
 import 'package:vally_app/app/feature/course/domain/entities/course.dart';
+import 'package:vally_app/app/feature/course/domain/usecases/course/update_invitation_code.dart';
+import 'package:vally_app/app/feature/course/domain/usecases/course/get_course_by_id.dart';
+import 'package:vally_app/app/core/di/dependency_injection.dart';
 import 'professor_category_screen.dart';
 
 class CourseManagementScreen extends StatelessWidget {
@@ -12,9 +15,60 @@ class CourseManagementScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CourseManagementController controller =
-        Get.put(CourseManagementController(course));
+    // Ensure dependencies are available before creating controller
+    try {
+      // Check if dependencies are available
+      Get.find<UpdateInvitationCode>();
+      Get.find<GetCourseById>();
 
+      // Use lazyPut to avoid conflicts and ensure dependencies are available
+      Get.lazyPut<CourseManagementController>(
+        () => CourseManagementController(
+          course,
+          Get.find<UpdateInvitationCode>(),
+          Get.find<GetCourseById>(),
+        ),
+        tag: 'course_management_${course.id}',
+      );
+
+      final CourseManagementController controller =
+          Get.find<CourseManagementController>(
+        tag: 'course_management_${course.id}',
+      );
+
+      return _buildScaffold(controller);
+    } catch (e) {
+      // If dependencies are not available, show error screen
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text(
+                'Error de dependencias',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text('Error: $e'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Reinitialize dependencies
+                  DependencyInjection.init();
+                  Get.offAll(() => CourseManagementScreen(course: course));
+                },
+                child: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildScaffold(CourseManagementController controller) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(

@@ -23,7 +23,8 @@ class LoginScreen extends StatelessWidget {
         child: Center(
           child: SingleChildScrollView(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
               width: double.infinity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -35,7 +36,10 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 10.0),
                   const Text(
                     'Bienvenido de vuelta',
-                    style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold, color: darkTextColor),
+                    style: TextStyle(
+                        fontSize: 28.0,
+                        fontWeight: FontWeight.bold,
+                        color: darkTextColor),
                   ),
                   const SizedBox(height: 8.0),
                   const Text(
@@ -51,7 +55,7 @@ class LoginScreen extends StatelessWidget {
                     prefixIcon: Icons.person_outline,
                   ),
                   const SizedBox(height: 20.0),
-                  
+
                   // Usamos Obx para reconstruir solo el campo de contraseña
                   Obx(() => StyledTextField(
                         controller: controller.passwordController,
@@ -62,18 +66,20 @@ class LoginScreen extends StatelessWidget {
                         onVisibilityToggle: controller.togglePasswordVisibility,
                       )),
                   const SizedBox(height: 20.0),
-                  
+
                   // Checkbox
                   Obx(() => Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Checkbox(
                             value: controller.isRememberMeChecked.value,
-                            onChanged: (value) => controller.toggleRememberMe(value),
+                            onChanged: (value) =>
+                                controller.toggleRememberMe(value),
                           ),
                           const Text(
                             'Recuérdame',
-                            style: TextStyle(fontSize: 16.0, color: Colors.black54),
+                            style: TextStyle(
+                                fontSize: 16.0, color: Colors.black54),
                           ),
                         ],
                       )),

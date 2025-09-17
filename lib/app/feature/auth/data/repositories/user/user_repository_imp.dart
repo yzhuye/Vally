@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:vally_app/app/feature/auth/domain/entities/user.dart';
-import '../../../../auth/data/models/user_hive_model.dart';
-import '../../../../auth/domain/repositories/user_repository.dart';
+import '../../models/user_hive_model.dart';
+import '../../../domain/repositories/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final Box<UserHiveModel> userBox;

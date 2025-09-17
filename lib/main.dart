@@ -9,6 +9,7 @@ import 'app/feature/course/data/models/category_hive_model.dart';
 import 'app/feature/auth/data/models/user_hive_model.dart';
 import 'app/feature/course/data/models/group_hive_model.dart';
 import 'app/feature/auth/domain/services/preload_data.dart';
+import 'app/core/di/dependency_injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,9 @@ void main() async {
   await Hive.openBox<UserHiveModel>('users');
   await Hive.openBox<GroupHiveModel>('groups');
   await Hive.openBox('login');
+
+  // Initialize dependency injection
+  DependencyInjection.init();
 
   await preloadData();
 

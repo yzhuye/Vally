@@ -104,10 +104,10 @@ class LoginController extends GetxController {
       passwordController.text = loginBox.get('password', defaultValue: '');
       isRememberMeChecked.value = true;
     } else {
-    usernameOrEmailController.clear();
-    passwordController.clear();
-    isRememberMeChecked.value = false;
-  }
+      usernameOrEmailController.clear();
+      passwordController.clear();
+      isRememberMeChecked.value = false;
+    }
   }
 
   @override

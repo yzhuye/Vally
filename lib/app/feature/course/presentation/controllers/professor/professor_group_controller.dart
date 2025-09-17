@@ -1,14 +1,11 @@
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/usecases/group/get_groups_by_category.dart';
-import '../../../data/repositories/group/group_repository_impl.dart';
-import '../../../domain/repositories/group_repository.dart';
 
 class ProfessorGroupController extends GetxController {
   final String courseId;
   final String categoryId;
-
-  late final GetGroupsByCategoryUseCase _getGroupsUseCase;
+  final GetGroupsByCategory _getGroupsByCategory;
 
   var groups = <Group>[].obs;
   var isLoading = false.obs;
@@ -17,10 +14,8 @@ class ProfessorGroupController extends GetxController {
   ProfessorGroupController({
     required this.courseId,
     required this.categoryId,
-  }) {
-    final GroupRepository repository = GroupRepositoryImpl();
-    _getGroupsUseCase = GetGroupsByCategoryUseCase(repository);
-  }
+    required GetGroupsByCategory getGroupsByCategory,
+  }) : _getGroupsByCategory = getGroupsByCategory;
 
   @override
   void onInit() {
@@ -31,10 +26,7 @@ class ProfessorGroupController extends GetxController {
   void loadGroups() {
     isLoading(true);
     try {
-      groups.value = _getGroupsUseCase(
-        courseId: courseId,
-        categoryId: categoryId,
-      );
+      groups.value = _getGroupsByCategory(courseId, categoryId);
     } finally {
       isLoading(false);
     }

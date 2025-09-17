@@ -3,6 +3,10 @@ import 'package:get/get.dart';
 import 'package:vally_app/app/feature/course/domain/entities/course.dart';
 import 'package:vally_app/app/feature/course/presentation/widgets/course/course_card.dart';
 import '../../controllers/category/category_controller.dart';
+import '../../../domain/usecases/category/get_categories_by_course.dart';
+import '../../../domain/usecases/category/add_category.dart';
+import '../../../domain/usecases/category/update_category.dart';
+import '../../../domain/usecases/category/delete_category.dart';
 import '../professor/professor_groups_screen.dart';
 
 class ProfessorCategoryScreen extends StatefulWidget {
@@ -22,7 +26,13 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
   void initState() {
     super.initState();
     controller = Get.put(
-      CategoryController(courseId: widget.course.id),
+      CategoryController(
+        courseId: widget.course.id,
+        getCategoriesByCourse: Get.find<GetCategoriesByCourse>(),
+        addCategory: Get.find<AddCategory>(),
+        updateCategory: Get.find<UpdateCategory>(),
+        deleteCategory: Get.find<DeleteCategory>(),
+      ),
       tag: 'category_${widget.course.id}',
     );
   }
