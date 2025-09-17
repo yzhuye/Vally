@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:logger/logger.dart';
 
-import 'app/presentation/screens/login/login_screen.dart';
-import 'app/data/models/course_hive_model.dart';
-import 'app/data/models/category_hive_model.dart';
-import 'app/data/models/user_hive_model.dart';
-import 'app/data/models/group_hive_model.dart';
-import 'app/domain/services/preload_data.dart';
+import 'presentation/screens/login/login_screen.dart';
+import 'data/models/course_hive_model.dart';
+import 'data/models/category_hive_model.dart';
+import 'data/models/user_hive_model.dart';
+import 'data/models/group_hive_model.dart';
+import 'domain/services/preload_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,8 +26,9 @@ void main() async {
     await Hive.deleteBoxFromDisk('users');
     await Hive.deleteBoxFromDisk('categories');
     await Hive.deleteBoxFromDisk('groups');
-    await Hive.deleteBoxFromDisk('login');
-  } catch (e) {}
+  } catch (e) {
+    Logger().e("Error deleting boxes: $e");
+  }
 
   await Hive.openBox<CourseHiveModel>('courses');
   await Hive.openBox('categories');
