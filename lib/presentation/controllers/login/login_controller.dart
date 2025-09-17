@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:vally_app/domain/services/api_service.dart';
 import 'package:vally_app/domain/usecases/login/login_user.dart';
 import 'package:vally_app/data/repositories/auth/auth_repository_impl.dart';
 import 'package:vally_app/presentation/screens/home/home_screen.dart';
@@ -9,18 +11,19 @@ import 'package:vally_app/presentation/screens/home/home_screen.dart';
 class LoginController extends GetxController {
   final LoginUser _loginUser = LoginUser(AuthRepositoryImpl());
 
-  final usernameOrEmailController = TextEditingController();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
   var isPasswordVisible = false.obs;
   var isLoading = false.obs;
   final isRememberMeChecked = false.obs;
   final Box loginBox = Hive.box('login');
+  static const storage = FlutterSecureStorage();
   static var logger = Logger();
 
   @override
   void onInit() {
     super.onInit();
-    _loadSavedLoginData();
+    _loadTokens();
   }
 
   void togglePasswordVisibility() {
@@ -34,7 +37,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> login() async {
-    if (usernameOrEmailController.text.isEmpty ||
+    if (emailController.text.isEmpty ||
         passwordController.text.isEmpty) {
       Get.snackbar(
         'Campos Vacíos',
@@ -49,8 +52,9 @@ class LoginController extends GetxController {
       isLoading.value = true;
 
       final response = await _loginUser(
-        usernameOrEmailController.text,
+        emailController.text,
         passwordController.text,
+        isRememberMeChecked.value,
       );
 
       if (response != null && response["success"] == true) {
@@ -62,8 +66,7 @@ class LoginController extends GetxController {
           colorText: Colors.white,
         );
         _saveLoginData(
-          usernameOrEmailController.text,
-          passwordController.text,
+          emailController.text,
           isRememberMeChecked.value,
         );
         Get.offAll(() => const HomeScreen());
@@ -90,29 +93,31 @@ class LoginController extends GetxController {
     }
   }
 
-  void _saveLoginData(String identifier, String password, bool rememberMe) {
-    loginBox.put('identifier', identifier);
-    loginBox.put('password', password);
+  void _saveLoginData(String email, bool rememberMe) {
+    loginBox.put('email', email);
     loginBox.put('rememberMe', rememberMe);
   }
 
-  void _loadSavedLoginData() {
+  void _loadTokens() async {
     final rememberMe = loginBox.get('rememberMe', defaultValue: false);
+    isRememberMeChecked.value = rememberMe;
     if (rememberMe) {
-      usernameOrEmailController.text =
-          loginBox.get('identifier', defaultValue: '');
-      passwordController.text = loginBox.get('password', defaultValue: '');
-      isRememberMeChecked.value = true;
-    } else {
-      usernameOrEmailController.clear();
-      passwordController.clear();
-      isRememberMeChecked.value = false;
+      final refreshToken = await storage.read(key: "refreshToken");
+      if (refreshToken == null) return;
+      ApiService.refreshAccessToken().then((newAccessToken) {
+        if (newAccessToken != null) {
+          logger.i("Access token refreshed successfully.");
+          Get.offAll(() => const HomeScreen());
+        } else {
+          logger.w("Failed to refresh access token.");
+        }
+      });
     }
   }
 
   @override
   void onClose() {
-    usernameOrEmailController.dispose();
+    emailController.dispose();
     passwordController.dispose();
     super.onClose();
   }

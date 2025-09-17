@@ -50,8 +50,8 @@ class LoginScreen extends StatelessWidget {
 
                   // Usamos el widget reutilizable
                   StyledTextField(
-                    controller: controller.usernameOrEmailController,
-                    hintText: 'Usuario o Email',
+                    controller: controller.emailController,
+                    hintText: 'Email',
                     prefixIcon: Icons.person_outline,
                   ),
                   const SizedBox(height: 20.0),
@@ -77,7 +77,7 @@ class LoginScreen extends StatelessWidget {
                                 controller.toggleRememberMe(value),
                           ),
                           const Text(
-                            'Recuérdame',
+                            'Mantener sesión iniciada',
                             style: TextStyle(
                                 fontSize: 16.0, color: Colors.black54),
                           ),

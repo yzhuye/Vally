@@ -6,7 +6,7 @@ class LoginUser {
   LoginUser(this._repository);
 
   Future<Map<String, dynamic>?> call(
-      String usernameOrEmail, String password) async {
-    return await _repository.login(usernameOrEmail, password);
+      String usernameOrEmail, String password, bool rememberMe) async {
+    return await _repository.login(usernameOrEmail, password, rememberMe);
   }
 }

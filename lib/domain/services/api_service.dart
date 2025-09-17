@@ -7,12 +7,14 @@ class ApiService {
   static var logger = Logger();
   static const storage = FlutterSecureStorage();
 
-  static const String baseUrl = "https://roble-api.openlab.uninorte.edu.co/auth/vally_e89f74b54e";
+  static const String baseUrl =
+      "https://roble-api.openlab.uninorte.edu.co/auth/vally_e89f74b54e";
 
   // Login user via ROBLE API
   static Future<Map<String, dynamic>> loginUser(
     String email,
     String password,
+    bool rememberMe,
   ) async {
     final url = Uri.parse("$baseUrl/login");
 
@@ -32,8 +34,10 @@ class ApiService {
         final refreshToken = data['refreshToken'];
 
         // Guardar tokens de manera segura
-        await storage.write(key: "accessToken", value: accessToken);
-        await storage.write(key: "refreshToken", value: refreshToken);
+        if (rememberMe) {
+          await storage.write(key: "accessToken", value: accessToken);
+          await storage.write(key: "refreshToken", value: refreshToken);
+        }
 
         logger.i("Login successful for $email");
 
@@ -73,7 +77,7 @@ class ApiService {
         body: jsonEncode({"refreshToken": refreshToken}),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         final newAccessToken = data['accessToken'];
 

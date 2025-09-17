@@ -35,7 +35,7 @@ class HomeController extends GetxController {
 
   void _loadUserFromLoginBox() {
     final loginBox = Hive.box('login');
-    final email = loginBox.get('identifier');
+    final email = loginBox.get('email');
 
     if (email != null) {
       final userBox = Hive.box<UserHiveModel>('users');
