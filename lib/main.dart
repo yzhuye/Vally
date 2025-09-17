@@ -9,6 +9,7 @@ import 'data/models/course_hive_model.dart';
 import 'data/models/category_hive_model.dart';
 import 'data/models/user_hive_model.dart';
 import 'data/models/group_hive_model.dart';
+import 'domain/services/preload_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +26,6 @@ void main() async {
     await Hive.deleteBoxFromDisk('users');
     await Hive.deleteBoxFromDisk('categories');
     await Hive.deleteBoxFromDisk('groups');
-    await Hive.deleteBoxFromDisk('login');
   } catch (e) {
     Logger().e("Error deleting boxes: $e");
   }
@@ -35,6 +35,8 @@ void main() async {
   await Hive.openBox<UserHiveModel>('users');
   await Hive.openBox<GroupHiveModel>('groups');
   await Hive.openBox('login');
+
+  await preloadData();
 
   runApp(const MyApp());
 }
