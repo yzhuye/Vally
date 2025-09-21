@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
-import '../../widgets/course/course_card.dart';
+import '../../widgets/course/course_detail_header.dart';
 import '../../widgets/group/group_card.dart';
 import '../../controllers/group/group_controller.dart';
 import '../../controllers/home/home_controller.dart';
@@ -71,27 +71,38 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.category.name),
-        actions: [
-          if (widget.category.groupingMethod == 'self-assigned')
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                if (groupController != null) {
-                  groupController!.loadGroups();
-                }
-              },
-              tooltip: 'Actualizar grupos',
-            ),
-        ],
-      ),
+      appBar: null,
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CourseCard(course: widget.course),
+          CourseDetailHeader(
+            course: widget.course,
+            screenTitle: widget.category.name,
           ),
+          if (widget.category.groupingMethod == 'self-assigned')
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      if (groupController != null) {
+                        groupController!.loadGroups();
+                      }
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Actualizar grupos'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00A4BD),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(

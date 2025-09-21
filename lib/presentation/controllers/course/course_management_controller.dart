@@ -10,6 +10,8 @@ class CourseManagementController extends GetxController {
   late Rx<Course> course;
   final CourseRepositoryImpl _repository = CourseRepositoryImpl();
 
+  var isStudentListVisible = false.obs;
+
   CourseManagementController(this._initialCourse);
 
   @override
@@ -18,6 +20,14 @@ class CourseManagementController extends GetxController {
     refreshCourse();
     super.onInit();
   }
+
+  /// Cambia el estado de visibilidad de la lista de estudiantes.
+  /// Si está visible, la oculta, y viceversa.
+  void toggleStudentListVisibility() {
+    isStudentListVisible.value = !isStudentListVisible.value;
+  }
+
+
 
   Future<void> generateNewInvitationCode() async {
     try {
@@ -72,7 +82,6 @@ class CourseManagementController extends GetxController {
 
   int get totalStudents => course.value.enrolledStudents.length;
   int get totalCategories => course.value.categories.length;
-  int get totalGroups => course.value.groups.length;
 
   String get currentInvitationCode => course.value.invitationCode;
 }

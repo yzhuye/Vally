@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/course.dart';
-import '../../widgets/course/course_card.dart';
+import '../../widgets/course/course_detail_header.dart';
 import '../../../data/repositories/course/category_repository_imp.dart';
 import '../activity/category_activity_screen.dart';
 
@@ -14,15 +14,14 @@ class CourseCategoryScreen extends StatelessWidget {
     final categories =
         CategoryRepositoryImpl().getCategoriesByCourse(course.id);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categorías del Curso'),
-      ),
+      appBar: null,
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CourseCard(course: course),
+          CourseDetailHeader(
+            course: course,
+            screenTitle: 'Categorías del Curso',
           ),
+          const SizedBox(height: 16),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Align(

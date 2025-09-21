@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vally_app/domain/entities/course.dart';
-import 'package:vally_app/presentation/widgets/course/course_card.dart';
+import 'package:vally_app/presentation/widgets/dialogs/category_dialogs.dart'; 
 import '../../controllers/category/category_controller.dart';
 import '../professor/professor_groups_screen.dart';
+import '../../widgets/course/course_detail_header.dart'; 
 
 class ProfessorCategoryScreen extends StatefulWidget {
   final Course course;
@@ -33,324 +34,116 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
     super.dispose();
   }
 
-  void _showAddCategoryDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final groupCountController = TextEditingController();
-    final studentsPerGroupController = TextEditingController();
-
-    final List<String> methods = ['random', 'self-assigned', 'manual'];
-    String selectedMethod = methods[0];
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Agregar Categoría'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Nombre'),
-                    ),
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedMethod,
-                      decoration: const InputDecoration(
-                          labelText: 'Método de agrupación'),
-                      items: methods
-                          .map((method) => DropdownMenuItem(
-                                value: method,
-                                child: Text(method),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => selectedMethod = value);
-                        }
-                      },
-                    ),
-                    TextField(
-                      controller: groupCountController,
-                      decoration: const InputDecoration(
-                          labelText: 'Cantidad de grupos'),
-                      keyboardType: TextInputType.number,
-                    ),
-                    TextField(
-                      controller: studentsPerGroupController,
-                      decoration: const InputDecoration(
-                          labelText: 'Estudiantes por grupo'),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                ElevatedButton(
-                  child: const Text('Agregar'),
-                  onPressed: () async {
-                    final name = nameController.text.trim();
-                    final groupCount =
-                        int.tryParse(groupCountController.text.trim()) ?? 1;
-                    final studentsPerGroup =
-                        int.tryParse(studentsPerGroupController.text.trim()) ??
-                            1;
-
-                    if (name.isNotEmpty && selectedMethod.isNotEmpty) {
-                      await controller.addCategory(
-                        name: name,
-                        groupingMethod: selectedMethod,
-                        groupCount: groupCount,
-                        studentsPerGroup: studentsPerGroup,
-                      );
-                      Get.back();
-                    } else {
-                      Get.snackbar(
-                        'Error',
-                        'Por favor, completa todos los campos',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showEditCategoryDialog(BuildContext context, Category category) {
-    final nameController = TextEditingController(text: category.name);
-    final groupCountController =
-        TextEditingController(text: category.groupCount.toString());
-    final studentsPerGroupController =
-        TextEditingController(text: category.studentsPerGroup.toString());
-
-    final List<String> methods = ['random', 'self-assigned', 'manual'];
-    String selectedMethod = category.groupingMethod;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Editar Categoría'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Nombre'),
-                    ),
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedMethod,
-                      decoration: const InputDecoration(
-                          labelText: 'Método de agrupación'),
-                      items: methods
-                          .map((method) => DropdownMenuItem(
-                                value: method,
-                                child: Text(method),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => selectedMethod = value);
-                        }
-                      },
-                    ),
-                    TextField(
-                      controller: groupCountController,
-                      decoration: const InputDecoration(
-                          labelText: 'Cantidad de grupos'),
-                      keyboardType: TextInputType.number,
-                    ),
-                    TextField(
-                      controller: studentsPerGroupController,
-                      decoration: const InputDecoration(
-                          labelText: 'Estudiantes por grupo'),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                ElevatedButton(
-                  child: const Text('Guardar'),
-                  onPressed: () async {
-                    final name = nameController.text.trim();
-                    final groupCount =
-                        int.tryParse(groupCountController.text.trim()) ?? 1;
-                    final studentsPerGroup =
-                        int.tryParse(studentsPerGroupController.text.trim()) ??
-                            1;
-
-                    if (name.isNotEmpty && selectedMethod.isNotEmpty) {
-                      await controller.updateCategory(
-                        Category(
-                          id: category.id,
-                          name: name,
-                          groupingMethod: selectedMethod,
-                          groupCount: groupCount,
-                          studentsPerGroup: studentsPerGroup,
-                        ),
-                      );
-                      Get.back();
-                    } else {
-                      Get.snackbar(
-                        'Error',
-                        'Por favor, completa todos los campos',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _confirmDeleteCategory(BuildContext context, Category category) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar Categoría'),
-        content: const Text(
-            '¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.'),
-        actions: [
-          TextButton(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () async {
-              await controller.deleteCategory(category.id);
-              Get.back();
-            },
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categorías del Curso'),
-      ),
+      appBar: null,
+      backgroundColor: const Color(0xFFF5F7FA),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CourseCard(course: widget.course),
+          CourseDetailHeader(
+            course: widget.course,
+            screenTitle: 'Categorías del Curso',
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Categorías',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            padding: EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
+            child: Text(
+              'Categorías',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black54,
               ),
             ),
           ),
-          const SizedBox(height: 8),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
               }
+              if (controller.categories.isEmpty) {
+                return const Center(
+                  child: Text('Aún no hay categorías. ¡Agrega una!'),
+                );
+              }
 
-              return ListView.separated(
+              return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                itemCount: controller.categories.length + 1,
-                separatorBuilder: (_, __) => const Divider(),
+                itemCount: controller.categories.length,
                 itemBuilder: (context, index) {
-                  if (index < controller.categories.length) {
-                    final category = controller.categories[index];
-                    return ListTile(
+                  final category = controller.categories[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    child: ListTile(
                       leading: Icon(
-                          controller.getMethodIcon(category.groupingMethod)),
-                      title: Text(category.name),
+                        controller.getMethodIcon(category.groupingMethod),
+                        color: const Color(0xFF00A4BD),
+                      ),
+                      title: Text(category.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(
                         'Método: ${controller.getMethodDisplayName(category.groupingMethod)}',
                       ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.group, color: Colors.green),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProfessorGroupsScreen(
-                                    course: widget.course,
-                                    category: category,
-                                  ),
-                                ),
-                              );
-                            },
-                            tooltip: 'Ver grupos',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () {
-                              _showEditCategoryDialog(context, category);
-                            },
-                            tooltip: 'Editar categoría',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              _confirmDeleteCategory(context, category);
-                            },
-                            tooltip: 'Eliminar categoría',
-                          ),
-                          const Icon(Icons.arrow_forward_ios, size: 16),
-                        ],
-                      ),
-                      onTap: () {},
-                    );
-                  } else {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12.0),
-                      child: Center(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.add),
-                          label: const Text('Agregar categoría'),
-                          onPressed: () {
-                            _showAddCategoryDialog(context);
-                          },
-                        ),
-                      ),
-                    );
-                  }
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () => _showCategoryOptions(context, category),
+                    ),
+                  );
                 },
               );
             }),
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => CategoryDialogs.showAddCategory(context, controller),
+        icon: const Icon(Icons.add),
+        label: const Text('Nueva Categoría'),
+        backgroundColor: const Color(0xFF00A4BD),
+        foregroundColor: Colors.white,
+      ),
+    );
+  }
+
+  void _showCategoryOptions(BuildContext context, Category category) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Wrap(
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.group, color: Colors.green),
+              title: const Text('Ver Grupos'),
+              onTap: () {
+                Get.back(); // Cierra el bottom sheet
+                Get.to(() => ProfessorGroupsScreen(
+                      course: widget.course,
+                      category: category,
+                    ));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit, color: Colors.blue),
+              title: const Text('Editar Categoría'),
+              onTap: () {
+                Get.back();
+                CategoryDialogs.showEditCategory(context, category, controller);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('Eliminar Categoría'),
+              onTap: () {
+                Get.back();
+                CategoryDialogs.showDeleteCategory(
+                    context, category, controller);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
