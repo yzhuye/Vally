@@ -61,16 +61,21 @@ class CategoryController extends GetxController {
 
       if (result.isSuccess) {
         loadCategories();
+        Get.back(); // <-- Cierra el diálogo
         Get.snackbar(
           'Éxito',
           result.message,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
         );
       } else {
         Get.snackbar(
           'Error',
           result.message,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
         );
       }
     } finally {
@@ -89,16 +94,21 @@ class CategoryController extends GetxController {
 
       if (result.isSuccess) {
         loadCategories();
+        Get.back(); // <-- Cierra el diálogo
         Get.snackbar(
           'Éxito',
           result.message,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
         );
       } else {
         Get.snackbar(
           'Error',
           result.message,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
         );
       }
     } finally {
@@ -117,16 +127,21 @@ class CategoryController extends GetxController {
 
       if (result.isSuccess) {
         loadCategories();
+        Get.back(); // <-- Cierra el diálogo
         Get.snackbar(
           'Éxito',
           result.message,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
         );
       } else {
         Get.snackbar(
           'Error',
           result.message,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
         );
       }
     } finally {

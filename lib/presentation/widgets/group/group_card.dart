@@ -168,7 +168,7 @@ class GroupCard extends StatelessWidget {
     if (currentUserEmail == null) return false;
 
     final isCurrentUser = group.members.contains(currentUserEmail);
-    if (isCurrentUser) return true;
+    if (isCurrentUser) return false; // Los estudiantes ya en el grupo no pueden hacer nada
 
     if (group.isFull) return false;
 
@@ -179,7 +179,7 @@ class GroupCard extends StatelessWidget {
     if (currentUserEmail == null) return Icons.block;
 
     final isCurrentUser = group.members.contains(currentUserEmail);
-    if (isCurrentUser) return Icons.exit_to_app;
+    if (isCurrentUser) return Icons.check_circle;
 
     if (group.isFull) return Icons.block;
 
@@ -190,7 +190,7 @@ class GroupCard extends StatelessWidget {
     if (currentUserEmail == null) return 'No disponible';
 
     final isCurrentUser = group.members.contains(currentUserEmail);
-    if (isCurrentUser) return 'Salir';
+    if (isCurrentUser) return 'En este grupo';
 
     if (group.isFull) return 'Lleno';
 
@@ -203,7 +203,7 @@ class GroupCard extends StatelessWidget {
     if (currentUserEmail == null) return Colors.grey;
 
     final isCurrentUser = group.members.contains(currentUserEmail);
-    if (isCurrentUser) return Colors.red;
+    if (isCurrentUser) return Colors.green;
 
     if (group.isFull || canJoin == false) return Colors.grey;
 

@@ -15,12 +15,16 @@ class CategoryHiveModel extends HiveObject {
   @HiveField(4)
   int studentsPerGroup;
 
+  @HiveField(5)
+  List<String> activityIds;
+
   CategoryHiveModel({
     required this.id,
     required this.name,
     required this.groupingMethod,
     required this.groupCount,
     required this.studentsPerGroup,
+    this.activityIds = const [],
   });
 
   factory CategoryHiveModel.fromCategory(Category category) =>
@@ -30,6 +34,7 @@ class CategoryHiveModel extends HiveObject {
         groupingMethod: category.groupingMethod,
         groupCount: category.groupCount,
         studentsPerGroup: category.studentsPerGroup,
+        activityIds: category.activities.map((activity) => activity.id).toList(),
       );
 
   Category toCategory() => Category(
@@ -38,5 +43,7 @@ class CategoryHiveModel extends HiveObject {
         groupingMethod: groupingMethod,
         groupCount: groupCount,
         studentsPerGroup: studentsPerGroup,
+        // Note: activities list will need to be populated separately from ActivityHiveModel
+        // since we only store activity IDs here to avoid circular dependencies
       );
 }

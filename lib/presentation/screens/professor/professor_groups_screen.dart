@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
 import '../../controllers/professor/professor_group_controller.dart';
-import '../../widgets/course/course_card.dart';
+import '../../widgets/course/course_detail_header.dart';
+import 'student_management_screen.dart';
 
 class ProfessorGroupsScreen extends StatefulWidget {
   final Course course;
@@ -45,27 +46,20 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Grupos - ${widget.category.name}'),
-        backgroundColor: const Color(0xFF00A4BD),
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => controller.loadGroups(),
-          ),
-        ],
-      ),
+      appBar: null, // Eliminamos la AppBar
       body: Column(
         children: [
-          // Información del curso
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CourseCard(course: widget.course),
+          // Usamos el nuevo CourseDetailHeader
+          CourseDetailHeader(
+            course: widget.course,
+            screenTitle: 'Grupos - ${widget.category.name}',
           ),
 
           // Estadísticas generales
           _buildStatsCard(),
+
+          // Botón de gestión de estudiantes
+          _buildStudentManagementButton(),
 
           // Filtros
           _buildFilterChips(),
@@ -159,16 +153,67 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
     );
   }
 
+  Widget _buildStudentManagementButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => StudentManagementScreen(
+                  course: widget.course,
+                  category: widget.category,
+                ),
+              ),
+            );
+          },
+          icon: const Icon(Icons.people_alt),
+          label: const Text('Gestión de Estudiantes'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF00A4BD),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterChips() {
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
+      child: Row(
         children: [
-          _buildFilterChip('all', 'Todos', Icons.list),
-          _buildFilterChip('available', 'Con Espacio', Icons.person_add),
-          _buildFilterChip('full', 'Llenos', Icons.check_circle),
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _buildFilterChip('all', 'Todos', Icons.list),
+                _buildFilterChip('available', 'Con Espacio', Icons.person_add),
+                _buildFilterChip('full', 'Llenos', Icons.check_circle),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Botón de actualizar
+          IconButton(
+            onPressed: () => controller.loadGroups(),
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Actualizar grupos',
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF00A4BD),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
         ],
       ),
     );

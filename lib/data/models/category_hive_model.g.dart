@@ -22,13 +22,14 @@ class CategoryHiveModelAdapter extends TypeAdapter<CategoryHiveModel> {
       groupingMethod: fields[2] as String,
       groupCount: fields[3] as int,
       studentsPerGroup: fields[4] as int,
+      activityIds: (fields[5] as List).cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, CategoryHiveModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class CategoryHiveModelAdapter extends TypeAdapter<CategoryHiveModel> {
       ..writeByte(3)
       ..write(obj.groupCount)
       ..writeByte(4)
-      ..write(obj.studentsPerGroup);
+      ..write(obj.studentsPerGroup)
+      ..writeByte(5)
+      ..write(obj.activityIds);
   }
 
   @override

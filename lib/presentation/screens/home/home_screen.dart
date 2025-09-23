@@ -22,20 +22,10 @@ class HomeScreen extends StatelessWidget {
                 const Icon(Icons.notifications_none, color: Color(0xFF757575)),
             onPressed: () {},
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.account_circle_outlined,
-                color: Color(0xFF757575)),
-            onSelected: (value) {
-              if (value == 'logout') {
-                controller.logout();
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: 'logout',
-                child: Text('Cerrar sesión'),
-              ),
-            ],
+          IconButton(
+            icon: const Icon(Icons.logout, color: Color(0xFF757575)),
+            onPressed: () => controller.logout(),
+            tooltip: 'Cerrar sesión',
           ),
         ],
       ),

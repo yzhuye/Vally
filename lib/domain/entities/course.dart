@@ -86,13 +86,52 @@ class Activity {
   final String name;
   final String description;
   final DateTime dueDate;
+  final String categoryId;
+  final List<Evaluation> evaluations;
 
   Activity({
     required this.id,
     required this.name,
     required this.description,
     required this.dueDate,
+    required this.categoryId,
+    this.evaluations = const [],
   });
+}
+
+class Evaluation {
+  final String id;
+  final String activityId;
+  final String evaluatorId; // ID del estudiante que evalúa
+  final String evaluatedId; // ID del estudiante evaluado
+  final int punctuality; // 0-5 estrellas - Puntualidad
+  final int contributions; // 0-5 estrellas - Contribuciones
+  final int commitment; // 0-5 estrellas - Compromiso
+  final int attitude; // 0-5 estrellas - Actitud
+  final DateTime createdAt;
+
+  Evaluation({
+    required this.id,
+    required this.activityId,
+    required this.evaluatorId,
+    required this.evaluatedId,
+    required this.punctuality,
+    required this.contributions,
+    required this.commitment,
+    required this.attitude,
+    required this.createdAt,
+  });
+
+  bool get isValid =>
+      _isValidMetric(punctuality) &&
+      _isValidMetric(contributions) &&
+      _isValidMetric(commitment) &&
+      _isValidMetric(attitude);
+
+  bool _isValidMetric(int metric) => metric >= 0 && metric <= 5;
+
+  double get averageRating =>
+      (punctuality + contributions + commitment + attitude) / 4.0;
 }
 
 class Group {
