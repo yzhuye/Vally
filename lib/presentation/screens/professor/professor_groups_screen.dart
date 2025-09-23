@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
 import '../../controllers/professor/professor_group_controller.dart';
 import '../../widgets/course/course_detail_header.dart';
+import 'student_management_screen.dart';
 
 class ProfessorGroupsScreen extends StatefulWidget {
   final Course course;
@@ -56,6 +57,9 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
 
           // Estadísticas generales
           _buildStatsCard(),
+
+          // Botón de gestión de estudiantes
+          _buildStudentManagementButton(),
 
           // Filtros
           _buildFilterChips(),
@@ -146,6 +150,37 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildStudentManagementButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => StudentManagementScreen(
+                  course: widget.course,
+                  category: widget.category,
+                ),
+              ),
+            );
+          },
+          icon: const Icon(Icons.people_alt),
+          label: const Text('Gestión de Estudiantes'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF00A4BD),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

@@ -88,4 +88,74 @@ class GroupRepositoryImpl implements GroupRepository {
       await addGroup(courseId, group);
     }
   }
+
+  @override
+  bool assignStudentToGroup(String courseId, String groupId, String studentEmail) {
+    final groupHive = _box.get(groupId);
+    if (groupHive == null) return false;
+
+    // Verificar que el grupo no esté lleno
+    if (groupHive.members.length >= groupHive.maxCapacity) return false;
+
+    // Verificar que el estudiante no esté ya en el grupo
+    if (groupHive.members.contains(studentEmail)) return false;
+
+    // Remover el estudiante de cualquier otro grupo en la misma categoría
+    final allGroups = _box.values.where((g) => 
+        g.courseId == courseId && g.categoryId == groupHive.categoryId).toList();
+    
+    for (final otherGroup in allGroups) {
+      if (otherGroup.id != groupId && otherGroup.members.contains(studentEmail)) {
+        otherGroup.members.remove(studentEmail);
+        otherGroup.save();
+      }
+    }
+
+    // Agregar el estudiante al grupo
+    groupHive.members.add(studentEmail);
+    groupHive.save();
+
+    return true;
+  }
+
+  @override
+  bool moveStudentToGroup(String courseId, String fromGroupId, String toGroupId, String studentEmail) {
+    // Primero remover del grupo origen
+    final fromGroupHive = _box.get(fromGroupId);
+    if (fromGroupHive == null || !fromGroupHive.members.contains(studentEmail)) {
+      return false;
+    }
+
+    // Verificar que el grupo destino no esté lleno
+    final toGroupHive = _box.get(toGroupId);
+    if (toGroupHive == null || toGroupHive.members.length >= toGroupHive.maxCapacity) {
+      return false;
+    }
+
+    // Remover del grupo origen
+    fromGroupHive.members.remove(studentEmail);
+    fromGroupHive.save();
+
+    // Agregar al grupo destino
+    toGroupHive.members.add(studentEmail);
+    toGroupHive.save();
+
+    return true;
+  }
+
+  @override
+  Group? findStudentGroup(String courseId, String categoryId, String studentEmail) {
+    final groupHive = _box.values.firstWhere(
+      (g) => g.courseId == courseId && 
+             g.categoryId == categoryId && 
+             g.members.contains(studentEmail),
+      orElse: () => throw StateError('No group found'),
+    );
+    
+    try {
+      return groupHive.toGroup();
+    } catch (e) {
+      return null;
+    }
+  }
 }

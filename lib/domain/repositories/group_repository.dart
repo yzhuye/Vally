@@ -11,4 +11,7 @@ abstract class GroupRepository {
   Future<void> createGroupsForCategory(
       String courseId, String categoryId, int groupCount, int studentsPerGroup,
       {String? categoryName});
+  bool assignStudentToGroup(String courseId, String groupId, String studentEmail);
+  bool moveStudentToGroup(String courseId, String fromGroupId, String toGroupId, String studentEmail);
+  Group? findStudentGroup(String courseId, String categoryId, String studentEmail);
 }

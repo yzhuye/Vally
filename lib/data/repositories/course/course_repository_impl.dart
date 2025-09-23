@@ -21,98 +21,78 @@ class CourseRepositoryImpl implements CourseRepository {
   }
 
   @override
-  Future<List<Course>> getCourses(String userType) async {
+  Future<List<Course>> getAllCourses() async {
     await _initializeData();
     await Future.delayed(const Duration(seconds: 1));
-    final allCourses =
-        _courseBox.values.map((e) => e.toCourse()).whereType<Course>().toList();
-    if (userType == 'Estudiante') {
-      return allCourses
-          .where((c) => c.enrolledStudents.contains(_currentStudentName))
-          .toList();
-    } else if (userType == 'Profesor') {
-      return allCourses;
-    } else {
-      return [];
-    }
+    return _courseBox.values
+        .map((e) => e.toCourse())
+        .whereType<Course>()
+        .toList();
   }
 
-  // ...resto de métodos deben migrar a usar _courseBox en vez de listas estáticas...
-
-  Future<Course> createCourse({
-    required String title,
-    required String description,
-  }) async {
+  @override
+  Future<void> saveCourse(Course course) async {
     await _initializeData();
-
-    final course = Course(
-      id: _generateId(),
-      title: title,
-      description: description,
-      enrolledStudents: [],
-      invitationCode: _generateInvitationCode(),
-      imageUrl: 'assets/images/course_placeholder.png',
-      createdBy:
-          'system', // Placeholder - este método no se usa en el home controller
-    );
-
     await _courseBox.put(course.id, CourseHiveModel.fromCourse(course));
-    return course;
   }
 
-  Future<bool> joinCourseWithCode(String invitationCode) async {
+  @override
+  Future<void> updateCourse(Course course) async {
     await _initializeData();
-
-    final allCourses =
-        _courseBox.values.map((e) => e.toCourse()).whereType<Course>().toList();
-    final course = allCourses.firstWhere(
-      (c) => c.invitationCode == invitationCode,
-      orElse: () => throw Exception('Código de invitación inválido'),
-    );
-
-    if (!course.enrolledStudents.contains(_currentStudentName)) {
-      final updatedCourse = Course(
-        id: course.id,
-        title: course.title,
-        description: course.description,
-        enrolledStudents: [...course.enrolledStudents, _currentStudentName],
-        categories: course.categories,
-        groups: course.groups,
-        invitationCode: course.invitationCode,
-        imageUrl: course.imageUrl,
-        createdBy: course.createdBy,
-      );
-      await _courseBox.put(
-          updatedCourse.id, CourseHiveModel.fromCourse(updatedCourse));
-      return true;
-    }
-    return false;
+    await _courseBox.put(course.id, CourseHiveModel.fromCourse(course));
   }
 
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
-  }
-
-  Future<Course> updateInvitationCode(String courseId) async {
+  @override
+  Future<bool> addStudentToCourse(String courseId, String studentEmail) async {
     await _initializeData();
     final courseHive = _courseBox.get(courseId);
-    if (courseHive == null) throw Exception('Curso no encontrado');
+    if (courseHive == null) return false;
+
     final course = courseHive.toCourse();
-    final newCode = _generateInvitationCode();
+    if (course.enrolledStudents.contains(studentEmail)) return false;
+
     final updatedCourse = Course(
       id: course.id,
       title: course.title,
       description: course.description,
-      enrolledStudents: course.enrolledStudents,
+      enrolledStudents: [...course.enrolledStudents, studentEmail],
       categories: course.categories,
       groups: course.groups,
-      invitationCode: newCode,
+      invitationCode: course.invitationCode,
       imageUrl: course.imageUrl,
       createdBy: course.createdBy,
     );
-    await _courseBox.put(
-        updatedCourse.id, CourseHiveModel.fromCourse(updatedCourse));
-    return updatedCourse;
+
+    await _courseBox.put(courseId, CourseHiveModel.fromCourse(updatedCourse));
+    return true;
+  }
+
+  @override
+  Future<bool> removeStudentFromCourse(
+      String courseId, String studentEmail) async {
+    await _initializeData();
+    final courseHive = _courseBox.get(courseId);
+    if (courseHive == null) return false;
+
+    final course = courseHive.toCourse();
+    final updatedStudents = course.enrolledStudents
+        .where((email) => email != studentEmail)
+        .toList();
+
+    final updatedCourse = Course(
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      enrolledStudents: updatedStudents,
+      categories: course.categories,
+      groups: course.groups,
+      invitationCode: course.invitationCode,
+      imageUrl: course.imageUrl,
+      createdBy: course.createdBy,
+    );
+
+    await _courseBox.put(courseId, CourseHiveModel.fromCourse(updatedCourse));
+    return true;
   }
 
   Course? getCourseById(String courseId) {
@@ -121,12 +101,5 @@ class CourseRepositoryImpl implements CourseRepository {
       return courseHive.toCourse();
     }
     return null;
-  }
-
-  String _generateInvitationCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = Random();
-    return String.fromCharCodes(Iterable.generate(
-        6, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
   }
 }
