@@ -5,6 +5,8 @@ import '../../widgets/course/course_detail_header.dart';
 import '../../widgets/group/group_card.dart';
 import '../../controllers/group/group_controller.dart';
 import '../../controllers/home/home_controller.dart';
+import '../../controllers/activity/student_activity_controller.dart';
+import 'student_evaluation_screen.dart';
 
 class CategoryActivityScreen extends StatefulWidget {
   final Course course;
@@ -23,8 +25,10 @@ class CategoryActivityScreen extends StatefulWidget {
 class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   bool showActivities = true;
   GroupController? groupController;
+  StudentActivityController? activityController;
   late String studentEmail;
   late String controllerTag;
+  late String activityControllerTag;
 
   @override
   void initState() {
@@ -32,6 +36,17 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
 
     final homeController = Get.find<HomeController>();
     studentEmail = homeController.currentUser.value?.email ?? '';
+
+    // Initialize activity controller
+    activityControllerTag = 'student_activity_${widget.category.id}_$studentEmail';
+    activityController = Get.put(
+      StudentActivityController(
+        categoryId: widget.category.id,
+        courseId: widget.course.id,
+        studentEmail: studentEmail,
+      ),
+      tag: activityControllerTag,
+    );
 
     if (widget.category.groupingMethod == 'self-assigned') {
       controllerTag = '${widget.course.id}_${widget.category.id}_$studentEmail';
@@ -65,6 +80,9 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
         Get.isRegistered<GroupController>(tag: controllerTag)) {
       Get.delete<GroupController>(tag: controllerTag);
     }
+    if (Get.isRegistered<StudentActivityController>(tag: activityControllerTag)) {
+      Get.delete<StudentActivityController>(tag: activityControllerTag);
+    }
     super.dispose();
   }
 
@@ -78,31 +96,6 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
             course: widget.course,
             screenTitle: widget.category.name,
           ),
-          if (widget.category.groupingMethod == 'self-assigned')
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      if (groupController != null) {
-                        groupController!.loadGroups();
-                      }
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Actualizar grupos'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00A4BD),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -215,24 +208,175 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
       }
     }
 
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.assignment_outlined,
-            size: 64,
-            color: Colors.grey,
+    return Obx(() {
+      if (activityController!.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (activityController!.activities.isEmpty) {
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.assignment_outlined,
+                size: 64,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Todavía no hay actividades disponibles.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          SizedBox(height: 16),
-          Text(
-            "Todavía no hay actividades disponibles.",
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+        );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: activityController!.activities.length,
+        itemBuilder: (context, index) {
+          final activity = activityController!.activities[index];
+          final evaluationCount = activityController!.getEvaluationCountForActivity(activity.id);
+          final isExpired = activityController!.isActivityExpired(activity.dueDate);
+
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16),
+              leading: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00A4BD).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.assignment,
+                  color: Color(0xFF00A4BD),
+                ),
+              ),
+              title: Text(
+                activity.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Text(
+                    activity.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: activityController!.getDueDateColor(activity.dueDate).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: activityController!.getDueDateColor(activity.dueDate),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            activityController!.formatDueDate(activity.dueDate),
+                            style: TextStyle(
+                              color: activityController!.getDueDateColor(activity.dueDate),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (evaluationCount > 0)
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green[100],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '$evaluationCount evaluaciones',
+                              style: TextStyle(
+                                color: Colors.green[700],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+              trailing: !isExpired
+                  ? ElevatedButton(
+                      onPressed: () => _navigateToEvaluation(activity),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00A4BD),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Evaluar'),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.red[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Vencida',
+                        style: TextStyle(
+                          color: Colors.red[700],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+              onTap: () => _navigateToEvaluation(activity),
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  void _navigateToEvaluation(Activity activity) {
+    Get.to(() => StudentEvaluationScreen(
+          course: widget.course,
+          category: widget.category,
+          activity: activity,
+          studentEmail: studentEmail,
+        ));
   }
 
   Widget _buildGroupsView() {
@@ -292,7 +436,6 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
         itemCount: groupController!.groups.length,
         itemBuilder: (context, index) {
           final group = groupController!.groups[index];
-          final isCurrentGroup = groupController!.currentGroup?.id == group.id;
           final canJoin = groupController!.canJoinGroup(group);
 
           return Padding(
@@ -302,9 +445,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
               currentUserEmail: studentEmail,
               canJoin: canJoin,
               onJoin: () async {
-                if (isCurrentGroup) {
-                  await groupController!.leaveGroup(group.id);
-                } else if (canJoin) {
+                if (canJoin) {
                   await groupController!.joinGroup(group.id);
                 }
               },

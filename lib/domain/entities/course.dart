@@ -44,13 +44,59 @@ class Activity {
   final String name;
   final String description;
   final DateTime dueDate;
+  final String categoryId;
+  final List<Evaluation> evaluations;
 
   Activity({
     required this.id,
     required this.name,
     required this.description,
     required this.dueDate,
+    required this.categoryId,
+    this.evaluations = const [],
   });
+}
+
+class Evaluation {
+  final String id;
+  final String activityId;
+  final String evaluatorId; // ID del estudiante que evalúa
+  final String evaluatedId; // ID del estudiante evaluado
+  final int metric1; // 0-5 estrellas
+  final int metric2; // 0-5 estrellas
+  final int metric3; // 0-5 estrellas
+  final int metric4; // 0-5 estrellas
+  final int metric5; // 0-5 estrellas
+  final String? comments; // Comentarios opcionales
+  final DateTime createdAt;
+
+  Evaluation({
+    required this.id,
+    required this.activityId,
+    required this.evaluatorId,
+    required this.evaluatedId,
+    required this.metric1,
+    required this.metric2,
+    required this.metric3,
+    required this.metric4,
+    required this.metric5,
+    this.comments,
+    required this.createdAt,
+  });
+
+  // Validar que las métricas estén en el rango correcto
+  bool get isValid =>
+      _isValidMetric(metric1) &&
+      _isValidMetric(metric2) &&
+      _isValidMetric(metric3) &&
+      _isValidMetric(metric4) &&
+      _isValidMetric(metric5);
+
+  bool _isValidMetric(int metric) => metric >= 0 && metric <= 5;
+
+  // Calcular promedio de las métricas
+  double get averageRating =>
+      (metric1 + metric2 + metric3 + metric4 + metric5) / 5.0;
 }
 
 class Group {

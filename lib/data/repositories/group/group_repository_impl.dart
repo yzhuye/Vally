@@ -59,18 +59,6 @@ class GroupRepositoryImpl implements GroupRepository {
     return true;
   }
 
-  @override
-  bool leaveGroup(String courseId, String groupId, String studentEmail) {
-    final groupHive = _box.get(groupId);
-    if (groupHive == null) return false;
-
-    final removed = groupHive.members.remove(studentEmail);
-    if (removed) {
-      groupHive.save();
-    }
-
-    return removed;
-  }
 
   @override
   Future<void> createGroupsForCategory(

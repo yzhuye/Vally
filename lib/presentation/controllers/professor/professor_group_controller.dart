@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/usecases/group/get_groups_by_category.dart';
-import '../../../domain/usecases/student/assign_student_to_group.dart';
-import '../../../domain/usecases/student/move_student_to_group.dart';
+import '../../../domain/usecases/group/assign_student_to_group.dart';
+import '../../../domain/usecases/group/move_student_to_group.dart';
 import '../../../domain/usecases/student/get_students_by_course.dart';
 import '../../../data/repositories/group/group_repository_impl.dart';
 import '../../../data/repositories/course/course_repository_impl.dart';
@@ -49,10 +49,21 @@ class ProfessorGroupController extends GetxController {
   void loadGroups() {
     isLoading(true);
     try {
-      groups.value = _getGroupsUseCase(
+      final result = _getGroupsUseCase(
         courseId: courseId,
         categoryId: categoryId,
       );
+      
+      if (result.isSuccess) {
+        groups.value = result.groups;
+      } else {
+        Get.snackbar(
+          'Error',
+          result.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     } finally {
       isLoading(false);
     }
@@ -108,7 +119,7 @@ class ProfessorGroupController extends GetxController {
   Future<bool> assignStudentToGroup(String studentEmail, String groupId) async {
     isAssigningStudent(true);
     try {
-      final result = await _assignStudentUseCase(
+      final result = _assignStudentUseCase(
         courseId: courseId,
         groupId: groupId,
         studentEmail: studentEmail,
@@ -133,7 +144,7 @@ class ProfessorGroupController extends GetxController {
       String studentEmail, String fromGroupId, String toGroupId) async {
     isAssigningStudent(true);
     try {
-      final result = await _moveStudentUseCase(
+      final result = _moveStudentUseCase(
         courseId: courseId,
         fromGroupId: fromGroupId,
         toGroupId: toGroupId,

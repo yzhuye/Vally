@@ -4,6 +4,7 @@ import 'package:vally_app/domain/entities/course.dart';
 import 'package:vally_app/presentation/widgets/dialogs/category_dialogs.dart'; 
 import '../../controllers/category/category_controller.dart';
 import '../professor/professor_groups_screen.dart';
+import '../activity/activity_management_screen.dart';
 import '../../widgets/course/course_detail_header.dart'; 
 
 class ProfessorCategoryScreen extends StatefulWidget {
@@ -113,6 +114,17 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
       builder: (context) {
         return Wrap(
           children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.assignment, color: Color(0xFF00A4BD)),
+              title: const Text('Ver Actividades'),
+              onTap: () {
+                Get.back(); // Cierra el bottom sheet
+                Get.to(() => ActivityManagementScreen(
+                      course: widget.course,
+                      category: category,
+                    ));
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.group, color: Colors.green),
               title: const Text('Ver Grupos'),
