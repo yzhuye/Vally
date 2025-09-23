@@ -1,35 +1,31 @@
 class User {
   final String id;
   final String email;
-  final String password;
   final String? username;
-  final bool isTeacher;
-  final List<String> courseIds;
+  final List<String> teacherCourses;
+  final List<String> studentCourses;
 
   User({
     required this.id,
     required this.email,
-    required this.password,
     this.username,
-    this.isTeacher = false,
-    this.courseIds = const [],
+    this.teacherCourses = const [],
+    this.studentCourses = const [],
   });
 
   User copyWith({
     String? id,
     String? email,
-    String? password,
     String? username,
-    bool? isTeacher,
-    List<String>? courseIds,
+    List<String>? teacherCourses,
+    List<String>? studentCourses,
   }) {
     return User(
       id: id ?? this.id,
       email: email ?? this.email,
-      password: password ?? this.password,
       username: username ?? this.username,
-      isTeacher: isTeacher ?? this.isTeacher,
-      courseIds: courseIds ?? this.courseIds,
+      teacherCourses: teacherCourses ?? this.teacherCourses,
+      studentCourses: studentCourses ?? this.studentCourses,
     );
   }
 }

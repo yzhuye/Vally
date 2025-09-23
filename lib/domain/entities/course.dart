@@ -7,7 +7,7 @@ class Course {
   final List<Group> groups;
   final String invitationCode;
   final String? imageUrl; // Mantener compatibilidad con la versión anterior
-  final String createdBy; // Email del usuario que creó el curso
+  final String createdBy; // ID del usuario que creó el curso
 
   Course({
     required this.id,
@@ -20,6 +20,48 @@ class Course {
     this.imageUrl,
     required this.createdBy,
   });
+
+  factory Course.fromJson(Map<String, dynamic> json) {
+    try {
+      return Course(
+        id: json['_id'] as String,
+        title: json['title'] as String,
+        description: json['description'] as String,
+        enrolledStudents: List<String>.from(json['enrolledStudents'] ?? []),
+        categories: (json['categories'] as List<dynamic>? ?? [])
+            .map((e) => Category(
+                  id: e['_id'] as String,
+                  name: e['name'] as String,
+                  groupingMethod: e['groupingMethod'] as String,
+                  groupCount: e['groupCount'] as int,
+                  studentsPerGroup: e['studentsPerGroup'] as int,
+                  activities: (e['activities'] as List<dynamic>? ?? [])
+                      .map((a) => Activity(
+                            id: a['_id'] as String,
+                            name: a['name'] as String,
+                            description: a['description'] as String,
+                            dueDate: DateTime.parse(a['dueDate'] as String),
+                          ))
+                      .toList(),
+                ))
+            .toList(),
+        groups: (json['groups'] as List<dynamic>? ?? [])
+            .map((g) => Group(
+                  id: g['_id'] as String,
+                  name: g['name'] as String,
+                  maxCapacity: g['maxCapacity'] as int,
+                  members: List<String>.from(g['members'] ?? []),
+                  categoryId: g['categoryId'] as String,
+                ))
+            .toList(),
+        invitationCode: json['invitationCode'] as String,
+        imageUrl: json['imageUrl'] as String?,
+        createdBy: json['createdBy'] as String,
+      );
+    } catch (e) {
+      throw Exception('Error parsing Course JSON: $e');
+    }
+  }
 }
 
 class Category {

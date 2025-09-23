@@ -1,17 +1,16 @@
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
 
 import 'package:vally_app/domain/entities/course.dart';
 import 'package:vally_app/domain/entities/user.dart';
 
-import 'package:vally_app/data/models/course_hive_model.dart';
-import 'package:vally_app/data/models/user_hive_model.dart';
-
 import 'package:vally_app/presentation/screens/login/login_screen.dart';
 import 'package:vally_app/presentation/controllers/login/login_controller.dart';
 
 import 'package:vally_app/domain/services/api_service.dart';
+import 'package:vally_app/domain/services/api_user_courses.dart';
 
 class HomeController extends GetxController {
   var currentUser = Rx<User?>(null);
@@ -26,6 +25,7 @@ class HomeController extends GetxController {
   var searchText = ''.obs;
 
   var selectedUserType = 'Estudiante'.obs;
+  final logger = Logger();
 
   @override
   void onInit() {
@@ -33,43 +33,95 @@ class HomeController extends GetxController {
     _loadUserFromLoginBox();
   }
 
-  void _loadUserFromLoginBox() {
+  void _loadUserFromLoginBox() async {
     final loginBox = Hive.box('login');
     final email = loginBox.get('email');
 
     if (email != null) {
-      final userBox = Hive.box<UserHiveModel>('users');
-      final userHive = userBox.values.firstWhere((u) => u.email == email);
-      currentUser.value = userHive.toUser();
+      try {
+        // Fetch the user with their courses from the backend
+        final userWithCourses = await ApiUserCourses.getUserWithCourses(email);
 
-      loadUserCourses();
+        if (userWithCourses != null) {
+          currentUser.value = userWithCourses;
+          await loadUserCourses(); // Load courses after fetching the user
+        } else {
+          Get.snackbar(
+            'Error',
+            'No se pudo cargar el usuario.',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      } catch (e) {
+        Get.snackbar(
+          'Error',
+          'Error al cargar el usuario: $e',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     }
   }
 
   Future<void> loadUserCourses() async {
     if (currentUser.value == null) return;
 
-    isLoading(true);
-    final courseBox = Hive.box<CourseHiveModel>('courses');
-    final allCourses = courseBox.values.map((c) => c.toCourse()).toList();
-    if (currentUser.value!.isTeacher) {
-      _originalProfessorCourses = allCourses.where((c) {
-        final isCreatedByUser = c.createdBy == currentUser.value!.email;
-        return isCreatedByUser;
-      }).toList();
-    } else {
-      _originalProfessorCourses = [];
+    try {
+      isLoading(true);
+
+      final userWithCourses =
+          await ApiUserCourses.getUserWithCourses(currentUser.value!.email);
+      if (userWithCourses != null) {
+        currentUser.value = userWithCourses;
+        // Fetch and create teacher courses from the database
+        _originalProfessorCourses = await Future.wait(
+          userWithCourses.teacherCourses.map((courseId) async {
+            final courseData = await ApiUserCourses.getCourseById(courseId);
+            if (courseData != null) {
+              return Course.fromJson(courseData);
+            }
+            return null;
+          }),
+        ).then((courses) =>
+            courses.whereType<Course>().toList()); // Filter out nulls
+
+        // Fetch and create student courses from the database
+        _originalStudentCourses = await Future.wait(
+          userWithCourses.studentCourses.map((courseId) async {
+            final courseData = await ApiUserCourses.getCourseById(courseId);
+            if (courseData != null) {
+              return Course.fromJson(courseData);
+            }
+            return null; // Skip if the course is not found
+          }),
+        ).then((courses) =>
+            courses.whereType<Course>().toList()); // Filter out nulls
+
+        // Update observable lists
+        professorCourses.assignAll(_originalProfessorCourses);
+        studentCourses.assignAll(_originalStudentCourses);
+
+        applySearch();
+      } else {
+        Get.snackbar(
+          'Error',
+          'No se pudieron cargar los cursos.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      logger.e("Error loading courses: $e");
+      Get.snackbar(
+        'Error',
+        'Error al cargar los cursos: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading(false);
     }
-
-    _originalStudentCourses = allCourses
-        .where((c) => c.enrolledStudents.contains(currentUser.value!.email))
-        .toList();
-
-    professorCourses.assignAll(_originalProfessorCourses);
-    studentCourses.assignAll(_originalStudentCourses);
-
-    applySearch();
-    isLoading(false);
   }
 
   void selectUserType(String userType) {
@@ -101,12 +153,12 @@ class HomeController extends GetxController {
     studentCourses.assignAll(filteredStudent);
   }
 
-  void logout() async{
+  void logout() async {
     try {
       await ApiService.logout();
       Get.delete<LoginController>();
       Get.offAll(() => const LoginScreen());
-      
+
       Get.snackbar(
         'Éxito',
         'Has cerrado sesión exitosamente',
@@ -136,10 +188,6 @@ class HomeController extends GetxController {
 
     try {
       isLoading(true);
-
-      final courseBox = Hive.box<CourseHiveModel>('courses');
-      final userBox = Hive.box<UserHiveModel>('users');
-
       final newCourse = Course(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: title,
@@ -150,7 +198,37 @@ class HomeController extends GetxController {
         createdBy: currentUser.value!.email,
       );
 
-      await courseBox.put(newCourse.id, CourseHiveModel.fromCourse(newCourse));
+      final createdCourse = await ApiUserCourses.createCourse(
+        title: title,
+        description: description,
+        invittionCode: newCourse.invitationCode,
+        imageUrl: newCourse.imageUrl,
+        createdByUserId: currentUser.value!.id,
+        createdByUserEmail: currentUser.value!.email,
+      );
+
+      if (createdCourse != null) {
+        final newCourseId = createdCourse["_id"];
+        final updatedUser = User(
+          id: currentUser.value!.id,
+          username: currentUser.value!.username,
+          email: currentUser.value!.email,
+          teacherCourses: [...currentUser.value!.teacherCourses, newCourseId],
+          studentCourses: currentUser.value!.studentCourses,
+        );
+
+        currentUser.value = updatedUser;
+        await loadUserCourses();
+
+        Get.snackbar(
+          'Éxito',
+          'Curso creado exitosamente',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        throw Exception("Error al crear el curso en el backend.");
+      }
 
       final oldUser = currentUser.value!;
 
@@ -158,12 +236,10 @@ class HomeController extends GetxController {
         id: oldUser.id,
         username: oldUser.username,
         email: oldUser.email,
-        password: oldUser.password,
-        isTeacher: true,
-        courseIds: [...oldUser.courseIds, newCourse.id],
+        teacherCourses: [...oldUser.teacherCourses, newCourse.id],
+        studentCourses: oldUser.studentCourses,
       );
 
-      await userBox.put(updatedUser.id, UserHiveModel.fromUser(updatedUser));
       currentUser.value = updatedUser;
 
       await loadUserCourses();
@@ -191,20 +267,15 @@ class HomeController extends GetxController {
 
     try {
       isLoading(true);
-      final courseBox = Hive.box<CourseHiveModel>('courses');
 
-      final courseHive = courseBox.values.firstWhere(
-        (c) => c.invitationCode == invitationCode,
-        orElse: () => throw Exception("Curso no encontrado"),
+      // Use the API to join the course with the invitation code
+      final joinedCourse = await ApiUserCourses.joinCourseByInvitation(
+        userId: currentUser.value!.id,
+        invitationCode: invitationCode,
       );
 
-      final course = courseHive.toCourse();
-
-      if (!course.enrolledStudents.contains(currentUser.value!.email)) {
-        course.enrolledStudents.add(currentUser.value!.email);
-
-        await courseBox.put(course.id, CourseHiveModel.fromCourse(course));
-
+      if (joinedCourse != null) {
+        // Reload the user's courses after successfully joining
         await loadUserCourses();
 
         Get.snackbar(
@@ -215,9 +286,9 @@ class HomeController extends GetxController {
         );
       } else {
         Get.snackbar(
-          'Info',
-          'Ya estás inscrito en este curso',
-          backgroundColor: Colors.orange,
+          'Error',
+          'No se pudo unir al curso. Verifica el código de invitación.',
+          backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
