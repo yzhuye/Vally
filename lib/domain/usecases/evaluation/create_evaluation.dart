@@ -12,12 +12,10 @@ class CreateEvaluationUseCase {
     required String activityId,
     required String evaluatorId,
     required String evaluatedId,
-    required int metric1,
-    required int metric2,
-    required int metric3,
-    required int metric4,
-    required int metric5,
-    String? comments,
+    required int punctuality,
+    required int contributions,
+    required int commitment,
+    required int attitude,
   }) async {
     try {
       // Validaciones básicas
@@ -44,12 +42,10 @@ class CreateEvaluationUseCase {
         activityId: activityId,
         evaluatorId: evaluatorId,
         evaluatedId: evaluatedId,
-        metric1: metric1,
-        metric2: metric2,
-        metric3: metric3,
-        metric4: metric4,
-        metric5: metric5,
-        comments: comments?.trim(),
+        punctuality: punctuality,
+        contributions: contributions,
+        commitment: commitment,
+        attitude: attitude,
         createdAt: DateTime.now(),
       );
 

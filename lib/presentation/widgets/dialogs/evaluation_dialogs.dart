@@ -9,15 +9,13 @@ class EvaluationDialogs {
     String evaluatedEmail,
     StudentActivityController controller,
   ) {
-    final commentsController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     
     // Métricas de evaluación
-    int metric1 = 3; // Comunicación
-    int metric2 = 3; // Colaboración
-    int metric3 = 3; // Responsabilidad
-    int metric4 = 3; // Calidad del trabajo
-    int metric5 = 3; // Puntualidad
+    int punctuality = 3; // Puntualidad
+    int contributions = 3; // Contribuciones
+    int commitment = 3; // Compromiso
+    int attitude = 3; // Actitud
 
     showDialog(
       context: context,
@@ -48,63 +46,41 @@ class EvaluationDialogs {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Métrica 1: Comunicación
-                  _buildMetricRating(
-                    'Comunicación',
-                    'Claridad y efectividad en la comunicación',
-                    metric1,
-                    (value) => setState(() => metric1 = value),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Métrica 2: Colaboración
-                  _buildMetricRating(
-                    'Colaboración',
-                    'Trabajo en equipo y apoyo a compañeros',
-                    metric2,
-                    (value) => setState(() => metric2 = value),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Métrica 3: Responsabilidad
-                  _buildMetricRating(
-                    'Responsabilidad',
-                    'Cumplimiento de tareas y compromisos',
-                    metric3,
-                    (value) => setState(() => metric3 = value),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Métrica 4: Calidad del trabajo
-                  _buildMetricRating(
-                    'Calidad del Trabajo',
-                    'Nivel de calidad en las entregas',
-                    metric4,
-                    (value) => setState(() => metric4 = value),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Métrica 5: Puntualidad
+                  // Métrica 1: Puntualidad
                   _buildMetricRating(
                     'Puntualidad',
                     'Cumplimiento de plazos y horarios',
-                    metric5,
-                    (value) => setState(() => metric5 = value),
+                    punctuality,
+                    (value) => setState(() => punctuality = value),
                   ),
                   const SizedBox(height: 16),
                   
-                  // Comentarios opcionales
-                  TextFormField(
-                    controller: commentsController,
-                    decoration: const InputDecoration(
-                      labelText: 'Comentarios (opcional)',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.comment),
-                      hintText: 'Agrega comentarios adicionales...',
-                    ),
-                    maxLines: 3,
-                    maxLength: 500,
+                  // Métrica 2: Contribuciones
+                  _buildMetricRating(
+                    'Contribuciones',
+                    'Calidad y cantidad de aportes al equipo',
+                    contributions,
+                    (value) => setState(() => contributions = value),
                   ),
+                  const SizedBox(height: 16),
+                  
+                  // Métrica 3: Compromiso
+                  _buildMetricRating(
+                    'Compromiso',
+                    'Dedicación y responsabilidad con las tareas',
+                    commitment,
+                    (value) => setState(() => commitment = value),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Métrica 4: Actitud
+                  _buildMetricRating(
+                    'Actitud',
+                    'Disposición positiva y colaborativa',
+                    attitude,
+                    (value) => setState(() => attitude = value),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -120,14 +96,10 @@ class EvaluationDialogs {
                 await controller.createEvaluation(
                   activityId: activity.id,
                   evaluatedId: evaluatedEmail,
-                  metric1: metric1,
-                  metric2: metric2,
-                  metric3: metric3,
-                  metric4: metric4,
-                  metric5: metric5,
-                  comments: commentsController.text.trim().isEmpty 
-                      ? null 
-                      : commentsController.text.trim(),
+                  punctuality: punctuality,
+                  contributions: contributions,
+                  commitment: commitment,
+                  attitude: attitude,
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -237,15 +209,13 @@ class EvaluationDialogs {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildMetricDisplay('Comunicación', evaluation.metric1),
+              _buildMetricDisplay('Puntualidad', evaluation.punctuality),
               const SizedBox(height: 12),
-              _buildMetricDisplay('Colaboración', evaluation.metric2),
+              _buildMetricDisplay('Contribuciones', evaluation.contributions),
               const SizedBox(height: 12),
-              _buildMetricDisplay('Responsabilidad', evaluation.metric3),
+              _buildMetricDisplay('Compromiso', evaluation.commitment),
               const SizedBox(height: 12),
-              _buildMetricDisplay('Calidad del Trabajo', evaluation.metric4),
-              const SizedBox(height: 12),
-              _buildMetricDisplay('Puntualidad', evaluation.metric5),
+              _buildMetricDisplay('Actitud', evaluation.attitude),
               const SizedBox(height: 16),
               
               // Promedio
@@ -271,22 +241,6 @@ class EvaluationDialogs {
                 ),
               ),
               
-              if (evaluation.comments != null && evaluation.comments!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const Text(
-                  'Comentarios:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(evaluation.comments!),
-                ),
-              ],
               
               const SizedBox(height: 16),
               Text(

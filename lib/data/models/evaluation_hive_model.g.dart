@@ -21,20 +21,18 @@ class EvaluationHiveModelAdapter extends TypeAdapter<EvaluationHiveModel> {
       activityId: fields[1] as String,
       evaluatorId: fields[2] as String,
       evaluatedId: fields[3] as String,
-      metric1: fields[4] as int,
-      metric2: fields[5] as int,
-      metric3: fields[6] as int,
-      metric4: fields[7] as int,
-      metric5: fields[8] as int,
-      comments: fields[9] as String?,
-      createdAt: fields[10] as DateTime,
+      punctuality: fields[4] as int,
+      contributions: fields[5] as int,
+      commitment: fields[6] as int,
+      attitude: fields[7] as int,
+      createdAt: fields[8] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, EvaluationHiveModel obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -44,18 +42,14 @@ class EvaluationHiveModelAdapter extends TypeAdapter<EvaluationHiveModel> {
       ..writeByte(3)
       ..write(obj.evaluatedId)
       ..writeByte(4)
-      ..write(obj.metric1)
+      ..write(obj.punctuality)
       ..writeByte(5)
-      ..write(obj.metric2)
+      ..write(obj.contributions)
       ..writeByte(6)
-      ..write(obj.metric3)
+      ..write(obj.commitment)
       ..writeByte(7)
-      ..write(obj.metric4)
+      ..write(obj.attitude)
       ..writeByte(8)
-      ..write(obj.metric5)
-      ..writeByte(9)
-      ..write(obj.comments)
-      ..writeByte(10)
       ..write(obj.createdAt);
   }
 

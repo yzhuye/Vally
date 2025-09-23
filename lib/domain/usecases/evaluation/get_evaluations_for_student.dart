@@ -29,11 +29,10 @@ class GetEvaluationsForStudentUseCase {
         'totalEvaluations': 0,
         'averageRating': 0.0,
         'averageByMetric': {
-          'metric1': 0.0,
-          'metric2': 0.0,
-          'metric3': 0.0,
-          'metric4': 0.0,
-          'metric5': 0.0,
+          'punctuality': 0.0,
+          'contributions': 0.0,
+          'commitment': 0.0,
+          'attitude': 0.0,
         },
       };
     }
@@ -45,26 +44,23 @@ class GetEvaluationsForStudentUseCase {
     final averageRating = totalRating / totalEvaluations;
 
     // Promedios por métrica
-    final metric1Avg = evaluations.fold<double>(
-        0.0, (sum, eval) => sum + eval.metric1) / totalEvaluations;
-    final metric2Avg = evaluations.fold<double>(
-        0.0, (sum, eval) => sum + eval.metric2) / totalEvaluations;
-    final metric3Avg = evaluations.fold<double>(
-        0.0, (sum, eval) => sum + eval.metric3) / totalEvaluations;
-    final metric4Avg = evaluations.fold<double>(
-        0.0, (sum, eval) => sum + eval.metric4) / totalEvaluations;
-    final metric5Avg = evaluations.fold<double>(
-        0.0, (sum, eval) => sum + eval.metric5) / totalEvaluations;
+    final punctualityAvg = evaluations.fold<double>(
+        0.0, (sum, eval) => sum + eval.punctuality) / totalEvaluations;
+    final contributionsAvg = evaluations.fold<double>(
+        0.0, (sum, eval) => sum + eval.contributions) / totalEvaluations;
+    final commitmentAvg = evaluations.fold<double>(
+        0.0, (sum, eval) => sum + eval.commitment) / totalEvaluations;
+    final attitudeAvg = evaluations.fold<double>(
+        0.0, (sum, eval) => sum + eval.attitude) / totalEvaluations;
 
     return {
       'totalEvaluations': totalEvaluations,
       'averageRating': averageRating,
       'averageByMetric': {
-        'metric1': metric1Avg,
-        'metric2': metric2Avg,
-        'metric3': metric3Avg,
-        'metric4': metric4Avg,
-        'metric5': metric5Avg,
+        'punctuality': punctualityAvg,
+        'contributions': contributionsAvg,
+        'commitment': commitmentAvg,
+        'attitude': attitudeAvg,
       },
     };
   }

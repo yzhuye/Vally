@@ -62,12 +62,10 @@ class Evaluation {
   final String activityId;
   final String evaluatorId; // ID del estudiante que evalúa
   final String evaluatedId; // ID del estudiante evaluado
-  final int metric1; // 0-5 estrellas
-  final int metric2; // 0-5 estrellas
-  final int metric3; // 0-5 estrellas
-  final int metric4; // 0-5 estrellas
-  final int metric5; // 0-5 estrellas
-  final String? comments; // Comentarios opcionales
+  final int punctuality; // 0-5 estrellas - Puntualidad
+  final int contributions; // 0-5 estrellas - Contribuciones
+  final int commitment; // 0-5 estrellas - Compromiso
+  final int attitude; // 0-5 estrellas - Actitud
   final DateTime createdAt;
 
   Evaluation({
@@ -75,28 +73,23 @@ class Evaluation {
     required this.activityId,
     required this.evaluatorId,
     required this.evaluatedId,
-    required this.metric1,
-    required this.metric2,
-    required this.metric3,
-    required this.metric4,
-    required this.metric5,
-    this.comments,
+    required this.punctuality,
+    required this.contributions,
+    required this.commitment,
+    required this.attitude,
     required this.createdAt,
   });
 
-  // Validar que las métricas estén en el rango correcto
   bool get isValid =>
-      _isValidMetric(metric1) &&
-      _isValidMetric(metric2) &&
-      _isValidMetric(metric3) &&
-      _isValidMetric(metric4) &&
-      _isValidMetric(metric5);
+      _isValidMetric(punctuality) &&
+      _isValidMetric(contributions) &&
+      _isValidMetric(commitment) &&
+      _isValidMetric(attitude);
 
   bool _isValidMetric(int metric) => metric >= 0 && metric <= 5;
 
-  // Calcular promedio de las métricas
   double get averageRating =>
-      (metric1 + metric2 + metric3 + metric4 + metric5) / 5.0;
+      (punctuality + contributions + commitment + attitude) / 4.0;
 }
 
 class Group {

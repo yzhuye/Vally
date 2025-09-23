@@ -17,24 +17,18 @@ class EvaluationHiveModel extends HiveObject {
   String evaluatedId;
 
   @HiveField(4)
-  int metric1;
+  int punctuality;
 
   @HiveField(5)
-  int metric2;
+  int contributions;
 
   @HiveField(6)
-  int metric3;
+  int commitment;
 
   @HiveField(7)
-  int metric4;
+  int attitude;
 
   @HiveField(8)
-  int metric5;
-
-  @HiveField(9)
-  String? comments;
-
-  @HiveField(10)
   DateTime createdAt;
 
   EvaluationHiveModel({
@@ -42,12 +36,10 @@ class EvaluationHiveModel extends HiveObject {
     required this.activityId,
     required this.evaluatorId,
     required this.evaluatedId,
-    required this.metric1,
-    required this.metric2,
-    required this.metric3,
-    required this.metric4,
-    required this.metric5,
-    this.comments,
+    required this.punctuality,
+    required this.contributions,
+    required this.commitment,
+    required this.attitude,
     required this.createdAt,
   });
 
@@ -57,12 +49,10 @@ class EvaluationHiveModel extends HiveObject {
         activityId: evaluation.activityId,
         evaluatorId: evaluation.evaluatorId,
         evaluatedId: evaluation.evaluatedId,
-        metric1: evaluation.metric1,
-        metric2: evaluation.metric2,
-        metric3: evaluation.metric3,
-        metric4: evaluation.metric4,
-        metric5: evaluation.metric5,
-        comments: evaluation.comments,
+        punctuality: evaluation.punctuality,
+        contributions: evaluation.contributions,
+        commitment: evaluation.commitment,
+        attitude: evaluation.attitude,
         createdAt: evaluation.createdAt,
       );
 
@@ -71,12 +61,10 @@ class EvaluationHiveModel extends HiveObject {
         activityId: activityId,
         evaluatorId: evaluatorId,
         evaluatedId: evaluatedId,
-        metric1: metric1,
-        metric2: metric2,
-        metric3: metric3,
-        metric4: metric4,
-        metric5: metric5,
-        comments: comments,
+        punctuality: punctuality,
+        contributions: contributions,
+        commitment: commitment,
+        attitude: attitude,
         createdAt: createdAt,
       );
 }

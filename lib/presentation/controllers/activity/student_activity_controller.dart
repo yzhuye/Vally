@@ -78,36 +78,23 @@ class StudentActivityController extends GetxController {
   Future<bool> createEvaluation({
     required String activityId,
     required String evaluatedId,
-    required int metric1,
-    required int metric2,
-    required int metric3,
-    required int metric4,
-    required int metric5,
-    String? comments,
+    required int punctuality,
+    required int contributions,
+    required int commitment,
+    required int attitude,
   }) async {
     isLoading(true);
 
-    try {
-      print('🚀 Creating evaluation...');
-      print('   Activity ID: $activityId');
-      print('   Evaluator: $studentEmail');
-      print('   Evaluated: $evaluatedId');
-      print('   Metrics: [$metric1, $metric2, $metric3, $metric4, $metric5]');
-      
+    try {      
       final result = await _createEvaluationUseCase(
         activityId: activityId,
         evaluatorId: studentEmail,
         evaluatedId: evaluatedId,
-        metric1: metric1,
-        metric2: metric2,
-        metric3: metric3,
-        metric4: metric4,
-        metric5: metric5,
-        comments: comments,
+        punctuality: punctuality,
+        contributions: contributions,
+        commitment: commitment,
+        attitude: attitude,
       );
-
-      print('📊 Evaluation result: ${result.isSuccess}');
-      print('📝 Message: ${result.message}');
 
       if (result.isSuccess) {
         loadMyEvaluations();
@@ -131,7 +118,6 @@ class StudentActivityController extends GetxController {
         return false;
       }
     } catch (e) {
-      print('💥 Exception creating evaluation: $e');
       Get.snackbar(
         'Error',
         'Error inesperado: $e',

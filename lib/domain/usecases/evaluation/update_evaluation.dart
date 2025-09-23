@@ -8,12 +8,10 @@ class UpdateEvaluationUseCase {
 
   Future<UpdateEvaluationResult> call({
     required String evaluationId,
-    required int metric1,
-    required int metric2,
-    required int metric3,
-    required int metric4,
-    required int metric5,
-    String? comments,
+    required int punctuality,
+    required int contributions,
+    required int commitment,
+    required int attitude,
   }) async {
     try {
       // Obtener la evaluación existente
@@ -28,12 +26,10 @@ class UpdateEvaluationUseCase {
         activityId: existingEvaluation.activityId,
         evaluatorId: existingEvaluation.evaluatorId,
         evaluatedId: existingEvaluation.evaluatedId,
-        metric1: metric1,
-        metric2: metric2,
-        metric3: metric3,
-        metric4: metric4,
-        metric5: metric5,
-        comments: comments?.trim(),
+        punctuality: punctuality,
+        contributions: contributions,
+        commitment: commitment,
+        attitude: attitude,
         createdAt: existingEvaluation.createdAt,
       );
 

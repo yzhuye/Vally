@@ -59,18 +59,19 @@ class ActivityDialogs {
                   const SizedBox(height: 16),
                   InkWell(
                     onTap: () async {
+                      final currentContext = context;
                       final date = await showDatePicker(
-                        context: context,
+                        context: currentContext,
                         initialDate: selectedDate,
                         firstDate: DateTime.now(),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                       );
-                      if (date != null) {
+                      if (date != null && currentContext.mounted) {
                         final time = await showTimePicker(
-                          context: context,
+                          context: currentContext,
                           initialTime: TimeOfDay.fromDateTime(selectedDate),
                         );
-                        if (time != null) {
+                        if (time != null && currentContext.mounted) {
                           setState(() {
                             selectedDate = DateTime(
                               date.year,
@@ -207,18 +208,19 @@ class ActivityDialogs {
                   const SizedBox(height: 16),
                   InkWell(
                     onTap: () async {
+                      final currentContext = context;
                       final date = await showDatePicker(
-                        context: context,
+                        context: currentContext,
                         initialDate: selectedDate,
                         firstDate: DateTime.now(),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                       );
-                      if (date != null) {
+                      if (date != null && currentContext.mounted) {
                         final time = await showTimePicker(
-                          context: context,
+                          context: currentContext,
                           initialTime: TimeOfDay.fromDateTime(selectedDate),
                         );
-                        if (time != null) {
+                        if (time != null && currentContext.mounted) {
                           setState(() {
                             selectedDate = DateTime(
                               date.year,

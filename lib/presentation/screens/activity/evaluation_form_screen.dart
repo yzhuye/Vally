@@ -26,14 +26,12 @@ class EvaluationFormScreen extends StatefulWidget {
 
 class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _commentsController = TextEditingController();
   
   // Métricas de evaluación
-  int metric1 = 3; // Comunicación
-  int metric2 = 3; // Colaboración  
-  int metric3 = 3; // Responsabilidad
-  int metric4 = 3; // Calidad del trabajo
-  int metric5 = 3; // Puntualidad
+  int punctuality = 3; // Puntualidad
+  int contributions = 3; // Contribuciones  
+  int commitment = 3; // Compromiso
+  int attitude = 3; // Actitud
 
   late StudentActivityController controller;
 
@@ -46,7 +44,6 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
 
   @override
   void dispose() {
-    _commentsController.dispose();
     super.dispose();
   }
 
@@ -78,7 +75,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -92,7 +89,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF00A4BD).withOpacity(0.1),
+                                  color: const Color(0xFF00A4BD).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -130,7 +127,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: controller.getDueDateColor(widget.activity.dueDate).withOpacity(0.1),
+                              color: controller.getDueDateColor(widget.activity.dueDate).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: controller.getDueDateColor(widget.activity.dueDate),
@@ -161,7 +158,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -171,7 +168,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                         children: [
                           CircleAvatar(
                             radius: 24,
-                            backgroundColor: const Color(0xFF00A4BD).withOpacity(0.1),
+                            backgroundColor: const Color(0xFF00A4BD).withValues(alpha: 0.1),
                             child: Text(
                               widget.evaluatedEmail.substring(0, 1).toUpperCase(),
                               style: const TextStyle(
@@ -233,119 +230,36 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
 
                     // Métricas de evaluación
                     _buildMetricCard(
-                      title: '1. Comunicación',
-                      description: 'Claridad y efectividad en la comunicación con el equipo',
-                      icon: Icons.chat_bubble_outline,
-                      currentValue: metric1,
-                      onChanged: (value) => setState(() => metric1 = value),
-                    ),
-                    
-                    _buildMetricCard(
-                      title: '2. Colaboración',
-                      description: 'Capacidad de trabajo en equipo y apoyo a compañeros',
-                      icon: Icons.group_work_outlined,
-                      currentValue: metric2,
-                      onChanged: (value) => setState(() => metric2 = value),
-                    ),
-                    
-                    _buildMetricCard(
-                      title: '3. Responsabilidad',
-                      description: 'Cumplimiento de tareas asignadas y compromisos adquiridos',
-                      icon: Icons.task_alt_outlined,
-                      currentValue: metric3,
-                      onChanged: (value) => setState(() => metric3 = value),
-                    ),
-                    
-                    _buildMetricCard(
-                      title: '4. Calidad del Trabajo',
-                      description: 'Nivel de calidad y atención al detalle en las entregas',
-                      icon: Icons.star_outline,
-                      currentValue: metric4,
-                      onChanged: (value) => setState(() => metric4 = value),
-                    ),
-                    
-                    _buildMetricCard(
-                      title: '5. Puntualidad',
+                      title: '1. Puntualidad',
                       description: 'Cumplimiento de plazos y horarios establecidos',
                       icon: Icons.schedule_outlined,
-                      currentValue: metric5,
-                      onChanged: (value) => setState(() => metric5 = value),
-                      isLast: true,
+                      currentValue: punctuality,
+                      onChanged: (value) => setState(() => punctuality = value),
                     ),
-
-                    const SizedBox(height: 32),
-
-                    // Comentarios opcionales
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.comment_outlined,
-                                  color: Colors.blue,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Text(
-                                'Comentarios Adicionales',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Opcional: Agrega comentarios específicos sobre el desempeño de tu compañero',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _commentsController,
-                            maxLines: 4,
-                            maxLength: 500,
-                            decoration: InputDecoration(
-                              hintText: 'Escribe tus comentarios aquí...',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFF00A4BD)),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                            ),
-                          ),
-                        ],
-                      ),
+                    
+                    _buildMetricCard(
+                      title: '2. Contribuciones',
+                      description: 'Calidad y cantidad de aportes al trabajo en equipo',
+                      icon: Icons.lightbulb_outline,
+                      currentValue: contributions,
+                      onChanged: (value) => setState(() => contributions = value),
+                    ),
+                    
+                    _buildMetricCard(
+                      title: '3. Compromiso',
+                      description: 'Dedicación y responsabilidad con las tareas asignadas',
+                      icon: Icons.task_alt_outlined,
+                      currentValue: commitment,
+                      onChanged: (value) => setState(() => commitment = value),
+                    ),
+                    
+                    _buildMetricCard(
+                      title: '4. Actitud',
+                      description: 'Disposición positiva y colaborativa en el equipo',
+                      icon: Icons.emoji_emotions_outlined,
+                      currentValue: attitude,
+                      onChanged: (value) => setState(() => attitude = value),
+                      isLast: true,
                     ),
 
                     const SizedBox(height: 32),
@@ -355,10 +269,10 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00A4BD).withOpacity(0.05),
+                        color: const Color(0xFF00A4BD).withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFF00A4BD).withOpacity(0.2),
+                          color: const Color(0xFF00A4BD).withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
@@ -379,7 +293,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '${((metric1 + metric2 + metric3 + metric4 + metric5) / 5.0).toStringAsFixed(1)} / 5.0',
+                            '${((punctuality + contributions + commitment + attitude) / 4.0).toStringAsFixed(1)} / 5.0',
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -390,7 +304,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(5, (index) {
-                              final avgRating = (metric1 + metric2 + metric3 + metric4 + metric5) / 5.0;
+                              final avgRating = (punctuality + contributions + commitment + attitude) / 4.0;
                               return Icon(
                                 index < avgRating ? Icons.star : Icons.star_border,
                                 color: Colors.amber,
@@ -416,7 +330,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -4),
                 ),
@@ -479,7 +393,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -493,7 +407,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00A4BD).withOpacity(0.1),
+                  color: const Color(0xFF00A4BD).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -572,7 +486,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.1),
+                color: Colors.amber.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -594,23 +508,15 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
     final success = await controller.createEvaluation(
       activityId: widget.activity.id,
       evaluatedId: widget.evaluatedEmail,
-      metric1: metric1,
-      metric2: metric2,
-      metric3: metric3,
-      metric4: metric4,
-      metric5: metric5,
-      comments: _commentsController.text.trim().isEmpty 
-          ? null 
-          : _commentsController.text.trim(),
+      punctuality: punctuality,
+      contributions: contributions,
+      commitment: commitment,
+      attitude: attitude,
     );
     
-    // Solo regresar si la evaluación fue exitosa
     if (success) {
-      // Esperar un poco para que el usuario vea el snackbar de éxito
       await Future.delayed(const Duration(milliseconds: 800));
-      
-      // Regresar a la pantalla anterior (StudentEvaluationScreen) 
-      // y actualizar la lista de evaluaciones
+
       if (Get.isRegistered<StudentActivityController>(tag: 'student_activity_${widget.category.id}_${widget.studentEmail}')) {
         final controller = Get.find<StudentActivityController>(tag: 'student_activity_${widget.category.id}_${widget.studentEmail}');
         controller.loadMyEvaluations();
