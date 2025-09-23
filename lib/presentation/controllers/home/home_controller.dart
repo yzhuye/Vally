@@ -29,8 +29,8 @@ class HomeController extends GetxController {
 
   @override
   void onInit() {
-    super.onInit();
     _loadUserFromLoginBox();
+    super.onInit();
   }
 
   void _loadUserFromLoginBox() async {
@@ -41,7 +41,6 @@ class HomeController extends GetxController {
       try {
         // Fetch the user with their courses from the backend
         final userWithCourses = await ApiUserCourses.getUserWithCourses(email);
-
         if (userWithCourses != null) {
           currentUser.value = userWithCourses;
           await loadUserCourses(); // Load courses after fetching the user

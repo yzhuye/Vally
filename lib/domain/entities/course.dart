@@ -41,6 +41,7 @@ class Course {
                             name: a['name'] as String,
                             description: a['description'] as String,
                             dueDate: DateTime.parse(a['dueDate'] as String),
+                            categoryId: a['categoryId'] as String,
                           ))
                       .toList(),
                 ))
