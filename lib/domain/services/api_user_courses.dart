@@ -42,7 +42,29 @@ class ApiUserCourses {
   static Future<Map<String, dynamic>?> getCourseById(String courseId) async {
     final courses = await _readTable("courses", filters: {"_id": courseId});
     if (courses.isEmpty) return null;
-    return courses.first as Map<String, dynamic>;
+
+    final course = courses.first as Map<String, dynamic>;
+
+    // Step 1: Query the user_courses table for the course_id
+    final userCourses = await _readTable("user_courses", filters: {"course_id": courseId});
+
+    // Step 2: Filter for students and fetch their details
+    final enrolledStudents = <String>[];
+    for (var userCourse in userCourses) {
+      if (userCourse["role"] == "student") {
+        final userId = userCourse["user_id"];
+        final users = await _readTable("users", filters: {"_id": userId});
+        if (users.isNotEmpty) {
+          final username = users.first["username"];
+          enrolledStudents.add(username);
+        }
+      }
+    }
+
+    // Step 3: Add enrolled students to the course data
+    course["enrolledStudents"] = enrolledStudents;
+
+    return course;
   }
 
   // Obtiene todos los cursos
