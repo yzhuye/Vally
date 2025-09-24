@@ -228,6 +228,21 @@ class ProfessorGroupController extends GetxController {
     return emailMappings[studentName.toLowerCase()];
   }
 
+  // Helper method to map emails to student names
+  String getNameForEmail(String email) {
+    // Reverse mapping from emails to names
+    final nameMappings = {
+      'gabriela@example.com': 'gabriela',
+      'b@a.com': 'betty',
+      'c@a.com': 'camila',
+      'daniela@example.com': 'daniela',
+      'eliana@example.com': 'eliana',
+      'fernanda@example.com': 'fernanda',
+    };
+
+    return nameMappings[email.toLowerCase()] ?? email;
+  }
+
   GroupRepository get groupRepository => _groupRepository;
 
   List<String> getStudentsNotInAnyGroup() {

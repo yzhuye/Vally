@@ -38,7 +38,8 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
     studentEmail = homeController.currentUser.value?.email ?? '';
 
     // Initialize activity controller
-    activityControllerTag = 'student_activity_${widget.category.id}_$studentEmail';
+    activityControllerTag =
+        'student_activity_${widget.category.id}_$studentEmail';
     activityController = Get.put(
       StudentActivityController(
         categoryId: widget.category.id,
@@ -80,10 +81,26 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
         Get.isRegistered<GroupController>(tag: controllerTag)) {
       Get.delete<GroupController>(tag: controllerTag);
     }
-    if (Get.isRegistered<StudentActivityController>(tag: activityControllerTag)) {
+    if (Get.isRegistered<StudentActivityController>(
+        tag: activityControllerTag)) {
       Get.delete<StudentActivityController>(tag: activityControllerTag);
     }
     super.dispose();
+  }
+
+  // Helper method to map emails to student names
+  String _getNameForEmail(String email) {
+    // Reverse mapping from emails to names
+    final nameMappings = {
+      'gabriela@example.com': 'gabriela',
+      'b@a.com': 'betty',
+      'c@a.com': 'camila',
+      'daniela@example.com': 'daniela',
+      'eliana@example.com': 'eliana',
+      'fernanda@example.com': 'fernanda',
+    };
+
+    return nameMappings[email.toLowerCase()] ?? email;
   }
 
   @override
@@ -239,8 +256,10 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
         itemCount: activityController!.activities.length,
         itemBuilder: (context, index) {
           final activity = activityController!.activities[index];
-          final evaluationCount = activityController!.getEvaluationCountForActivity(activity.id);
-          final isExpired = activityController!.isActivityExpired(activity.dueDate);
+          final evaluationCount =
+              activityController!.getEvaluationCountForActivity(activity.id);
+          final isExpired =
+              activityController!.isActivityExpired(activity.dueDate);
 
           return Card(
             margin: const EdgeInsets.symmetric(vertical: 6),
@@ -290,17 +309,21 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: activityController!.getDueDateColor(activity.dueDate).withOpacity(0.1),
+                            color: activityController!
+                                .getDueDateColor(activity.dueDate)
+                                .withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: activityController!.getDueDateColor(activity.dueDate),
+                              color: activityController!
+                                  .getDueDateColor(activity.dueDate),
                               width: 1,
                             ),
                           ),
                           child: Text(
                             activityController!.formatDueDate(activity.dueDate),
                             style: TextStyle(
-                              color: activityController!.getDueDateColor(activity.dueDate),
+                              color: activityController!
+                                  .getDueDateColor(activity.dueDate),
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -348,7 +371,8 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
                       child: const Text('Evaluar'),
                     )
                   : Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.red[100],
                         borderRadius: BorderRadius.circular(8),
@@ -444,6 +468,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
               group: group,
               currentUserEmail: studentEmail,
               canJoin: canJoin,
+              nameMapper: (email) => _getNameForEmail(email),
               onJoin: () async {
                 if (canJoin) {
                   await groupController!.joinGroup(group.id);

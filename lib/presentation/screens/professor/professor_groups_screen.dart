@@ -348,7 +348,7 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          member,
+                          controller.getNameForEmail(member),
                           style: const TextStyle(fontSize: 14),
                         ),
                       ),
