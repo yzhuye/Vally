@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
+import '../../../domain/services/email_mapping_service.dart';
 import '../../widgets/course/course_detail_header.dart';
 import '../../widgets/group/group_card.dart';
 import '../../controllers/group/group_controller.dart';
@@ -35,7 +36,10 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
     super.initState();
 
     final homeController = Get.find<HomeController>();
-    studentEmail = homeController.currentUser.value?.email ?? '';
+    final userEmail = homeController.currentUser.value?.email ?? '';
+    
+    // Mapear el email del usuario autenticado al nombre usado en los grupos
+    studentEmail = EmailMappingService.mapUserEmailToGroupEmail(userEmail);
 
     // Initialize activity controller
     activityControllerTag =
@@ -87,6 +91,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
     }
     super.dispose();
   }
+
 
   // Helper method to map emails to student names
   String _getNameForEmail(String email) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
+import '../../../domain/services/email_mapping_service.dart';
 import '../../controllers/activity/student_activity_controller.dart';
 import '../../controllers/group/group_controller.dart';
 import '../../widgets/course/course_detail_header.dart';
@@ -34,18 +35,21 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
   void initState() {
     super.initState();
     
-    controllerTag = 'student_activity_${widget.category.id}_${widget.studentEmail}';
+    // Mapear el email del usuario autenticado al nombre usado en los grupos
+    final mappedStudentEmail = EmailMappingService.mapUserEmailToGroupEmail(widget.studentEmail);
+    
+    controllerTag = 'student_activity_${widget.category.id}_$mappedStudentEmail';
     activityController = Get.put(
       StudentActivityController(
         categoryId: widget.category.id,
         courseId: widget.course.id,
-        studentEmail: widget.studentEmail,
+        studentEmail: mappedStudentEmail,
       ),
       tag: controllerTag,
     );
 
     // Controller para obtener compañeros de grupo
-    final groupControllerTag = '${widget.course.id}_${widget.category.id}_${widget.studentEmail}';
+    final groupControllerTag = '${widget.course.id}_${widget.category.id}_$mappedStudentEmail';
     
     // Verificar si el controlador existe antes de intentar obtenerlo
     if (Get.isRegistered<GroupController>(tag: groupControllerTag)) {
@@ -56,7 +60,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
         GroupController(
           courseId: widget.course.id,
           categoryId: widget.category.id,
-          studentEmail: widget.studentEmail,
+          studentEmail: mappedStudentEmail,
         ),
         tag: groupControllerTag,
       );
@@ -74,6 +78,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
     // No eliminamos el GroupController aquí porque puede estar siendo usado por otras pantallas
     super.dispose();
   }
+
 
   // Método para actualizar la pantalla cuando regrese de una evaluación
   void _refreshEvaluations() {
