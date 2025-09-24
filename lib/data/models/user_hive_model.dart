@@ -12,34 +12,29 @@ class UserHiveModel extends HiveObject {
   String email;
 
   @HiveField(2)
-  String password;
-
-  @HiveField(3)
   String? username;
 
-  @HiveField(4)
-  bool isTeacher;
+  @HiveField(3)
+  List<String> teacherCourses;
 
-  @HiveField(5)
-  List<String> courseIds;
+  @HiveField(4)
+  List<String> studentCourses;
 
   UserHiveModel({
     required this.id,
     required this.email,
-    required this.password,
     this.username,
-    this.isTeacher = false,
-    this.courseIds = const [],
+    this.teacherCourses = const [],
+    this.studentCourses = const [],
   });
 
   factory UserHiveModel.fromUser(User user) {
     return UserHiveModel(
       id: user.id,
       email: user.email,
-      password: user.password,
       username: user.username,
-      isTeacher: user.isTeacher,
-      courseIds: List<String>.from(user.courseIds),
+      teacherCourses: user.teacherCourses,
+      studentCourses: user.studentCourses,
     );
   }
 
@@ -47,10 +42,9 @@ class UserHiveModel extends HiveObject {
     return User(
       id: id,
       email: email,
-      password: password,
       username: username,
-      isTeacher: isTeacher,
-      courseIds: List<String>.from(courseIds),
+      teacherCourses: teacherCourses,
+      studentCourses: studentCourses,
     );
   }
 }

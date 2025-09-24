@@ -1,11 +1,9 @@
 import 'package:vally_app/domain/entities/course.dart';
 import '../../../domain/repositories/course_repository.dart';
-import 'dart:math';
 import 'package:hive/hive.dart';
 import '../../models/course_hive_model.dart';
 
 class CourseRepositoryImpl implements CourseRepository {
-  static const String _currentStudentName = 'Estudiante Actual';
   late final Box<CourseHiveModel> _courseBox;
   bool _isInitialized = false;
 
@@ -98,7 +96,8 @@ class CourseRepositoryImpl implements CourseRepository {
   Course? getCourseById(String courseId) {
     final courseHive = _courseBox.get(courseId);
     if (courseHive != null) {
-      return courseHive.toCourse();
+      final course = courseHive.toCourse();
+      return course;
     }
     return null;
   }

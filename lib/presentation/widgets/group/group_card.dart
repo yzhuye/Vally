@@ -6,6 +6,7 @@ class GroupCard extends StatelessWidget {
   final VoidCallback onJoin;
   final String? currentUserEmail;
   final bool? canJoin;
+  final String Function(String)? nameMapper;
 
   const GroupCard({
     super.key,
@@ -13,6 +14,7 @@ class GroupCard extends StatelessWidget {
     required this.onJoin,
     this.currentUserEmail,
     this.canJoin,
+    this.nameMapper,
   });
 
   @override
@@ -113,7 +115,9 @@ class GroupCard extends StatelessWidget {
                             : null,
                       ),
                       child: Text(
-                        isCurrentUser ? '$member (Tú)' : member,
+                        isCurrentUser
+                            ? '${nameMapper?.call(member) ?? member} (Tú)'
+                            : nameMapper?.call(member) ?? member,
                         style: TextStyle(
                           color: isCurrentUser
                               ? const Color(0xFF00A4BD)
@@ -168,7 +172,8 @@ class GroupCard extends StatelessWidget {
     if (currentUserEmail == null) return false;
 
     final isCurrentUser = group.members.contains(currentUserEmail);
-    if (isCurrentUser) return false; // Los estudiantes ya en el grupo no pueden hacer nada
+    if (isCurrentUser)
+      return false; // Los estudiantes ya en el grupo no pueden hacer nada
 
     if (group.isFull) return false;
 

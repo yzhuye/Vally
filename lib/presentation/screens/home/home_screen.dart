@@ -34,10 +34,10 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Hola,\n${controller.currentUser.value?.email ?? ''}',
+            Obx(() => Text(
+              'Hola,\n${controller.currentUser.value?.username ?? ''}',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
+            )),
             const SizedBox(height: 20),
             Obx(() => Row(
                   children: [

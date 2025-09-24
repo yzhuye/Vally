@@ -33,9 +33,6 @@ Future<void> preloadData() async {
   final userA = User(
     id: '1',
     email: 'a@a.com',
-    password: '123456',
-    isTeacher: true,
-    courseIds: [course1.id],
   );
   await userBox.put(userA.id, UserHiveModel.fromUser(userA));
 
@@ -43,9 +40,6 @@ Future<void> preloadData() async {
   final userB = User(
     id: '2',
     email: 'b@a.com',
-    password: '123456',
-    isTeacher: false,
-    courseIds: [course1.id],
   );
   await userBox.put(userB.id, UserHiveModel.fromUser(userB));
 
@@ -53,9 +47,6 @@ Future<void> preloadData() async {
   final userC = User(
     id: '3',
     email: 'c@a.com',
-    password: '123456',
-    isTeacher: false,
-    courseIds: [],
   );
   await userBox.put(userC.id, UserHiveModel.fromUser(userC));
 
@@ -63,9 +54,6 @@ Future<void> preloadData() async {
   final userD = User(
     id: '4',
     email: 'd@a.com',
-    password: '123456',
-    isTeacher: false,
-    courseIds: [course1.id],
   );
   await userBox.put(userD.id, UserHiveModel.fromUser(userD));
 
@@ -73,9 +61,6 @@ Future<void> preloadData() async {
   final userE = User(
     id: '5',
     email: 'e@a.com',
-    password: '123456',
-    isTeacher: false,
-    courseIds: [course1.id],
   );
   await userBox.put(userE.id, UserHiveModel.fromUser(userE));
 
@@ -83,9 +68,6 @@ Future<void> preloadData() async {
   final userF = User(
     id: '6',
     email: 'f@a.com',
-    password: '123456',
-    isTeacher: false,
-    courseIds: [course1.id],
   );
   await userBox.put(userF.id, UserHiveModel.fromUser(userF));
 
@@ -93,21 +75,18 @@ Future<void> preloadData() async {
   final userG = User(
     id: '7',
     email: 'g@a.com',
-    password: '123456',
-    isTeacher: false,
-    courseIds: [course1.id],
   );
   await userBox.put(userG.id, UserHiveModel.fromUser(userG));
 
   // 🔹 Usuarios A-G (@b.com), no inscritos en ningún curso
   final usersB = [
-    User(id: '8', email: 'a@b.com', password: '123456', isTeacher: false, courseIds: []),
-    User(id: '9', email: 'b@b.com', password: '123456', isTeacher: false, courseIds: []),
-    User(id: '10', email: 'c@b.com', password: '123456', isTeacher: false, courseIds: []),
-    User(id: '11', email: 'd@b.com', password: '123456', isTeacher: false, courseIds: []),
-    User(id: '12', email: 'e@b.com', password: '123456', isTeacher: false, courseIds: []),
-    User(id: '13', email: 'f@b.com', password: '123456', isTeacher: false, courseIds: []),
-    User(id: '14', email: 'g@b.com', password: '123456', isTeacher: false, courseIds: []),
+    User(id: '8', email: 'a@b.com'),
+    User(id: '9', email: 'b@b.com'),
+    User(id: '10', email: 'c@b.com'),
+    User(id: '11', email: 'd@b.com'),
+    User(id: '12', email: 'e@b.com'),
+    User(id: '13', email: 'f@b.com'),
+    User(id: '14', email: 'g@b.com'),
   ];
   for (final user in usersB) {
     await userBox.put(user.id, UserHiveModel.fromUser(user));
