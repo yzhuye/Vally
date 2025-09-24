@@ -26,9 +26,30 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   @override
   void initState() {
     super.initState();
-    controller = Get.find<ProfessorGroupController>(
-      tag: 'professor_groups_${widget.course.id}_${widget.category.id}',
-    );
+
+    // Initialize the controller with proper tag
+    final tag = 'professor_groups_${widget.course.id}_${widget.category.id}';
+    try {
+      controller = Get.find<ProfessorGroupController>(tag: tag);
+      // Update the course object if controller already exists
+      controller.course = widget.course;
+    } catch (e) {
+      // If controller doesn't exist, create it
+      controller = Get.put(
+        ProfessorGroupController(
+          courseId: widget.course.id,
+          categoryId: widget.category.id,
+          course: widget.course, // Pass the course object
+        ),
+        tag: tag,
+      );
+    }
+
+    // Load data after a short delay to ensure controller is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.loadStudents();
+      controller.loadGroups();
+    });
   }
 
   @override
@@ -90,22 +111,22 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             children: [
               _buildStatItem(
                 'Total Estudiantes',
-                '${controller.students.length}',
+                '${controller.totalStudentsCount}',
                 Icons.people,
               ),
               _buildStatItem(
                 'En Grupos',
-                '${controller.students.length - controller.getStudentsNotInAnyGroup().length}',
+                '${controller.studentsInGroupsCount}',
                 Icons.group,
               ),
               _buildStatItem(
                 'Sin Grupo',
-                '${controller.getStudentsNotInAnyGroup().length}',
+                '${controller.studentsNotInGroupsCount}',
                 Icons.person_off,
               ),
               _buildStatItem(
                 'Total Grupos',
-                '${controller.totalGroups}',
+                '${controller.totalGroupsCount}',
                 Icons.folder,
               ),
             ],

@@ -30,6 +30,7 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
       ProfessorGroupController(
         courseId: widget.course.id,
         categoryId: widget.category.id,
+        course: widget.course, // Pass the course object
       ),
       tag: 'professor_groups_${widget.course.id}_${widget.category.id}',
     );
@@ -106,12 +107,12 @@ class _ProfessorGroupsScreenState extends State<ProfessorGroupsScreen> {
             children: [
               _buildStatItem(
                 'Total Grupos',
-                '${controller.totalGroups}',
+                '${controller.totalGroupsCount}',
                 Icons.group,
               ),
               _buildStatItem(
                 'Estudiantes',
-                '${controller.totalStudents}',
+                '${controller.totalStudentsCount}',
                 Icons.people,
               ),
               _buildStatItem(
