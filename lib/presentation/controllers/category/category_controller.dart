@@ -33,10 +33,10 @@ class CategoryController extends GetxController {
     loadCategories();
   }
 
-  void loadCategories() {
+  void loadCategories() async {
     isLoading(true);
     try {
-      categories.value = _getCategoriesUseCase(courseId);
+      categories.value = await _getCategoriesUseCase(courseId);
     } finally {
       isLoading(false);
     }

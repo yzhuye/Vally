@@ -6,7 +6,7 @@ class GetCategoriesUseCase {
 
   GetCategoriesUseCase(this._repository);
 
-  List<Category> call(String courseId) {
+  Future<List<Category>> call(String courseId) {
     return _repository.getCategoriesByCourse(courseId);
   }
 }

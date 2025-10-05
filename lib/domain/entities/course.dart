@@ -79,7 +79,22 @@ class Category {
       required this.groupingMethod,
       required this.groupCount,
       required this.studentsPerGroup,
-      this.activities = const []});
+      this.activities = const []
+  });
+
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(
+      id: json["_id"] ?? '',
+      name: json["name"] ?? '',
+      groupingMethod: json["groupingMethod"] ?? '',
+      groupCount: json["groupCount"] is int
+          ? json["groupCount"]
+          : int.tryParse(json["groupCount"]?.toString() ?? '') ?? 0,
+      studentsPerGroup: json["studentsPerGroup"] is int
+          ? json["studentsPerGroup"]
+          : int.tryParse(json["studentsPerGroup"]?.toString() ?? '') ?? 0,
+    );
+  }
 }
 
 class Activity {
