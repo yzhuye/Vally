@@ -1,3 +1,5 @@
+import 'package:vally_app/features/course/application/dto/course.dto.dart';
+
 class Course {
   final String id;
   final String title;
@@ -6,8 +8,8 @@ class Course {
   final List<Category> categories;
   final List<Group> groups;
   final String invitationCode;
-  final String? imageUrl; // Mantener compatibilidad con la versión anterior
-  final String createdBy; // ID del usuario que creó el curso
+  final String? imageUrl;
+  final String createdBy;
 
   Course({
     required this.id,
@@ -23,45 +25,25 @@ class Course {
 
   factory Course.fromJson(Map<String, dynamic> json) {
     try {
-      return Course(
-        id: json['_id'] as String,
-        title: json['title'] as String,
-        description: json['description'] as String,
-        enrolledStudents: List<String>.from(json['enrolledStudents'] ?? []),
-        categories: (json['categories'] as List<dynamic>? ?? [])
-            .map((e) => Category(
-                  id: e['_id'] as String,
-                  name: e['name'] as String,
-                  groupingMethod: e['groupingMethod'] as String,
-                  groupCount: e['groupCount'] as int,
-                  studentsPerGroup: e['studentsPerGroup'] as int,
-                  activities: (e['activities'] as List<dynamic>? ?? [])
-                      .map((a) => Activity(
-                            id: a['_id'] as String,
-                            name: a['name'] as String,
-                            description: a['description'] as String,
-                            dueDate: DateTime.parse(a['dueDate'] as String),
-                            categoryId: a['categoryId'] as String,
-                          ))
-                      .toList(),
-                ))
-            .toList(),
-        groups: (json['groups'] as List<dynamic>? ?? [])
-            .map((g) => Group(
-                  id: g['_id'] as String,
-                  name: g['name'] as String,
-                  maxCapacity: g['maxCapacity'] as int,
-                  members: List<String>.from(g['members'] ?? []),
-                  categoryId: g['categoryId'] as String,
-                ))
-            .toList(),
-        invitationCode: json['invitationCode'] as String,
-        imageUrl: json['imageUrl'] as String?,
-        createdBy: json['createdBy'] as String,
-      );
+      final dto = CourseDto.fromJson(json);
+      return Course.fromDto(dto);
     } catch (e) {
       throw Exception('Error parsing Course JSON: $e');
     }
+  }
+
+  factory Course.fromDto(CourseDto dto) {
+    return Course(
+      id: dto.id,
+      title: dto.title,
+      description: dto.description,
+      enrolledStudents: dto.enrolledStudents,
+      categories: dto.categories.map((c) => Category.fromDto(c)).toList(),
+      groups: dto.groups.map((g) => Group.fromDto(g)).toList(),
+      invitationCode: dto.invitationCode,
+      imageUrl: dto.imageUrl,
+      createdBy: dto.createdBy,
+    );
   }
 }
 
@@ -80,6 +62,17 @@ class Category {
       required this.groupCount,
       required this.studentsPerGroup,
       this.activities = const []});
+
+  factory Category.fromDto(CategoryDto dto) {
+    return Category(
+      id: dto.id,
+      name: dto.name,
+      groupingMethod: dto.groupingMethod,
+      groupCount: dto.groupCount,
+      studentsPerGroup: dto.studentsPerGroup,
+      activities: dto.activities.map((a) => Activity.fromDto(a)).toList(),
+    );
+  }
 }
 
 class Activity {
@@ -98,6 +91,17 @@ class Activity {
     required this.categoryId,
     this.evaluations = const [],
   });
+
+  factory Activity.fromDto(ActivityDto dto) {
+    return Activity(
+      id: dto.id,
+      name: dto.name,
+      description: dto.description,
+      dueDate: dto.dueDate,
+      categoryId: dto.categoryId,
+      evaluations: dto.evaluations.map((e) => Evaluation.fromDto(e)).toList(),
+    );
+  }
 }
 
 class Evaluation {
@@ -122,6 +126,20 @@ class Evaluation {
     required this.attitude,
     required this.createdAt,
   });
+
+  factory Evaluation.fromDto(EvaluationDto dto) {
+    return Evaluation(
+      id: dto.id,
+      activityId: dto.activityId,
+      evaluatorId: dto.evaluatorId,
+      evaluatedId: dto.evaluatedId,
+      punctuality: dto.punctuality,
+      contributions: dto.contributions,
+      commitment: dto.commitment,
+      attitude: dto.attitude,
+      createdAt: dto.createdAt,
+    );
+  }
 
   bool get isValid =>
       _isValidMetric(punctuality) &&
@@ -150,6 +168,16 @@ class Group {
     required this.categoryId,
   });
 
+  factory Group.fromDto(GroupDto dto) {
+    return Group(
+      id: dto.id,
+      name: dto.name,
+      maxCapacity: dto.maxCapacity,
+      members: dto.members,
+      categoryId: dto.categoryId,
+    );
+  }
+
   bool get isFull => members.length >= maxCapacity;
   String get status => isFull ? 'Full' : 'Join';
   String get capacityText => '${members.length}/$maxCapacity';
@@ -161,6 +189,14 @@ class Student {
   final String email;
 
   Student({required this.id, required this.name, required this.email});
+
+  factory Student.fromDto(StudentDto dto) {
+    return Student(
+      id: dto.id,
+      name: dto.name,
+      email: dto.email,
+    );
+  }
 }
 
 class InvitationRequest {
@@ -173,4 +209,12 @@ class InvitationRequest {
     required this.email,
     required this.code,
   });
+
+  factory InvitationRequest.fromDto(InvitationRequestDto dto) {
+    return InvitationRequest(
+      name: dto.name,
+      email: dto.email,
+      code: dto.code,
+    );
+  }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
-import '../../../domain/usecases/group/get_groups_by_category.dart';
-import '../../../domain/usecases/group/assign_student_to_group.dart';
-import '../../../domain/usecases/group/move_student_to_group.dart';
-import '../../../domain/usecases/student/get_students_by_course.dart';
+import '../../../application/use-cases/group/get_groups_by_category.dart';
+import '../../../application/use-cases/group/assign_student_to_group.dart';
+import '../../../application/use-cases/group/move_student_to_group.dart';
+import '../../../application/use-cases/student/get_students_by_course.dart';
 import '../../../data/repositories/group/group_repository_impl.dart';
 import '../../../data/repositories/course/course_repository_impl.dart';
 import '../../../domain/repositories/group_repository.dart';

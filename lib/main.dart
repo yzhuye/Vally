@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:vally_app/features/auth/presentation/bindings/auth_binding.dart';
-import 'package:vally_app/features/auth/presentation/pages/login_page.dart';
+import 'package:vally_app/features/auth/presentation/screens/login_screen.dart';
 
 import 'features/course/data/models/course_hive_model.dart';
 import 'features/course/data/models/category_hive_model.dart';
@@ -52,8 +52,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: GoogleFonts.lato().fontFamily,
       ),
-      initialBinding: AuthBinding(), // <-- aquí se inyectan tus dependencias
-      home: const LoginScreen(), // <-- tu pantalla inicial
+      initialBinding: AuthBinding(),
+      home: const LoginScreen(),
     );
   }
 }

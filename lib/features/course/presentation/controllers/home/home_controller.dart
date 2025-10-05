@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vally_app/features/course/domain/entities/course.dart';
 import 'package:vally_app/features/course/domain/entities/user.dart';
 
-import 'package:vally_app/features/auth/presentation/pages/login_page.dart';
+import 'package:vally_app/features/auth/presentation/screens/login_screen.dart';
 
 import 'package:vally_app/core/network/api_service.dart';
 import 'package:vally_app/core/network/api_user_courses.dart';

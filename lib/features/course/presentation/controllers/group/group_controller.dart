@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:vally_app/features/course/domain/entities/course.dart';
 import 'package:vally_app/features/course/data/repositories/group/group_repository_impl.dart';
 import 'package:vally_app/features/course/domain/repositories/group_repository.dart';
-import 'package:vally_app/features/course/domain/usecases/group/get_groups_by_category.dart';
-import 'package:vally_app/features/course/domain/usecases/group/join_group.dart';
-import 'package:vally_app/features/course/domain/usecases/group/find_student_group.dart';
+import 'package:vally_app/features/course/application/use-cases/group/get_groups_by_category.dart';
+import 'package:vally_app/features/course/application/use-cases/group/join_group.dart';
+import 'package:vally_app/features/course/application/use-cases/group/find_student_group.dart';
 
 class GroupController extends GetxController {
   final String courseId;

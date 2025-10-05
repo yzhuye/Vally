@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
-import '../../../domain/usecases/activity/get_activities_by_category.dart';
-import '../../../domain/usecases/evaluation/create_evaluation.dart';
-import '../../../domain/usecases/evaluation/get_evaluations_by_evaluator.dart';
-import '../../../domain/usecases/evaluation/check_evaluation_eligibility.dart';
+import '../../../application/use-cases/activity/get_activities_by_category.dart';
+import '../../../application/use-cases/evaluation/create_evaluation.dart';
+import '../../../application/use-cases/evaluation/get_evaluations_by_evaluator.dart';
+import '../../../application/use-cases/evaluation/check_evaluation_eligibility.dart';
 import '../../../data/repositories/activity/activity_repository_impl.dart';
 import '../../../data/repositories/evaluation/evaluation_repository_impl.dart';
 import '../../../data/repositories/group/group_repository_impl.dart';
@@ -32,12 +32,15 @@ class StudentActivityController extends GetxController {
     required this.studentEmail,
   }) {
     final ActivityRepository activityRepository = ActivityRepositoryImpl();
-    final EvaluationRepository evaluationRepository = EvaluationRepositoryImpl();
+    final EvaluationRepository evaluationRepository =
+        EvaluationRepositoryImpl();
     final GroupRepository groupRepository = GroupRepositoryImpl();
 
     _getActivitiesUseCase = GetActivitiesByCategoryUseCase(activityRepository);
-    _createEvaluationUseCase = CreateEvaluationUseCase(evaluationRepository, activityRepository);
-    _getEvaluationsByEvaluatorUseCase = GetEvaluationsByEvaluatorUseCase(evaluationRepository);
+    _createEvaluationUseCase =
+        CreateEvaluationUseCase(evaluationRepository, activityRepository);
+    _getEvaluationsByEvaluatorUseCase =
+        GetEvaluationsByEvaluatorUseCase(evaluationRepository);
     _checkEligibilityUseCase = CheckEvaluationEligibilityUseCase(
       evaluationRepository,
       activityRepository,
@@ -66,7 +69,8 @@ class StudentActivityController extends GetxController {
 
   void loadMyEvaluations() {
     try {
-      final result = _getEvaluationsByEvaluatorUseCase(evaluatorId: studentEmail);
+      final result =
+          _getEvaluationsByEvaluatorUseCase(evaluatorId: studentEmail);
       if (result.isSuccess) {
         myEvaluations.value = result.evaluations;
       }
@@ -85,7 +89,7 @@ class StudentActivityController extends GetxController {
   }) async {
     isLoading(true);
 
-    try {      
+    try {
       final result = await _createEvaluationUseCase(
         activityId: activityId,
         evaluatorId: studentEmail,
@@ -157,7 +161,9 @@ class StudentActivityController extends GetxController {
   }
 
   List<Evaluation> getEvaluationsForActivity(String activityId) {
-    return myEvaluations.where((eval) => eval.activityId == activityId).toList();
+    return myEvaluations
+        .where((eval) => eval.activityId == activityId)
+        .toList();
   }
 
   int getEvaluationCountForActivity(String activityId) {

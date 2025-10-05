@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
-import '../../../domain/usecases/activity/create_activity.dart';
-import '../../../domain/usecases/activity/get_activities_by_category.dart';
-import '../../../domain/usecases/activity/get_activity_by_id.dart';
-import '../../../domain/usecases/activity/update_activity.dart';
-import '../../../domain/usecases/activity/delete_activity.dart';
+import '../../../application/use-cases/activity/create_activity.dart';
+import '../../../application/use-cases/activity/get_activities_by_category.dart';
+import '../../../application/use-cases/activity/get_activity_by_id.dart';
+import '../../../application/use-cases/activity/update_activity.dart';
+import '../../../application/use-cases/activity/delete_activity.dart';
 import '../../../data/repositories/activity/activity_repository_impl.dart';
 import '../../../domain/repositories/activity_repository.dart';
 

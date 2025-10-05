@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vally_app/features/course/domain/entities/course.dart';
 import 'package:vally_app/features/course/data/repositories/course/course_repository_impl.dart';
-import 'package:vally_app/features/course/domain/usecases/course/update_invitation_code.dart';
+import 'package:vally_app/features/course/application/use-cases/course/update_invitation_code.dart';
 import 'package:vally_app/features/course/presentation/controllers/home/home_controller.dart';
 
 class CourseManagementController extends GetxController {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
-import '../../../domain/usecases/category/get_categories.dart';
-import '../../../domain/usecases/category/add_category.dart';
-import '../../../domain/usecases/category/update_category.dart';
-import '../../../domain/usecases/category/delete_category.dart';
+import '../../../application/use-cases/category/get_categories.dart';
+import '../../../application/use-cases/category/add_category.dart';
+import '../../../application/use-cases/category/update_category.dart';
+import '../../../application/use-cases/category/delete_category.dart';
 import '../../../data/repositories/course/category_repository_imp.dart';
 import '../../../domain/repositories/category_repository.dart';
 
