@@ -6,12 +6,12 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import '../../models/category_hive_model.dart';
-import '../group/group_repository_impl.dart';
+//import '../group/group_repository_impl.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
   static const _boxName = 'categories';
   late final Box _box;
-  late final GroupRepositoryImpl _groupRepository;
+  //late final GroupRepositoryImpl _groupRepository;
   bool _isInitialized = false;
   static const storage = FlutterSecureStorage();
   late final Logger logger = Logger();
@@ -20,7 +20,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   CategoryRepositoryImpl() {
     _box = Hive.box(_boxName);
-    _groupRepository = GroupRepositoryImpl();
+    //_groupRepository = GroupRepositoryImpl();
   }
 
   Future<void> _initializeData() async {
