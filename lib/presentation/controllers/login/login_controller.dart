@@ -112,6 +112,9 @@ class LoginController extends GetxController {
           logger.w("Failed to refresh access token.");
         }
       });
+    } else {
+      await storage.delete(key: "accessToken");
+      await storage.delete(key: "refreshToken");
     }
   }
 

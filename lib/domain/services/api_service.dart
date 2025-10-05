@@ -34,10 +34,8 @@ class ApiService {
         final refreshToken = data['refreshToken'];
 
         // Guardar tokens de manera segura
-        if (rememberMe) {
-          await storage.write(key: "accessToken", value: accessToken);
-          await storage.write(key: "refreshToken", value: refreshToken);
-        }
+        await storage.write(key: "accessToken", value: accessToken);
+        await storage.write(key: "refreshToken", value: refreshToken);
 
         logger.i("Login successful for $email");
 
