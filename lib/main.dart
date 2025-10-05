@@ -3,14 +3,16 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'presentation/screens/login/login_screen.dart';
-import 'data/models/course_hive_model.dart';
-import 'data/models/category_hive_model.dart';
-import 'data/models/user_hive_model.dart';
-import 'data/models/group_hive_model.dart';
-import 'data/models/activity_hive_model.dart';
-import 'data/models/evaluation_hive_model.dart';
-import 'domain/services/preload_data.dart';
+import 'package:vally_app/features/auth/presentation/bindings/auth_binding.dart';
+import 'package:vally_app/features/auth/presentation/pages/login_page.dart';
+
+import 'features/course/data/models/course_hive_model.dart';
+import 'features/course/data/models/category_hive_model.dart';
+import 'features/course/data/models/user_hive_model.dart';
+import 'features/course/data/models/group_hive_model.dart';
+import 'features/course/data/models/activity_hive_model.dart';
+import 'features/course/data/models/evaluation_hive_model.dart';
+import 'core/local/preload_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,7 +52,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: GoogleFonts.lato().fontFamily,
       ),
-      home: const LoginScreen(),
+      initialBinding: AuthBinding(), // <-- aquí se inyectan tus dependencias
+      home: const LoginScreen(), // <-- tu pantalla inicial
     );
   }
 }
