@@ -289,15 +289,27 @@ class ReportRepositoryImpl implements ReportRepository {
   String _getStudentName(String studentEmail) {
     // Helper method to map emails to student names (same as in ProfessorGroupController)
     final nameMappings = {
-      'gabriela@example.com': 'Gabriela',
+      'a@a.com': 'Gabriela', // Usar email real
       'b@a.com': 'Betty',
       'c@a.com': 'Camila',
-      'daniela@example.com': 'Daniela',
-      'eliana@example.com': 'Eliana',
-      'fernanda@example.com': 'Fernanda',
+      'd@a.com': 'Daniela', // Usar email real
+      'e@a.com': 'Eliana', // Usar email real
+      'f@a.com': 'Fernanda', // Usar email real
     };
 
-    return nameMappings[studentEmail.toLowerCase()] ?? studentEmail;
+    // Si está en el mapeo, usar el nombre
+    if (nameMappings.containsKey(studentEmail.toLowerCase())) {
+      return nameMappings[studentEmail.toLowerCase()]!;
+    }
+
+    // Si no está en el mapeo, extraer nombre del email (antes del @) y capitalizar
+    final emailParts = studentEmail.toLowerCase().split('@');
+    if (emailParts.isNotEmpty) {
+      final name = emailParts[0];
+      return name[0].toUpperCase() + name.substring(1);
+    }
+
+    return studentEmail;
   }
 
   @override

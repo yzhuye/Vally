@@ -116,14 +116,19 @@ class ProfessorGroupController extends GetxController {
       // First try to use students from the course object if available
       if (course != null && course!.enrolledStudents.isNotEmpty) {
         students.value = course!.enrolledStudents;
+        print(
+            '🔍 DEBUG ProfessorGroupController - Students from course: ${course!.enrolledStudents}');
         return;
       }
 
       // Fallback to repository if course object doesn't have students
       final studentList = await _getStudentsUseCase(courseId);
       students.value = studentList;
+      print(
+          '🔍 DEBUG ProfessorGroupController - Students from repository: $studentList');
     } catch (e) {
       students.value = [];
+      print('🔍 DEBUG ProfessorGroupController - Error loading students: $e');
     }
   }
 
@@ -216,12 +221,12 @@ class ProfessorGroupController extends GetxController {
     // This is a simple mapping - you might want to make this more sophisticated
     // or store this mapping in a database
     final emailMappings = {
-      'gabriela': 'gabriela@example.com',
-      'betty': 'b@a.com', // Based on the logs, betty maps to b@a.com
-      'camila': 'c@a.com', // Based on the logs, camila maps to c@a.com
-      'daniela': 'daniela@example.com',
-      'eliana': 'eliana@example.com',
-      'fernanda': 'fernanda@example.com',
+      'gabriela': 'a@a.com', // Usar email real
+      'betty': 'b@a.com',
+      'camila': 'c@a.com',
+      'daniela': 'd@a.com', // Usar email real
+      'eliana': 'e@a.com', // Usar email real
+      'fernanda': 'f@a.com', // Usar email real
       'b@a.com': 'b@a.com',
       'c@a.com': 'c@a.com',
     };
@@ -233,23 +238,45 @@ class ProfessorGroupController extends GetxController {
   String getNameForEmail(String email) {
     // Reverse mapping from emails to names
     final nameMappings = {
-      'gabriela@example.com': 'gabriela',
+      'a@a.com': 'gabriela', // Usar email real
       'b@a.com': 'betty',
       'c@a.com': 'camila',
-      'daniela@example.com': 'daniela',
-      'eliana@example.com': 'eliana',
-      'fernanda@example.com': 'fernanda',
+      'd@a.com': 'daniela', // Usar email real
+      'e@a.com': 'eliana', // Usar email real
+      'f@a.com': 'fernanda', // Usar email real
     };
 
-    return nameMappings[email.toLowerCase()] ?? email;
+    // Si está en el mapeo, usar el nombre
+    if (nameMappings.containsKey(email.toLowerCase())) {
+      return nameMappings[email.toLowerCase()]!;
+    }
+
+    // Si no está en el mapeo, extraer nombre del email (antes del @)
+    final emailParts = email.toLowerCase().split('@');
+    if (emailParts.isNotEmpty) {
+      return emailParts[0];
+    }
+
+    return email;
   }
 
   GroupRepository get groupRepository => _groupRepository;
 
   List<String> getStudentsNotInAnyGroup() {
-    return students
-        .where((studentEmail) => findStudentGroup(studentEmail) == null)
-        .toList();
+    print(
+        '🔍 DEBUG ProfessorGroupController - Checking students not in any group...');
+    print('🔍 DEBUG ProfessorGroupController - All students: $students');
+
+    final unassignedStudents = students.where((studentEmail) {
+      final group = findStudentGroup(studentEmail);
+      print(
+          '🔍 DEBUG ProfessorGroupController - Student $studentEmail -> Group: ${group?.name ?? "None"}');
+      return group == null;
+    }).toList();
+
+    print(
+        '🔍 DEBUG ProfessorGroupController - Unassigned students: $unassignedStudents');
+    return unassignedStudents;
   }
 
   List<String> getStudentsInGroup(Group group) {
@@ -280,6 +307,11 @@ class ProfessorGroupController extends GetxController {
     try {
       // Obtener estudiantes no asignados
       final unassignedStudents = getStudentsNotInAnyGroup();
+
+      print('🔍 DEBUG ProfessorGroupController - All students: $students');
+      print(
+          '🔍 DEBUG ProfessorGroupController - Unassigned students: $unassignedStudents');
+      print('🔍 DEBUG ProfessorGroupController - Groups: $groups');
 
       if (unassignedStudents.isEmpty) {
         Get.snackbar(

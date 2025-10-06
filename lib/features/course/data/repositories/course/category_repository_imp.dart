@@ -21,7 +21,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
         Category(
           id: 'cat1',
           name: "Trabajo en Equipo",
-          groupingMethod: "random",
+          groupingMethod: "manual",
           groupCount: 3,
           studentsPerGroup: 5,
         ),

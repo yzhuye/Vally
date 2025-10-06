@@ -49,22 +49,21 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
       tag: activityControllerTag,
     );
 
-    if (widget.category.groupingMethod == 'self-assigned') {
-      controllerTag = '${widget.course.id}_${widget.category.id}_$studentEmail';
+    // Inicializar GroupController para todos los métodos
+    controllerTag = '${widget.course.id}_${widget.category.id}_$studentEmail';
 
-      if (Get.isRegistered<GroupController>(tag: controllerTag)) {
-        Get.delete<GroupController>(tag: controllerTag);
-      }
-
-      groupController = Get.put(
-        GroupController(
-          courseId: widget.course.id,
-          categoryId: widget.category.id,
-          studentEmail: studentEmail,
-        ),
-        tag: controllerTag,
-      );
+    if (Get.isRegistered<GroupController>(tag: controllerTag)) {
+      Get.delete<GroupController>(tag: controllerTag);
     }
+
+    groupController = Get.put(
+      GroupController(
+        courseId: widget.course.id,
+        categoryId: widget.category.id,
+        studentEmail: studentEmail,
+      ),
+      tag: controllerTag,
+    );
   }
 
   @override
@@ -92,15 +91,26 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   String _getNameForEmail(String email) {
     // Reverse mapping from emails to names
     final nameMappings = {
-      'gabriela@example.com': 'gabriela',
+      'a@a.com': 'gabriela', // Usar email real
       'b@a.com': 'betty',
       'c@a.com': 'camila',
-      'daniela@example.com': 'daniela',
-      'eliana@example.com': 'eliana',
-      'fernanda@example.com': 'fernanda',
+      'd@a.com': 'daniela', // Usar email real
+      'e@a.com': 'eliana', // Usar email real
+      'f@a.com': 'fernanda', // Usar email real
     };
 
-    return nameMappings[email.toLowerCase()] ?? email;
+    // Si está en el mapeo, usar el nombre
+    if (nameMappings.containsKey(email.toLowerCase())) {
+      return nameMappings[email.toLowerCase()]!;
+    }
+
+    // Si no está en el mapeo, extraer nombre del email (antes del @)
+    final emailParts = email.toLowerCase().split('@');
+    if (emailParts.isNotEmpty) {
+      return emailParts[0];
+    }
+
+    return email;
   }
 
   @override
@@ -205,8 +215,15 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
     // Verificar si el estudiante está en un grupo para todos los métodos
     bool isInGroup = false;
 
+    print('🔍 DEBUG CategoryActivityScreen - Building activities view');
+    print('🔍 DEBUG CategoryActivityScreen - Student email: $studentEmail');
+    print(
+        '🔍 DEBUG CategoryActivityScreen - GroupController exists: ${groupController != null}');
+
     if (groupController != null) {
       isInGroup = groupController!.currentGroup != null;
+      print(
+          '🔍 DEBUG CategoryActivityScreen - Current group: ${groupController!.currentGroup?.name ?? "None"}');
     } else {
       // Si no hay groupController, inicializarlo para verificar
       controllerTag = '${widget.course.id}_${widget.category.id}_$studentEmail';
@@ -222,7 +239,11 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
         groupController!.loadGroups();
       }
       isInGroup = groupController?.currentGroup != null;
+      print(
+          '🔍 DEBUG CategoryActivityScreen - Current group after init: ${groupController?.currentGroup?.name ?? "None"}');
     }
+
+    print('🔍 DEBUG CategoryActivityScreen - Is in group: $isInGroup');
 
     // Si no está en un grupo, mostrar mensaje según el método
     if (!isInGroup) {
@@ -233,11 +254,6 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
         case 'self-assigned':
           message = "Debes unirte a un grupo para ver las actividades.";
           icon = Icons.group_add;
-          break;
-        case 'random':
-          message =
-              "Aún no has sido asignado a un grupo. Contacta al profesor.";
-          icon = Icons.schedule;
           break;
         case 'manual':
           message =

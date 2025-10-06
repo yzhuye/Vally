@@ -32,8 +32,6 @@ class ActivityAverageWidget extends StatelessWidget {
             _buildHeaderCard(activityAverage),
             const SizedBox(height: 16),
             _buildCriteriaCards(activityAverage),
-            const SizedBox(height: 16),
-            _buildSummaryCard(activityAverage),
           ],
         ),
       );
@@ -175,95 +173,6 @@ class ActivityAverageWidget extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildSummaryCard(activityAverage) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Resumen de Datos',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF00A4BD),
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildSummaryRow(
-              'Total de Actividades',
-              activityAverage.totalActivities.toString(),
-              Icons.assignment,
-            ),
-            _buildSummaryRow(
-              'Total de Evaluaciones',
-              activityAverage.totalEvaluations.toString(),
-              Icons.rate_review,
-            ),
-            _buildSummaryRow(
-              'Promedio General',
-              controller.formatScore(activityAverage.overallAverage),
-              Icons.trending_up,
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Estas métricas representan el promedio de todas las evaluaciones realizadas en las actividades de esta categoría.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue.shade700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF00A4BD), size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF00A4BD),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

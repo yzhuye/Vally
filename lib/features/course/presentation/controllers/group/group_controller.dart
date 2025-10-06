@@ -112,39 +112,47 @@ class GroupController extends GetxController {
     // Convertir el email del estudiante a nombre para comparar con los miembros
     final studentName = _getNameForEmail(studentEmail);
 
-    // Debug: Print comparison
     print('🔍 DEBUG GroupController - Student email: $studentEmail');
     print('🔍 DEBUG GroupController - Student name: $studentName');
-    print('🔍 DEBUG GroupController - Groups count: ${groups.length}');
+    print(
+        '🔍 DEBUG GroupController - Available groups: ${groups.map((g) => '${g.name}: ${g.members}').toList()}');
 
-    for (final group in groups) {
+    final foundGroup = groups.firstWhereOrNull((g) {
+      final hasEmail = g.members.contains(studentEmail);
+      final hasName = g.members.contains(studentName);
       print(
-          '🔍 DEBUG GroupController - Group "${group.name}" members: ${group.members}');
-      final isInGroup = group.members.contains(studentEmail) ||
-          group.members.contains(studentName);
-      print('🔍 DEBUG GroupController - Is student in this group? $isInGroup');
-    }
-
-    final currentGroup = groups.firstWhereOrNull((g) =>
-        g.members.contains(studentEmail) || g.members.contains(studentName));
+          '🔍 DEBUG GroupController - Group ${g.name}: hasEmail=$hasEmail, hasName=$hasName, members=${g.members}');
+      return hasEmail || hasName;
+    });
 
     print(
-        '🔍 DEBUG GroupController - Current group found: ${currentGroup?.name ?? "None"}');
-
-    return currentGroup;
+        '🔍 DEBUG GroupController - Found group: ${foundGroup?.name ?? "None"}');
+    return foundGroup;
   }
 
   // Helper method to convert emails to names
   String _getNameForEmail(String email) {
     final nameMappings = {
-      'gabriela@example.com': 'gabriela',
+      'a@a.com': 'gabriela', // Usar email real
       'b@a.com': 'betty',
       'c@a.com': 'camila',
-      'daniela@example.com': 'daniela',
-      'eliana@example.com': 'eliana',
-      'fernanda@example.com': 'fernanda',
+      'd@a.com': 'daniela', // Usar email real
+      'e@a.com': 'eliana', // Usar email real
+      'f@a.com': 'fernanda', // Usar email real
     };
-    return nameMappings[email.toLowerCase()] ?? email;
+
+    // Si está en el mapeo, usar el nombre
+    if (nameMappings.containsKey(email.toLowerCase())) {
+      return nameMappings[email.toLowerCase()]!;
+    }
+
+    // Si no está en el mapeo, extraer nombre del email (antes del @)
+    final emailParts = email.toLowerCase().split('@');
+    if (emailParts.isNotEmpty) {
+      return emailParts[0];
+    }
+
+    return email;
   }
 
   bool canJoinGroup(Group group) {

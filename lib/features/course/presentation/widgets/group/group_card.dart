@@ -20,18 +20,72 @@ class GroupCard extends StatelessWidget {
   // Helper method to convert names to emails
   String? _getEmailForName(String name) {
     final emailMappings = {
-      'gabriela': 'gabriela@example.com',
+      'gabriela': 'a@a.com', // Usar email real
       'betty': 'b@a.com',
       'camila': 'c@a.com',
-      'daniela': 'daniela@example.com',
-      'eliana': 'eliana@example.com',
-      'fernanda': 'fernanda@example.com',
+      'daniela': 'd@a.com', // Usar email real
+      'eliana': 'e@a.com', // Usar email real
+      'fernanda': 'f@a.com', // Usar email real
+      'd': 'd@a.com', // Mapeo para nombres cortos
+      'e': 'e@a.com',
+      'f': 'f@a.com',
     };
     return emailMappings[name.toLowerCase()];
   }
 
+  // Helper method to convert emails to names
+  String _getNameForEmail(String email) {
+    final nameMappings = {
+      'a@a.com': 'gabriela', // Usar email real
+      'b@a.com': 'betty',
+      'c@a.com': 'camila',
+      'd@a.com': 'daniela', // Usar email real
+      'e@a.com': 'eliana', // Usar email real
+      'f@a.com': 'fernanda', // Usar email real
+    };
+
+    // Si está en el mapeo, usar el nombre
+    if (nameMappings.containsKey(email.toLowerCase())) {
+      return nameMappings[email.toLowerCase()]!;
+    }
+
+    // Si no está en el mapeo, extraer nombre del email (antes del @)
+    final emailParts = email.toLowerCase().split('@');
+    if (emailParts.isNotEmpty) {
+      return emailParts[0];
+    }
+
+    return email;
+  }
+
+  // Helper method to convert short names to full names
+  String _getFullName(String name) {
+    print('🔍 DEBUG GroupCard - Converting name: "$name"');
+
+    final fullNameMappings = {
+      'gabriela': 'gabriela',
+      'betty': 'betty',
+      'camila': 'camila',
+      'daniela': 'daniela',
+      'eliana': 'eliana',
+      'fernanda': 'fernanda',
+      'd': 'daniela', // Convertir nombre corto a nombre completo
+      'e': 'eliana',
+      'f': 'fernanda',
+    };
+
+    final result = fullNameMappings[name.toLowerCase()] ?? name;
+    print('🔍 DEBUG GroupCard - Result: "$name" -> "$result"');
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Debug logs
+    print('🔍 DEBUG GroupCard - Group: ${group.name}');
+    print('🔍 DEBUG GroupCard - Members: ${group.members}');
+    print('🔍 DEBUG GroupCard - Current user email: $currentUserEmail');
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -110,8 +164,27 @@ class GroupCard extends StatelessWidget {
               (member) {
                 // Convert member to email if it's a name, or keep as email
                 final memberEmail = _getEmailForName(member) ?? member;
-                final isCurrentUser =
+
+                // Check if current user is in this group by email or by name
+                final isCurrentUserByEmail =
                     currentUserEmail != null && memberEmail == currentUserEmail;
+                final isCurrentUserByName = currentUserEmail != null &&
+                    _getNameForEmail(currentUserEmail!).toLowerCase() ==
+                        member.toLowerCase();
+                final isCurrentUser =
+                    isCurrentUserByEmail || isCurrentUserByName;
+
+                print('🔍 DEBUG GroupCard - Member: "$member"');
+                print('🔍 DEBUG GroupCard - Member email: "$memberEmail"');
+                print(
+                    '🔍 DEBUG GroupCard - Current user email: "$currentUserEmail"');
+                print(
+                    '🔍 DEBUG GroupCard - Current user name: "${currentUserEmail != null ? _getNameForEmail(currentUserEmail!) : 'null'}"');
+                print(
+                    '🔍 DEBUG GroupCard - Is current user by email: $isCurrentUserByEmail');
+                print(
+                    '🔍 DEBUG GroupCard - Is current user by name: $isCurrentUserByName');
+                print('🔍 DEBUG GroupCard - Is current user: $isCurrentUser');
 
                 return Align(
                   alignment: Alignment.centerLeft,
@@ -132,8 +205,8 @@ class GroupCard extends StatelessWidget {
                       ),
                       child: Text(
                         isCurrentUser
-                            ? '${nameMapper?.call(member) ?? member} (Tú)'
-                            : nameMapper?.call(member) ?? member,
+                            ? '${_getFullName(nameMapper?.call(member) ?? member)} (Tú)'
+                            : _getFullName(nameMapper?.call(member) ?? member),
                         style: TextStyle(
                           color: isCurrentUser
                               ? const Color(0xFF00A4BD)

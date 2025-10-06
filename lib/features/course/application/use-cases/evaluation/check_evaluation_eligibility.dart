@@ -54,32 +54,17 @@ class CheckEvaluationEligibilityUseCase {
       final evaluatorName = _getNameForEmail(evaluatorId);
       final evaluatedName = _getNameForEmail(evaluatedId);
 
-      // Debug: Print eligibility check
-      print(
-          '🔍 DEBUG Eligibility - Evaluator email: $evaluatorId, name: $evaluatorName');
-      print(
-          '🔍 DEBUG Eligibility - Evaluated email: $evaluatedId, name: $evaluatedName');
-
       String? evaluatorGroupId;
       String? evaluatedGroupId;
 
       for (final group in groups) {
-        print(
-            '🔍 DEBUG Eligibility - Group "${group.name}" members: ${group.members}');
-
         // Buscar tanto por email como por nombre
-        final evaluatorInGroup = group.members.contains(evaluatorId) ||
-            group.members.contains(evaluatorName);
-        final evaluatedInGroup = group.members.contains(evaluatedId) ||
-            group.members.contains(evaluatedName);
-
-        print('🔍 DEBUG Eligibility - Evaluator in group? $evaluatorInGroup');
-        print('🔍 DEBUG Eligibility - Evaluated in group? $evaluatedInGroup');
-
-        if (evaluatorInGroup) {
+        if (group.members.contains(evaluatorId) ||
+            group.members.contains(evaluatorName)) {
           evaluatorGroupId = group.id;
         }
-        if (evaluatedInGroup) {
+        if (group.members.contains(evaluatedId) ||
+            group.members.contains(evaluatedName)) {
           evaluatedGroupId = group.id;
         }
       }
@@ -127,12 +112,24 @@ class CheckEvaluationEligibilityResult {
 // Helper method to convert emails to names
 String _getNameForEmail(String email) {
   final nameMappings = {
-    'gabriela@example.com': 'gabriela',
+    'a@a.com': 'gabriela', // Usar email real
     'b@a.com': 'betty',
     'c@a.com': 'camila',
-    'daniela@example.com': 'daniela',
-    'eliana@example.com': 'eliana',
-    'fernanda@example.com': 'fernanda',
+    'd@a.com': 'daniela', // Usar email real
+    'e@a.com': 'eliana', // Usar email real
+    'f@a.com': 'fernanda', // Usar email real
   };
-  return nameMappings[email.toLowerCase()] ?? email;
+
+  // Si está en el mapeo, usar el nombre
+  if (nameMappings.containsKey(email.toLowerCase())) {
+    return nameMappings[email.toLowerCase()]!;
+  }
+
+  // Si no está en el mapeo, extraer nombre del email (antes del @)
+  final emailParts = email.toLowerCase().split('@');
+  if (emailParts.isNotEmpty) {
+    return emailParts[0];
+  }
+
+  return email;
 }

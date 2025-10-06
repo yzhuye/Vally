@@ -15,7 +15,7 @@ class CategoryDialogs {
     final groupCountController = TextEditingController();
     final studentsPerGroupController = TextEditingController();
 
-    final List<String> methods = ['random', 'self-assigned', 'manual'];
+    final List<String> methods = ['self-assigned', 'manual'];
     String selectedMethod = methods[0];
 
     Get.dialog(
@@ -124,7 +124,7 @@ class CategoryDialogs {
     final studentsPerGroupController =
         TextEditingController(text: category.studentsPerGroup.toString());
 
-    final List<String> methods = ['random', 'self-assigned', 'manual'];
+    final List<String> methods = ['self-assigned', 'manual'];
     String selectedMethod = category.groupingMethod;
 
     Get.dialog(

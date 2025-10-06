@@ -50,7 +50,7 @@ class Course {
 class Category {
   final String id;
   String name;
-  String groupingMethod; // "random" | "self-assigned" | "manual"
+  String groupingMethod; // "self-assigned" | "manual"
   int groupCount;
   int studentsPerGroup;
   final List<Activity> activities;

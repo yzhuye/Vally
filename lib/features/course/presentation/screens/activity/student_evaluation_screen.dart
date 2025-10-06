@@ -237,19 +237,10 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
               // Filtrar al estudiante actual (tanto por email como por nombre)
               final studentName = _getNameForEmail(widget.studentEmail);
 
-              // Debug: Print filtering logic
-              print(
-                  '🔍 DEBUG Evaluation - Student email: ${widget.studentEmail}');
-              print('🔍 DEBUG Evaluation - Student name: $studentName');
-              print(
-                  '🔍 DEBUG Evaluation - All members: ${currentGroup.members}');
-
               final groupMembers = currentGroup.members
                   .where((member) =>
                       member != widget.studentEmail && member != studentName)
                   .toList();
-
-              print('🔍 DEBUG Evaluation - Filtered members: $groupMembers');
 
               if (groupMembers.isEmpty) {
                 return const Center(
@@ -431,13 +422,25 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
   // Helper method to convert emails to names
   String _getNameForEmail(String email) {
     final nameMappings = {
-      'gabriela@example.com': 'gabriela',
+      'a@a.com': 'gabriela', // Usar email real
       'b@a.com': 'betty',
       'c@a.com': 'camila',
-      'daniela@example.com': 'daniela',
-      'eliana@example.com': 'eliana',
-      'fernanda@example.com': 'fernanda',
+      'd@a.com': 'daniela', // Usar email real
+      'e@a.com': 'eliana', // Usar email real
+      'f@a.com': 'fernanda', // Usar email real
     };
-    return nameMappings[email.toLowerCase()] ?? email;
+
+    // Si está en el mapeo, usar el nombre
+    if (nameMappings.containsKey(email.toLowerCase())) {
+      return nameMappings[email.toLowerCase()]!;
+    }
+
+    // Si no está en el mapeo, extraer nombre del email (antes del @)
+    final emailParts = email.toLowerCase().split('@');
+    if (emailParts.isNotEmpty) {
+      return emailParts[0];
+    }
+
+    return email;
   }
 }
