@@ -66,6 +66,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           // Estadísticas
           _buildStatsCard(),
 
+          // Botones de asignación aleatoria
+          _buildRandomAssignmentButtons(),
+
           // Filtros
           _buildFilterChips(),
 
@@ -155,6 +158,47 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildRandomAssignmentButtons() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: controller.studentsNotInGroupsCount > 0 &&
+                      controller.groups.isNotEmpty
+                  ? () => controller.assignStudentsRandomly()
+                  : null,
+              icon: const Icon(Icons.shuffle),
+              label: const Text('Asignar Aleatoriamente'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: controller.studentsInGroupsCount > 0 &&
+                      controller.groups.isNotEmpty
+                  ? () => controller.reassignAllStudentsRandomly()
+                  : null,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reasignar Todos'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF9800),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

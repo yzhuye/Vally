@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
@@ -271,4 +272,203 @@ class ProfessorGroupController extends GetxController {
   }
 
   int get totalGroupsCount => groups.length;
+
+  /// Asigna aleatoriamente todos los estudiantes no asignados a grupos
+  Future<void> assignStudentsRandomly() async {
+    isLoading(true);
+
+    try {
+      // Obtener estudiantes no asignados
+      final unassignedStudents = getStudentsNotInAnyGroup();
+
+      if (unassignedStudents.isEmpty) {
+        Get.snackbar(
+          'Información',
+          'No hay estudiantes sin asignar a grupos',
+          backgroundColor: Colors.blue,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (groups.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'No hay grupos disponibles para asignar estudiantes',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Mezclar estudiantes aleatoriamente
+      final shuffledStudents = List<String>.from(unassignedStudents);
+      shuffledStudents.shuffle(Random());
+
+      // Distribuir estudiantes entre grupos de forma equilibrada
+      int studentIndex = 0;
+      int groupIndex = 0;
+
+      while (studentIndex < shuffledStudents.length) {
+        final group = groups[groupIndex];
+
+        // Verificar si el grupo tiene espacio
+        if (!group.isFull) {
+          final studentEmail = shuffledStudents[studentIndex];
+
+          // Asignar estudiante al grupo
+          final success = await assignStudentToGroup(studentEmail, group.id);
+
+          if (success) {
+            studentIndex++;
+          } else {
+            // Si no se pudo asignar, continuar con el siguiente grupo
+            studentIndex++;
+          }
+        }
+
+        // Mover al siguiente grupo (circular)
+        groupIndex = (groupIndex + 1) % groups.length;
+
+        // Si todos los grupos están llenos, salir del bucle
+        if (groups.every((g) => g.isFull)) {
+          break;
+        }
+      }
+
+      // Recargar datos
+      loadGroups();
+      loadStudents();
+
+      Get.snackbar(
+        'Éxito',
+        'Asignación aleatoria completada',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error al realizar asignación aleatoria: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  /// Asigna aleatoriamente todos los estudiantes (incluyendo los ya asignados)
+  Future<void> reassignAllStudentsRandomly() async {
+    isLoading(true);
+
+    try {
+      // Mostrar diálogo de confirmación
+      final confirmed = await _showReassignConfirmationDialog();
+      if (!confirmed) return;
+
+      // Obtener todos los estudiantes asignados
+      final allAssignedStudents = <String>[];
+      for (final group in groups) {
+        allAssignedStudents.addAll(group.members);
+      }
+
+      // Limpiar todos los grupos
+      for (final group in groups) {
+        final emptyGroup = Group(
+          id: group.id,
+          name: group.name,
+          maxCapacity: group.maxCapacity,
+          members: [],
+          categoryId: group.categoryId,
+        );
+        _groupRepository.updateGroup(courseId, emptyGroup);
+      }
+
+      // Recargar grupos
+      loadGroups();
+
+      // Asignar aleatoriamente todos los estudiantes que estaban asignados
+      if (allAssignedStudents.isNotEmpty) {
+        await _assignStudentsToGroupsRandomly(allAssignedStudents);
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error al reasignar estudiantes: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  /// Asigna una lista de estudiantes a grupos de forma aleatoria
+  Future<void> _assignStudentsToGroupsRandomly(
+      List<String> studentsToAssign) async {
+    if (studentsToAssign.isEmpty || groups.isEmpty) return;
+
+    // Mezclar estudiantes aleatoriamente
+    final shuffledStudents = List<String>.from(studentsToAssign);
+    shuffledStudents.shuffle(Random());
+
+    // Distribuir estudiantes entre grupos de forma equilibrada
+    int studentIndex = 0;
+    int groupIndex = 0;
+
+    while (studentIndex < shuffledStudents.length) {
+      final group = groups[groupIndex];
+
+      // Verificar si el grupo tiene espacio
+      if (!group.isFull) {
+        final studentEmail = shuffledStudents[studentIndex];
+
+        // Asignar estudiante al grupo
+        final success = await assignStudentToGroup(studentEmail, group.id);
+
+        if (success) {
+          studentIndex++;
+        } else {
+          // Si no se pudo asignar, continuar con el siguiente grupo
+          studentIndex++;
+        }
+      }
+
+      // Mover al siguiente grupo (circular)
+      groupIndex = (groupIndex + 1) % groups.length;
+
+      // Si todos los grupos están llenos, salir del bucle
+      if (groups.every((g) => g.isFull)) {
+        break;
+      }
+    }
+  }
+
+  /// Muestra diálogo de confirmación para reasignación
+  Future<bool> _showReassignConfirmationDialog() async {
+    return await Get.dialog<bool>(
+          AlertDialog(
+            title: const Text('Confirmar Reasignación'),
+            content: const Text(
+                'Esta acción removerá a todos los estudiantes de sus grupos actuales '
+                'y los asignará aleatoriamente a nuevos grupos. ¿Está seguro?'),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Get.back(result: true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Confirmar'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 }

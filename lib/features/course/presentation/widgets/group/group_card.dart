@@ -17,6 +17,19 @@ class GroupCard extends StatelessWidget {
     this.nameMapper,
   });
 
+  // Helper method to convert names to emails
+  String? _getEmailForName(String name) {
+    final emailMappings = {
+      'gabriela': 'gabriela@example.com',
+      'betty': 'b@a.com',
+      'camila': 'c@a.com',
+      'daniela': 'daniela@example.com',
+      'eliana': 'eliana@example.com',
+      'fernanda': 'fernanda@example.com',
+    };
+    return emailMappings[name.toLowerCase()];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -95,8 +108,11 @@ class GroupCard extends StatelessWidget {
             ),
             ...group.members.map(
               (member) {
+                // Convert member to email if it's a name, or keep as email
+                final memberEmail = _getEmailForName(member) ?? member;
                 final isCurrentUser =
-                    currentUserEmail != null && member == currentUserEmail;
+                    currentUserEmail != null && memberEmail == currentUserEmail;
+
                 return Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(

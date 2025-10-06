@@ -40,22 +40,46 @@ class CheckEvaluationEligibilityUseCase {
       }
 
       // Verificar que no haya evaluado antes
-      if (_evaluationRepository.hasEvaluated(activityId, evaluatorId, evaluatedId)) {
+      if (_evaluationRepository.hasEvaluated(
+          activityId, evaluatorId, evaluatedId)) {
         return CheckEvaluationEligibilityResult.notEligible(
             'Ya has evaluado a este compañero en esta actividad.');
       }
 
       // Verificar que ambos estudiantes estén en el mismo grupo de la categoría
-      final groups = _groupRepository.getGroupsByCategory(courseId, activity.categoryId);
-      
+      final groups =
+          _groupRepository.getGroupsByCategory(courseId, activity.categoryId);
+
+      // Convertir emails a nombres para comparar con los miembros
+      final evaluatorName = _getNameForEmail(evaluatorId);
+      final evaluatedName = _getNameForEmail(evaluatedId);
+
+      // Debug: Print eligibility check
+      print(
+          '🔍 DEBUG Eligibility - Evaluator email: $evaluatorId, name: $evaluatorName');
+      print(
+          '🔍 DEBUG Eligibility - Evaluated email: $evaluatedId, name: $evaluatedName');
+
       String? evaluatorGroupId;
       String? evaluatedGroupId;
-      
+
       for (final group in groups) {
-        if (group.members.contains(evaluatorId)) {
+        print(
+            '🔍 DEBUG Eligibility - Group "${group.name}" members: ${group.members}');
+
+        // Buscar tanto por email como por nombre
+        final evaluatorInGroup = group.members.contains(evaluatorId) ||
+            group.members.contains(evaluatorName);
+        final evaluatedInGroup = group.members.contains(evaluatedId) ||
+            group.members.contains(evaluatedName);
+
+        print('🔍 DEBUG Eligibility - Evaluator in group? $evaluatorInGroup');
+        print('🔍 DEBUG Eligibility - Evaluated in group? $evaluatedInGroup');
+
+        if (evaluatorInGroup) {
           evaluatorGroupId = group.id;
         }
-        if (group.members.contains(evaluatedId)) {
+        if (evaluatedInGroup) {
           evaluatedGroupId = group.id;
         }
       }
@@ -77,7 +101,6 @@ class CheckEvaluationEligibilityUseCase {
 
       return CheckEvaluationEligibilityResult.eligible(
           'Puedes evaluar a este compañero.');
-          
     } catch (e) {
       return CheckEvaluationEligibilityResult.notEligible(
           'Error al verificar elegibilidad: $e');
@@ -99,4 +122,17 @@ class CheckEvaluationEligibilityResult {
 
   factory CheckEvaluationEligibilityResult.notEligible(String message) =>
       CheckEvaluationEligibilityResult._(isEligible: false, message: message);
+}
+
+// Helper method to convert emails to names
+String _getNameForEmail(String email) {
+  final nameMappings = {
+    'gabriela@example.com': 'gabriela',
+    'b@a.com': 'betty',
+    'c@a.com': 'camila',
+    'daniela@example.com': 'daniela',
+    'eliana@example.com': 'eliana',
+    'fernanda@example.com': 'fernanda',
+  };
+  return nameMappings[email.toLowerCase()] ?? email;
 }

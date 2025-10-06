@@ -202,27 +202,67 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   }
 
   Widget _buildActivitiesView() {
-    if (widget.category.groupingMethod == 'self-assigned') {
-      if (groupController?.currentGroup == null) {
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.group_off,
-                size: 64,
-                color: Colors.grey,
-              ),
-              SizedBox(height: 16),
-              Text(
-                "Debes unirte a un grupo para ver las actividades.",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ],
+    // Verificar si el estudiante está en un grupo para todos los métodos
+    bool isInGroup = false;
+
+    if (groupController != null) {
+      isInGroup = groupController!.currentGroup != null;
+    } else {
+      // Si no hay groupController, inicializarlo para verificar
+      controllerTag = '${widget.course.id}_${widget.category.id}_$studentEmail';
+      if (!Get.isRegistered<GroupController>(tag: controllerTag)) {
+        groupController = Get.put(
+          GroupController(
+            courseId: widget.course.id,
+            categoryId: widget.category.id,
+            studentEmail: studentEmail,
           ),
+          tag: controllerTag,
         );
+        groupController!.loadGroups();
       }
+      isInGroup = groupController?.currentGroup != null;
+    }
+
+    // Si no está en un grupo, mostrar mensaje según el método
+    if (!isInGroup) {
+      String message;
+      IconData icon;
+
+      switch (widget.category.groupingMethod) {
+        case 'self-assigned':
+          message = "Debes unirte a un grupo para ver las actividades.";
+          icon = Icons.group_add;
+          break;
+        case 'random':
+          message =
+              "Aún no has sido asignado a un grupo. Contacta al profesor.";
+          icon = Icons.schedule;
+          break;
+        case 'manual':
+          message =
+              "Aún no has sido asignado a un grupo. Contacta al profesor.";
+          icon = Icons.person_add_disabled;
+          break;
+        default:
+          message = "Debes estar en un grupo para ver las actividades.";
+          icon = Icons.group_off;
+      }
+
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
     }
 
     return Obx(() {
@@ -404,24 +444,21 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   }
 
   Widget _buildGroupsView() {
-    if (widget.category.groupingMethod != 'self-assigned') {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.info_outline,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Esta categoría usa método "${widget.category.groupingMethod}".\nLos grupos no están disponibles para auto-asignación.',
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-          ],
+    // Inicializar el groupController si no existe (para métodos que no son self-assigned)
+    if (groupController == null) {
+      controllerTag = '${widget.course.id}_${widget.category.id}_$studentEmail';
+
+      if (Get.isRegistered<GroupController>(tag: controllerTag)) {
+        Get.delete<GroupController>(tag: controllerTag);
+      }
+
+      groupController = Get.put(
+        GroupController(
+          courseId: widget.course.id,
+          categoryId: widget.category.id,
+          studentEmail: studentEmail,
         ),
+        tag: controllerTag,
       );
     }
 
@@ -435,19 +472,21 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
       }
 
       if (groupController!.groups.isEmpty) {
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.group_off,
                 size: 64,
                 color: Colors.grey,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
-                'No hay grupos disponibles para esta categoría.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                widget.category.groupingMethod == 'self-assigned'
+                    ? 'No hay grupos disponibles para esta categoría.'
+                    : 'No hay grupos creados para esta categoría.\nLos grupos se crean automáticamente por el profesor.',
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -455,28 +494,68 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
         );
       }
 
-      return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: groupController!.groups.length,
-        itemBuilder: (context, index) {
-          final group = groupController!.groups[index];
-          final canJoin = groupController!.canJoinGroup(group);
+      return Column(
+        children: [
+          // Mensaje informativo para métodos que no son self-assigned
+          if (widget.category.groupingMethod != 'self-assigned') ...[
+            Container(
+              margin: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Esta categoría usa método "${widget.category.groupingMethod}". '
+                      'Puedes ver tu grupo asignado pero no cambiarlo.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.blue[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          // Lista de grupos
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              itemCount: groupController!.groups.length,
+              itemBuilder: (context, index) {
+                final group = groupController!.groups[index];
+                // Solo permitir unirse si el método es 'self-assigned'
+                final canJoin =
+                    widget.category.groupingMethod == 'self-assigned'
+                        ? groupController!.canJoinGroup(group)
+                        : false;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: GroupCard(
-              group: group,
-              currentUserEmail: studentEmail,
-              canJoin: canJoin,
-              nameMapper: (email) => _getNameForEmail(email),
-              onJoin: () async {
-                if (canJoin) {
-                  await groupController!.joinGroup(group.id);
-                }
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: GroupCard(
+                    group: group,
+                    currentUserEmail: studentEmail,
+                    canJoin: canJoin,
+                    nameMapper: (email) => _getNameForEmail(email),
+                    onJoin: () async {
+                      if (canJoin) {
+                        await groupController!.joinGroup(group.id);
+                      }
+                    },
+                  ),
+                );
               },
             ),
-          );
-        },
+          ),
+        ],
       );
     });
   }

@@ -22,7 +22,8 @@ class StudentEvaluationScreen extends StatefulWidget {
   });
 
   @override
-  State<StudentEvaluationScreen> createState() => _StudentEvaluationScreenState();
+  State<StudentEvaluationScreen> createState() =>
+      _StudentEvaluationScreenState();
 }
 
 class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
@@ -33,8 +34,9 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
   @override
   void initState() {
     super.initState();
-    
-    controllerTag = 'student_activity_${widget.category.id}_${widget.studentEmail}';
+
+    controllerTag =
+        'student_activity_${widget.category.id}_${widget.studentEmail}';
     activityController = Get.put(
       StudentActivityController(
         categoryId: widget.category.id,
@@ -45,8 +47,9 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
     );
 
     // Controller para obtener compañeros de grupo
-    final groupControllerTag = '${widget.course.id}_${widget.category.id}_${widget.studentEmail}';
-    
+    final groupControllerTag =
+        '${widget.course.id}_${widget.category.id}_${widget.studentEmail}';
+
     // Verificar si el controlador existe antes de intentar obtenerlo
     if (Get.isRegistered<GroupController>(tag: groupControllerTag)) {
       groupController = Get.find<GroupController>(tag: groupControllerTag);
@@ -61,7 +64,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
         tag: groupControllerTag,
       );
     }
-    
+
     // Cargar grupos después de inicializar el controlador
     WidgetsBinding.instance.addPostFrameCallback((_) {
       groupController.loadGroups();
@@ -151,19 +154,24 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: activityController.getDueDateColor(widget.activity.dueDate).withOpacity(0.1),
+                    color: activityController
+                        .getDueDateColor(widget.activity.dueDate)
+                        .withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: activityController.getDueDateColor(widget.activity.dueDate),
+                      color: activityController
+                          .getDueDateColor(widget.activity.dueDate),
                       width: 1,
                     ),
                   ),
                   child: Text(
                     activityController.formatDueDate(widget.activity.dueDate),
                     style: TextStyle(
-                      color: activityController.getDueDateColor(widget.activity.dueDate),
+                      color: activityController
+                          .getDueDateColor(widget.activity.dueDate),
                       fontWeight: FontWeight.w500,
                       fontSize: 12,
                     ),
@@ -226,9 +234,22 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                 );
               }
 
+              // Filtrar al estudiante actual (tanto por email como por nombre)
+              final studentName = _getNameForEmail(widget.studentEmail);
+
+              // Debug: Print filtering logic
+              print(
+                  '🔍 DEBUG Evaluation - Student email: ${widget.studentEmail}');
+              print('🔍 DEBUG Evaluation - Student name: $studentName');
+              print(
+                  '🔍 DEBUG Evaluation - All members: ${currentGroup.members}');
+
               final groupMembers = currentGroup.members
-                  .where((member) => member != widget.studentEmail)
+                  .where((member) =>
+                      member != widget.studentEmail && member != studentName)
                   .toList();
+
+              print('🔍 DEBUG Evaluation - Filtered members: $groupMembers');
 
               if (groupMembers.isEmpty) {
                 return const Center(
@@ -256,7 +277,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                       widget.activity.id, memberEmail);
                   final canEvaluate = activityController.canEvaluateStudent(
                       widget.activity.id, memberEmail);
-                  final isExpired = activityController.isActivityExpired(widget.activity.dueDate);
+                  final isExpired = activityController
+                      .isActivityExpired(widget.activity.dueDate);
 
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 4),
@@ -266,7 +288,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
                       leading: CircleAvatar(
-                        backgroundColor: const Color(0xFF00A4BD).withOpacity(0.1),
+                        backgroundColor:
+                            const Color(0xFF00A4BD).withOpacity(0.1),
                         child: Text(
                           memberEmail.substring(0, 1).toUpperCase(),
                           style: const TextStyle(
@@ -285,7 +308,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                           const SizedBox(height: 4),
                           if (hasEvaluated)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.green[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -301,7 +325,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                             )
                           else if (isExpired)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.red[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -317,7 +342,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                             )
                           else if (!canEvaluate)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.orange[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -333,7 +359,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                             )
                           else
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.blue[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -351,7 +378,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                       ),
                       trailing: !hasEvaluated && canEvaluate && !isExpired
                           ? ElevatedButton(
-                              onPressed: () => _showEvaluationDialog(memberEmail),
+                              onPressed: () =>
+                                  _showEvaluationDialog(memberEmail),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF00A4BD),
                                 foregroundColor: Colors.white,
@@ -378,22 +406,38 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
 
   void _showEvaluationDialog(String evaluatedEmail) async {
     await Get.to(() => EvaluationFormScreen(
-      course: widget.course,
-      category: widget.category,
-      activity: widget.activity,
-      evaluatedEmail: evaluatedEmail,
-      studentEmail: widget.studentEmail,
-    ));
-    
+          course: widget.course,
+          category: widget.category,
+          activity: widget.activity,
+          evaluatedEmail: evaluatedEmail,
+          studentEmail: widget.studentEmail,
+        ));
+
     // Cuando regrese de la pantalla de evaluación, actualizar la lista
     _refreshEvaluations();
   }
 
   void _showEvaluationDetails(String evaluatedEmail) {
     final evaluation = activityController.myEvaluations.firstWhere(
-      (eval) => eval.activityId == widget.activity.id && eval.evaluatedId == evaluatedEmail,
+      (eval) =>
+          eval.activityId == widget.activity.id &&
+          eval.evaluatedId == evaluatedEmail,
     );
-    
-    EvaluationDialogs.showEvaluationDetails(context, evaluation, evaluatedEmail);
+
+    EvaluationDialogs.showEvaluationDetails(
+        context, evaluation, evaluatedEmail);
+  }
+
+  // Helper method to convert emails to names
+  String _getNameForEmail(String email) {
+    final nameMappings = {
+      'gabriela@example.com': 'gabriela',
+      'b@a.com': 'betty',
+      'c@a.com': 'camila',
+      'daniela@example.com': 'daniela',
+      'eliana@example.com': 'eliana',
+      'fernanda@example.com': 'fernanda',
+    };
+    return nameMappings[email.toLowerCase()] ?? email;
   }
 }

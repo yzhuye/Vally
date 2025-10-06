@@ -5,6 +5,7 @@ import 'package:vally_app/features/course/presentation/widgets/dialogs/category_
 import '../../controllers/category/category_controller.dart';
 import '../professor/professor_groups_screen.dart';
 import '../activity/activity_management_screen.dart';
+import '../report/report_screen.dart';
 import '../../widgets/course/course_detail_header.dart';
 
 class ProfessorCategoryScreen extends StatefulWidget {
@@ -133,6 +134,18 @@ class _ProfessorCategoryScreenState extends State<ProfessorCategoryScreen> {
                 Get.to(() => ProfessorGroupsScreen(
                       course: widget.course,
                       category: category,
+                    ));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.analytics, color: Color(0xFF9C27B0)),
+              title: const Text('Ver Reportes'),
+              onTap: () {
+                Get.back(); // Cierra el bottom sheet
+                Get.to(() => ReportScreen(
+                      course: widget.course,
+                      categoryId: category.id,
+                      categoryName: category.name,
                     ));
               },
             ),

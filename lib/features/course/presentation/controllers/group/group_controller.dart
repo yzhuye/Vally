@@ -109,7 +109,42 @@ class GroupController extends GetxController {
   }
 
   Group? get currentGroup {
-    return groups.firstWhereOrNull((g) => g.members.contains(studentEmail));
+    // Convertir el email del estudiante a nombre para comparar con los miembros
+    final studentName = _getNameForEmail(studentEmail);
+
+    // Debug: Print comparison
+    print('🔍 DEBUG GroupController - Student email: $studentEmail');
+    print('🔍 DEBUG GroupController - Student name: $studentName');
+    print('🔍 DEBUG GroupController - Groups count: ${groups.length}');
+
+    for (final group in groups) {
+      print(
+          '🔍 DEBUG GroupController - Group "${group.name}" members: ${group.members}');
+      final isInGroup = group.members.contains(studentEmail) ||
+          group.members.contains(studentName);
+      print('🔍 DEBUG GroupController - Is student in this group? $isInGroup');
+    }
+
+    final currentGroup = groups.firstWhereOrNull((g) =>
+        g.members.contains(studentEmail) || g.members.contains(studentName));
+
+    print(
+        '🔍 DEBUG GroupController - Current group found: ${currentGroup?.name ?? "None"}');
+
+    return currentGroup;
+  }
+
+  // Helper method to convert emails to names
+  String _getNameForEmail(String email) {
+    final nameMappings = {
+      'gabriela@example.com': 'gabriela',
+      'b@a.com': 'betty',
+      'c@a.com': 'camila',
+      'daniela@example.com': 'daniela',
+      'eliana@example.com': 'eliana',
+      'fernanda@example.com': 'fernanda',
+    };
+    return nameMappings[email.toLowerCase()] ?? email;
   }
 
   bool canJoinGroup(Group group) {
