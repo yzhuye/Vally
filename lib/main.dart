@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
+import 'package:vally_app/domain/services/api_service.dart';
 import 'presentation/screens/login/login_screen.dart';
 import 'data/models/course_hive_model.dart';
 import 'data/models/category_hive_model.dart';
@@ -33,13 +33,15 @@ void main() async {
   await Hive.openBox('login');
 
   await preloadData();
-
+  WidgetsFlutterBinding.ensureInitialized();
+  final token = await ApiService.storage.read(key: 'access_token');
+  if (token != null) ApiService.scheduleRefresh(token);
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(

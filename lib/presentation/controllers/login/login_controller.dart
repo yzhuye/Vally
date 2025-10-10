@@ -18,6 +18,7 @@ class LoginController extends GetxController {
   final isRememberMeChecked = false.obs;
   final Box loginBox = Hive.box('login');
   static const storage = FlutterSecureStorage();
+  final ApiService apiService = ApiService();
   static var logger = Logger();
 
   @override
@@ -69,6 +70,7 @@ class LoginController extends GetxController {
           emailController.text,
           isRememberMeChecked.value,
         );
+        
         Get.offAll(() => const HomeScreen());
       } else {
         String errorMessage = response?["error"] ?? "Error desconocido";
