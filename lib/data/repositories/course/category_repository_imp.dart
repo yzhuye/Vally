@@ -2,50 +2,14 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vally_app/domain/entities/course.dart';
 import '../../../domain/repositories/category_repository.dart';
-import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import '../../models/category_hive_model.dart';
-//import '../group/group_repository_impl.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
-  static const _boxName = 'categories';
-  late final Box _box;
-  //late final GroupRepositoryImpl _groupRepository;
-  bool _isInitialized = false;
   static const storage = FlutterSecureStorage();
   late final Logger logger = Logger();
   static const baseUrl =
       "https://roble-api.openlab.uninorte.edu.co/database/vally_e89f74b54e";
-
-  CategoryRepositoryImpl() {
-    _box = Hive.box(_boxName);
-    //_groupRepository = GroupRepositoryImpl();
-  }
-
-  Future<void> _initializeData() async {
-    if (!_isInitialized && _box.isEmpty) {
-      final initial = [
-        Category(
-          id: 'cat1',
-          name: "Trabajo en Equipo",
-          groupingMethod: "random",
-          groupCount: 3,
-          studentsPerGroup: 5,
-        ),
-        Category(
-          id: 'cat2',
-          name: "Investigación",
-          groupingMethod: "self-assigned",
-          groupCount: 2,
-          studentsPerGroup: 4,
-        ),
-      ];
-      await _box.put(
-          '1', initial.map((c) => CategoryHiveModel.fromCategory(c)).toList());
-      _isInitialized = true;
-    }
-  }
 
   @override
   Future<List<Category>> getCategoriesByCourse(String courseId) async {
@@ -125,7 +89,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
   @override
   Future<Map<String, dynamic>?> updateCategory(
       String courseId, Category category) async {
-    logger.d("actualizando categoría: ${category.id} de curso: $courseId");
     final token = await storage.read(key: "accessToken");
     if (token == null) throw Exception("No access token found");
 
@@ -173,12 +136,38 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  void deleteCategory(String courseId, String categoryId) {
-    _initializeData();
-    final raw = _box.get(courseId) as List<dynamic>?;
-    if (raw == null) return;
-    final list = raw.whereType<CategoryHiveModel>().toList();
-    list.removeWhere((c) => c.id == categoryId);
-    _box.put(courseId, list);
+  Future<bool> deleteCategory(String courseId, String categoryId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
+
+    final url = Uri.parse("$baseUrl/delete");
+
+    final body = {
+      "tableName": "categories",
+      "idColumn": "_id",
+      "idValue": categoryId,
+    };
+
+    final response = await http.delete(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+
+      if (data.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      throw Exception(
+          "Error eliminando categoría: ${response.statusCode} ${response.body}");
+    }
   }
 }
