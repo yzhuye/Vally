@@ -69,19 +69,22 @@ class CategoryRepositoryImpl implements CategoryRepository {
     final data = jsonDecode(response.body);
     logger.d("Response data: $data");
 
-    final categories = data.map((row) {
-      return Category(
-        id: row['_id'].toString(),
-        name: row['name'] ?? '',
-        groupingMethod: row['groupingMethod'] ?? '',
-        groupCount: row['groupCount'] is int
-            ? row['groupCount']
-            : int.tryParse(row['groupCount'].toString()) ?? 0,
-        studentsPerGroup: row['studentsPerGroup'] is int
-            ? row['studentsPerGroup']
-            : int.tryParse(row['studentsPerGroup'].toString()) ?? 0,
-      );
-    }).whereType<Category>().toList();
+    final categories = data
+        .map((row) {
+          return Category(
+            id: row['_id'].toString(),
+            name: row['name'] ?? '',
+            groupingMethod: row['groupingMethod'] ?? '',
+            groupCount: row['groupCount'] is int
+                ? row['groupCount']
+                : int.tryParse(row['groupCount'].toString()) ?? 0,
+            studentsPerGroup: row['studentsPerGroup'] is int
+                ? row['studentsPerGroup']
+                : int.tryParse(row['studentsPerGroup'].toString()) ?? 0,
+          );
+        })
+        .whereType<Category>()
+        .toList();
 
     return categories;
   }
@@ -120,15 +123,52 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  void updateCategory(String courseId, Category category) {
-    _initializeData();
-    final raw = _box.get(courseId) as List<dynamic>?;
-    if (raw == null) return;
-    final list = raw.whereType<CategoryHiveModel>().toList();
-    final index = list.indexWhere((c) => c.id == category.id);
-    if (index != -1) {
-      list[index] = CategoryHiveModel.fromCategory(category);
-      _box.put(courseId, list);
+  Future<Map<String, dynamic>?> updateCategory(
+      String courseId, Category category) async {
+    logger.d("actualizando categoría: ${category.id} de curso: $courseId");
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
+
+    final url = Uri.parse("$baseUrl/update");
+
+    final body = {
+      "tableName": "categories",
+      "idColumn": "_id",
+      "idValue": category.id,
+      "updates": {
+        "name": category.name,
+        "groupingMethod": category.groupingMethod,
+        "groupCount": category.groupCount,
+        "studentsPerGroup": category.studentsPerGroup,
+        "course_id": courseId,
+      }
+    };
+    logger.d("Request body: $body");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      // ROBLE devuelve "updated" con los registros modificados
+      if (data.isNotEmpty) {
+        logger.i("Categoría actualizada: $data");
+        return data;
+      } else {
+        logger.w("No se actualizó ninguna categoría.");
+        return null;
+      }
+    } else {
+      logger.e(
+          "Error actualizando categoría: ${response.statusCode} ${response.body}");
+      throw Exception(
+          "Error actualizando categoría: ${response.statusCode} ${response.body}");
     }
   }
 

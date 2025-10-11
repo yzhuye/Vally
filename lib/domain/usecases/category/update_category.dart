@@ -1,5 +1,6 @@
 import '../../entities/course.dart';
 import '../../repositories/category_repository.dart';
+import 'package:logger/logger.dart';
 
 class UpdateCategoryUseCase {
   final CategoryRepository _repository;
@@ -10,6 +11,7 @@ class UpdateCategoryUseCase {
     required String courseId,
     required Category category,
   }) async {
+    Logger().d("bbbbbb");
     try {
       if (category.name.trim().isEmpty) {
         return UpdateCategoryResult.failure(
