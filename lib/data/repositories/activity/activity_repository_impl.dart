@@ -1,21 +1,57 @@
 import 'package:hive/hive.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/repositories/activity_repository.dart';
 import '../../models/activity_hive_model.dart';
+import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
+import 'dart:convert';
 
 class ActivityRepositoryImpl implements ActivityRepository {
-  Box<ActivityHiveModel> get _activityBox => Hive.box<ActivityHiveModel>('activities');
+  static const storage = FlutterSecureStorage();
+  late final Logger logger = Logger();
+  static const baseUrl =
+      "https://roble-api.openlab.uninorte.edu.co/database/vally_e89f74b54e";
+
+  // REMOVE THIS LATER ❗❗❗
+  final Box<ActivityHiveModel> _activityBox = Hive.box<ActivityHiveModel>('activities');
+  // REMOVE THIS LATER ❗❗❗
 
   @override
-  List<Activity> getActivitiesByCategory(String categoryId) {
-    try {
-      return _activityBox.values
-          .where((activityHive) => activityHive.categoryId == categoryId)
-          .map((activityHive) => activityHive.toActivity())
-          .toList();
-    } catch (e) {
-      return [];
+  Future<List<Activity>> getActivitiesByCategory(String categoryId) async {
+    final token = await storage.read(key: "accessToken");
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "activities",
+      "categoryId": categoryId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      logger.e("Failed to fetch activities: ${response.body}");
+      throw Exception('Failed to fetch activities: ${response.body}');
     }
+
+    final data = jsonDecode(response.body);
+    logger.d("Response data: $data");
+
+    final activities = data
+        .map((row) {
+          return Activity(
+            id: row['_id'].toString(),
+            name: row['name'] ?? '',
+            description: row['description'] ?? '',
+            dueDate: DateTime.tryParse(row['dueDate'] ?? '') ?? DateTime.now(),
+            categoryId: row['categoryId'] ?? '',
+          );
+        })
+        .whereType<Activity>()
+        .toList();
+
+    return activities;
   }
 
   @override
@@ -54,19 +90,6 @@ class ActivityRepositoryImpl implements ActivityRepository {
       await _activityBox.delete(activityId);
     } catch (e) {
       throw Exception('Error al eliminar actividad: $e');
-    }
-  }
-
-  @override
-  List<Activity> getActivitiesByCourse(String courseId) {
-    try {
-      // Para obtener actividades por curso, necesitamos obtener todas las categorías del curso
-      // y luego sus actividades. Por simplicidad, retornamos todas las actividades por ahora.
-      return _activityBox.values
-          .map((activityHive) => activityHive.toActivity())
-          .toList();
-    } catch (e) {
-      return [];
     }
   }
 }

@@ -6,13 +6,14 @@ class GetActivitiesByCategoryUseCase {
 
   GetActivitiesByCategoryUseCase(this._repository);
 
-  GetActivitiesResult call({required String categoryId}) {
+  Future<GetActivitiesResult> call({required String categoryId}) async {
     try {
-      final activities = _repository.getActivitiesByCategory(categoryId);
-      
+      // Await the Future to get the actual List<Activity>
+      final activities = await _repository.getActivitiesByCategory(categoryId);
+
       // Ordenar por fecha de vencimiento (más próximas primero)
       activities.sort((a, b) => a.dueDate.compareTo(b.dueDate));
-      
+
       return GetActivitiesResult.success(activities);
     } catch (e) {
       return GetActivitiesResult.failure('Error al obtener actividades: $e');

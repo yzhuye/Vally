@@ -52,13 +52,20 @@ class StudentActivityController extends GetxController {
     loadMyEvaluations();
   }
 
-  void loadActivities() {
+  void loadActivities() async {
     isLoading(true);
     try {
-      final result = _getActivitiesUseCase(categoryId: categoryId);
+      final result = await _getActivitiesUseCase(categoryId: categoryId);
       if (result.isSuccess) {
         activities.value = result.activities;
       }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error inesperado al cargar actividades: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading(false);
     }

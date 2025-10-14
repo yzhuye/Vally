@@ -36,10 +36,10 @@ class ActivityController extends GetxController {
     loadActivities();
   }
 
-  void loadActivities() {
+  void loadActivities() async {
     isLoading(true);
     try {
-      final result = _getActivitiesUseCase(categoryId: categoryId);
+      final result = await _getActivitiesUseCase(categoryId: categoryId);
       if (result.isSuccess) {
         activities.value = result.activities;
       } else {
@@ -50,6 +50,13 @@ class ActivityController extends GetxController {
           colorText: Colors.white,
         );
       }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error inesperado: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading(false);
     }
