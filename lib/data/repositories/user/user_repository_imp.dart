@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 import 'package:vally_app/domain/entities/user.dart';
-import '../../models/user_hive_model.dart';
+import '../../datasources/in-memory/models/user_hive_model.dart';
 import '../../../domain/repositories/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {

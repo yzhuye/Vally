@@ -24,11 +24,10 @@ class CreateGroupsForCategoryUseCase {
   }) async {
     try {
       await _repository.createGroupsForCategory(
-        courseId,
         categoryId,
         groupCount,
         studentsPerGroup,
-        categoryName: categoryName,
+        categoryName,
       );
       
       return CreateGroupsForCategoryResult(

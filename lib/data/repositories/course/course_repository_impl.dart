@@ -1,15 +1,11 @@
 import 'package:vally_app/domain/entities/course.dart';
 import '../../../domain/repositories/course_repository.dart';
 import 'package:hive/hive.dart';
-import '../../models/course_hive_model.dart';
+import '../../datasources/in-memory/models/course_hive_model.dart';
 
 class CourseRepositoryImpl implements CourseRepository {
-  late final Box<CourseHiveModel> _courseBox;
+  Box<CourseHiveModel> get _courseBox => Hive.box<CourseHiveModel>('courses');
   bool _isInitialized = false;
-
-  CourseRepositoryImpl() {
-    _courseBox = Hive.box<CourseHiveModel>('courses');
-  }
 
   Future<void> _initializeData() async {
     if (!_isInitialized) {

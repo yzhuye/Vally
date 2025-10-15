@@ -11,7 +11,7 @@ class GroupController extends GetxController {
   final String courseId;
   final String categoryId;
   final String studentEmail;
-  
+
   late final GroupRepository _repository;
   late final GetGroupsByCategoryUseCase _getGroupsUseCase;
   late final JoinGroupUseCase _joinGroupUseCase;
@@ -37,14 +37,13 @@ class GroupController extends GetxController {
     loadGroups();
   }
 
-  void loadGroups() {
+  void loadGroups() async {
     isLoading(true);
     try {
-      final result = _getGroupsUseCase(
-        courseId: courseId,
+      final result = await _getGroupsUseCase(
         categoryId: categoryId,
       );
-      
+
       if (result.isSuccess) {
         groups.value = result.groups;
       } else {
@@ -65,10 +64,9 @@ class GroupController extends GetxController {
 
     try {
       // Verificar si ya está en un grupo usando el caso de uso
-      final currentGroupResult = _findStudentGroupUseCase(
-        courseId: courseId,
+      final currentGroupResult = await _findStudentGroupUseCase(
         categoryId: categoryId,
-        studentEmail: studentEmail,
+        studentId: studentEmail,
       );
 
       if (currentGroupResult.isSuccess && currentGroupResult.group != null) {
@@ -81,10 +79,10 @@ class GroupController extends GetxController {
         return;
       }
 
-      final result = _joinGroupUseCase(
-        courseId: courseId,
+
+      final result = await _joinGroupUseCase(
         groupId: groupId,
-        studentEmail: studentEmail,
+        studentId: studentEmail,
       );
 
       if (result.isSuccess) {
@@ -107,7 +105,6 @@ class GroupController extends GetxController {
       isLoading(false);
     }
   }
-
 
   Group? get currentGroup {
     return groups.firstWhereOrNull((g) => g.members.contains(studentEmail));

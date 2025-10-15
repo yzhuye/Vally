@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:vally_app/domain/services/api_service.dart';
+import 'package:vally_app/data/datasources/remote/auth/api_service.dart';
 import 'presentation/screens/login/login_screen.dart';
-import 'data/models/course_hive_model.dart';
-import 'data/models/category_hive_model.dart';
-import 'data/models/user_hive_model.dart';
-import 'data/models/group_hive_model.dart';
-import 'data/models/activity_hive_model.dart';
-import 'data/models/evaluation_hive_model.dart';
-import 'domain/services/preload_data.dart';
+import 'data/datasources/in-memory/models/course_hive_model.dart';
+import 'data/datasources/in-memory/models/category_hive_model.dart';
+import 'data/datasources/in-memory/models/user_hive_model.dart';
+import 'data/datasources/in-memory/models/group_hive_model.dart';
+import 'data/datasources/in-memory/models/activity_hive_model.dart';
+import 'data/datasources/in-memory/models/evaluation_hive_model.dart';
+import 'data/datasources/in-memory/preload_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

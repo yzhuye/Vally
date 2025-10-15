@@ -15,13 +15,12 @@ class AssignStudentToGroupUseCase {
 
   AssignStudentToGroupUseCase(this._repository);
 
-  AssignStudentToGroupResult call({
-    required String courseId,
+  Future<AssignStudentToGroupResult> call({
     required String groupId,
-    required String studentEmail,
-  }) {
+    required String userId,
+  }) async {
     try {
-      final success = _repository.assignStudentToGroup(courseId, groupId, studentEmail);
+      final success = await _repository.assignStudentToGroup(userId, groupId);
       
       if (success) {
         return AssignStudentToGroupResult(

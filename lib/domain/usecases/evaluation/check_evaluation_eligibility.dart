@@ -40,17 +40,19 @@ class CheckEvaluationEligibilityUseCase {
       }
 
       // Verificar que no haya evaluado antes
-      if (_evaluationRepository.hasEvaluated(activityId, evaluatorId, evaluatedId)) {
+      if (_evaluationRepository.hasEvaluated(
+          activityId, evaluatorId, evaluatedId)) {
         return CheckEvaluationEligibilityResult.notEligible(
             'Ya has evaluado a este compañero en esta actividad.');
       }
 
       // Verificar que ambos estudiantes estén en el mismo grupo de la categoría
-      final groups = _groupRepository.getGroupsByCategory(courseId, activity.categoryId);
-      
+      final groups =
+          await _groupRepository.getGroupsByCategory(activity.categoryId);
+
       String? evaluatorGroupId;
       String? evaluatedGroupId;
-      
+
       for (final group in groups) {
         if (group.members.contains(evaluatorId)) {
           evaluatorGroupId = group.id;
@@ -77,7 +79,6 @@ class CheckEvaluationEligibilityUseCase {
 
       return CheckEvaluationEligibilityResult.eligible(
           'Puedes evaluar a este compañero.');
-          
     } catch (e) {
       return CheckEvaluationEligibilityResult.notEligible(
           'Error al verificar elegibilidad: $e');

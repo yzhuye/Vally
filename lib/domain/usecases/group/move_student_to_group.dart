@@ -15,18 +15,14 @@ class MoveStudentToGroupUseCase {
 
   MoveStudentToGroupUseCase(this._repository);
 
-  MoveStudentToGroupResult call({
-    required String courseId,
-    required String fromGroupId,
+  Future<MoveStudentToGroupResult> call({
     required String toGroupId,
-    required String studentEmail,
-  }) {
+    required String studentId,
+  }) async {
     try {
-      final success = _repository.moveStudentToGroup(
-        courseId, 
-        fromGroupId, 
-        toGroupId, 
-        studentEmail
+      final success = await _repository.assignStudentToGroup(
+        studentId,
+        toGroupId,
       );
       
       if (success) {

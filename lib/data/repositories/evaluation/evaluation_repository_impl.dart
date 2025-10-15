@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/repositories/evaluation_repository.dart';
-import '../../models/evaluation_hive_model.dart';
+import '../../datasources/in-memory/models/evaluation_hive_model.dart';
 
 class EvaluationRepositoryImpl implements EvaluationRepository {
   Box<EvaluationHiveModel> get _evaluationBox => Hive.box<EvaluationHiveModel>('evaluations');
@@ -9,19 +9,11 @@ class EvaluationRepositoryImpl implements EvaluationRepository {
   @override
   Future<void> createEvaluation(Evaluation evaluation) async {
     try {
-      print('💾 Saving evaluation to Hive...');
-      print('   Evaluation ID: ${evaluation.id}');
-      print('   Activity ID: ${evaluation.activityId}');
-      print('   Evaluator: ${evaluation.evaluatorId}');
-      print('   Evaluated: ${evaluation.evaluatedId}');
       
       final evaluationHive = EvaluationHiveModel.fromEvaluation(evaluation);
       await _evaluationBox.put(evaluation.id, evaluationHive);
       
-      print('✅ Evaluation saved successfully!');
-      print('📊 Total evaluations in box: ${_evaluationBox.length}');
     } catch (e) {
-      print('💥 Error saving evaluation: $e');
       throw Exception('Error al crear evaluación: $e');
     }
   }

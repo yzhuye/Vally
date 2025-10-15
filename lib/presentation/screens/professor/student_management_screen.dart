@@ -66,6 +66,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           // Estadísticas
           _buildStatsCard(),
 
+          _buildRandomAssignmentButtons(),
+
           // Filtros
           _buildFilterChips(),
 
@@ -246,83 +248,95 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   }
 
   Widget _buildStudentCard(String studentEmail) {
-    final currentGroup = controller.findStudentGroup(studentEmail);
-    final isAssigned = currentGroup != null;
+    return FutureBuilder<Group?>(
+      future: controller.findStudentGroup(studentEmail),
+      builder: (context, snapshot) {
+        final currentGroup = snapshot.data;
+        final isAssigned = currentGroup != null;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isAssigned ? Colors.green : Colors.orange,
-          child: Icon(
-            isAssigned ? Icons.group : Icons.person,
-            color: Colors.white,
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12.0),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        ),
-        title: Text(
-          studentEmail,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: isAssigned ? Colors.green : Colors.orange,
+              child: Icon(
+                isAssigned ? Icons.group : Icons.person,
+                color: Colors.white,
+              ),
+            ),
+            title: Text(
+              controller.getStudentName(studentEmail),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  studentEmail, // Mostrar email como subtítulo
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                if (isAssigned) ...[
+                  Text('Grupo: ${currentGroup.name}'),
+                  Text(
+                      'Capacidad: ${currentGroup.members.length}/${currentGroup.maxCapacity}'),
+                ] else ...[
+                  const Text('Sin grupo asignado',
+                      style: TextStyle(color: Colors.orange)),
+                ],
+              ],
+            ),
+            trailing: PopupMenuButton<String>(
+              onSelected: (action) =>
+                  _handleStudentAction(action, studentEmail, currentGroup),
+              itemBuilder: (context) => [
+                if (isAssigned) ...[
+                  const PopupMenuItem(
+                    value: 'move',
+                    child: Row(
+                      children: [
+                        Icon(Icons.swap_horiz),
+                        SizedBox(width: 8),
+                        Text('Cambiar de grupo'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'remove',
+                    child: Row(
+                      children: [
+                        Icon(Icons.person_remove),
+                        SizedBox(width: 8),
+                        Text('Quitar del grupo'),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  const PopupMenuItem(
+                    value: 'assign',
+                    child: Row(
+                      children: [
+                        Icon(Icons.person_add),
+                        SizedBox(width: 8),
+                        Text('Asignar a grupo'),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isAssigned) ...[
-              Text('Grupo: ${currentGroup.name}'),
-              Text(
-                  'Capacidad: ${currentGroup.members.length}/${currentGroup.maxCapacity}'),
-            ] else ...[
-              const Text('Sin grupo asignado',
-                  style: TextStyle(color: Colors.orange)),
-            ],
-          ],
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (action) =>
-              _handleStudentAction(action, studentEmail, currentGroup),
-          itemBuilder: (context) => [
-            if (isAssigned) ...[
-              const PopupMenuItem(
-                value: 'move',
-                child: Row(
-                  children: [
-                    Icon(Icons.swap_horiz),
-                    SizedBox(width: 8),
-                    Text('Cambiar de grupo'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'remove',
-                child: Row(
-                  children: [
-                    Icon(Icons.person_remove),
-                    SizedBox(width: 8),
-                    Text('Quitar del grupo'),
-                  ],
-                ),
-              ),
-            ] else ...[
-              const PopupMenuItem(
-                value: 'assign',
-                child: Row(
-                  children: [
-                    Icon(Icons.person_add),
-                    SizedBox(width: 8),
-                    Text('Asignar a grupo'),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -361,7 +375,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Asignar $studentEmail'),
+        title: Text('Asignar ${controller.getStudentName(studentEmail)}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: availableGroups.map((group) {
@@ -408,7 +422,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Mover $studentEmail'),
+        title: Text('Mover ${controller.getStudentName(studentEmail)}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: availableGroups.map((group) {
@@ -420,8 +434,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               trailing: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  controller.moveStudentToGroup(
-                      studentEmail, currentGroup.id, group.id);
+                  controller.moveStudentToGroup(studentEmail, currentGroup.id);
                 },
                 child: const Text('Mover'),
               ),
@@ -444,7 +457,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Confirmar'),
         content: Text(
-            '¿Está seguro de que desea quitar a $studentEmail del ${group.name}?'),
+            '¿Está seguro de que desea quitar a ${controller.getStudentName(studentEmail)} del ${group.name}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -453,22 +466,6 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
-
-              // Simulamos la remoción creando un grupo temporal sin el estudiante
-              final updatedGroup = Group(
-                id: group.id,
-                name: group.name,
-                maxCapacity: group.maxCapacity,
-                members: group.members
-                    .where((member) => member != studentEmail)
-                    .toList(),
-                categoryId: group.categoryId,
-              );
-
-              // Actualizar el grupo en el repositorio
-              final repository = controller.groupRepository;
-              repository.updateGroup(widget.course.id, updatedGroup);
-
               // Recargar datos
               controller.loadGroups();
 
@@ -487,14 +484,63 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     );
   }
 
+  Widget _buildRandomAssignmentButtons() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: controller.studentsNotInGroupsCount > 0 &&
+                      controller.groups.isNotEmpty
+                  ? () => controller.assignStudentsRandomly()
+                  : null,
+              icon: const Icon(Icons.shuffle),
+              label: const Text('Asignar Aleatoriamente'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: controller.studentsInGroupsCount > 0 &&
+                      controller.groups.isNotEmpty
+                  ? () => controller.reassignAllStudentsRandomly()
+                  : null,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reasignar Todos'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF9800),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<String> _getFilteredStudents() {
     switch (selectedFilter) {
       case 'assigned':
-        return controller.students
-            .where((student) => controller.findStudentGroup(student) != null)
-            .toList();
+        final assigned = controller.students.where((student) {
+          // Use the synchronous version for filtering
+          for (final group in controller.groups) {
+            if (group.members.contains(student)) {
+              return true;
+            }
+          }
+          return false;
+        }).toList();
+        return assigned;
       case 'unassigned':
-        return controller.getStudentsNotInAnyGroup();
+        final unassigned = controller.getStudentsNotInAnyGroup();
+        return unassigned;
       default:
         return controller.students;
     }
