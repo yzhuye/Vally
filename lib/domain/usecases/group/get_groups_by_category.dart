@@ -18,12 +18,11 @@ class GetGroupsByCategoryUseCase {
 
   GetGroupsByCategoryUseCase(this._repository);
 
-  GetGroupsByCategoryResult call({
-    required String courseId,
+  Future<GetGroupsByCategoryResult> call({
     required String categoryId,
-  }) {
+  }) async {
     try {
-      final groups = _repository.getGroupsByCategory(courseId, categoryId);
+      final groups = await _repository.getGroupsByCategory(categoryId);
       
       return GetGroupsByCategoryResult(
         isSuccess: true,

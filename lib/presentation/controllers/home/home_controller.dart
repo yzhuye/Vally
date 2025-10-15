@@ -9,8 +9,8 @@ import 'package:vally_app/domain/entities/user.dart';
 import 'package:vally_app/presentation/screens/login/login_screen.dart';
 import 'package:vally_app/presentation/controllers/login/login_controller.dart';
 
-import 'package:vally_app/domain/services/api_service.dart';
-import 'package:vally_app/domain/services/api_user_courses.dart';
+import 'package:vally_app/data/datasources/remote/auth/api_service.dart';
+import 'package:vally_app/data/datasources/remote/course/api_user_courses.dart';
 
 class HomeController extends GetxController {
   var currentUser = Rx<User?>(null);

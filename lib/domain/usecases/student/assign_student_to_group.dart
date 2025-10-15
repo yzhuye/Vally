@@ -1,4 +1,3 @@
-import '../../entities/course.dart';
 import '../../repositories/group_repository.dart';
 
 class AssignStudentToGroupUseCase {
@@ -7,18 +6,17 @@ class AssignStudentToGroupUseCase {
   AssignStudentToGroupUseCase(this._repository);
 
   Future<AssignStudentResult> call({
-    required String courseId,
     required String groupId,
-    required String studentEmail,
+    required String studentId,
   }) async {
     try {
-      if (studentEmail.trim().isEmpty) {
+      if (studentId.trim().isEmpty) {
         return AssignStudentResult.failure(
             'El email del estudiante no puede estar vacío.');
       }
 
-      final success = _repository.assignStudentToGroup(
-          courseId, groupId, studentEmail.trim());
+      final success = await _repository.assignStudentToGroup(
+          studentId.trim(), groupId);
 
       if (success) {
         return AssignStudentResult.success(

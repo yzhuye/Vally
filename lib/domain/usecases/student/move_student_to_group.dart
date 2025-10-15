@@ -1,4 +1,3 @@
-import '../../entities/course.dart';
 import '../../repositories/group_repository.dart';
 
 class MoveStudentToGroupUseCase {
@@ -7,24 +6,16 @@ class MoveStudentToGroupUseCase {
   MoveStudentToGroupUseCase(this._repository);
 
   Future<MoveStudentResult> call({
-    required String courseId,
-    required String fromGroupId,
-    required String toGroupId,
-    required String studentEmail,
+    required String studentId,
+    required String toGroupId, 
   }) async {
     try {
-      if (studentEmail.trim().isEmpty) {
-        return MoveStudentResult.failure(
-            'El email del estudiante no puede estar vacío.');
+      if (studentId.trim().isEmpty) {
+        return MoveStudentResult.failure( 
+          'El id del estudiante no puede estar vacío.');
       }
 
-      if (fromGroupId == toGroupId) {
-        return MoveStudentResult.failure(
-            'El estudiante ya está en este grupo.');
-      }
-
-      final success = _repository.moveStudentToGroup(
-          courseId, fromGroupId, toGroupId, studentEmail.trim());
+      final success = await _repository.assignStudentToGroup(studentId, toGroupId);
 
       if (success) {
         return MoveStudentResult.success(

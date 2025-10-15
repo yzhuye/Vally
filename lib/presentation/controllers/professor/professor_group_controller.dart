@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/usecases/group/get_groups_by_category.dart';
 import '../../../domain/usecases/group/assign_student_to_group.dart';
 import '../../../domain/usecases/group/move_student_to_group.dart';
+import '../../../domain/usecases/group/find_student_group.dart';
 import '../../../domain/usecases/student/get_students_by_course.dart';
 import '../../../data/repositories/group/group_repository_impl.dart';
 import '../../../data/repositories/course/course_repository_impl.dart';
@@ -18,11 +21,13 @@ class ProfessorGroupController extends GetxController {
   late final GetGroupsByCategoryUseCase _getGroupsUseCase;
   late final AssignStudentToGroupUseCase _assignStudentUseCase;
   late final MoveStudentToGroupUseCase _moveStudentUseCase;
+  late final FindStudentGroupUseCase _findStudentGroupUseCase;
   late final GetStudentsByCourseUseCase _getStudentsUseCase;
   late final GroupRepository _groupRepository;
 
   var groups = <Group>[].obs;
-  var students = <String>[].obs;
+  var students = <String>[].obs; // Mantener para compatibilidad
+  var studentInfo = <StudentInfo>[].obs; // Nueva estructura con nombres
   var isLoading = false.obs;
   var isAssigningStudent = false.obs;
   var selectedCategory = Rxn<Category>();
@@ -38,6 +43,7 @@ class ProfessorGroupController extends GetxController {
     _getGroupsUseCase = GetGroupsByCategoryUseCase(groupRepository);
     _assignStudentUseCase = AssignStudentToGroupUseCase(groupRepository);
     _moveStudentUseCase = MoveStudentToGroupUseCase(groupRepository);
+    _findStudentGroupUseCase = FindStudentGroupUseCase(groupRepository);
     _getStudentsUseCase = GetStudentsByCourseUseCase(courseRepository);
   }
 
@@ -48,13 +54,13 @@ class ProfessorGroupController extends GetxController {
     loadStudents();
   }
 
-  void loadGroups() {
+  void loadGroups() async {
     isLoading(true);
     try {
-      final result = _getGroupsUseCase(
-        courseId: courseId,
+      final result = await _getGroupsUseCase(
         categoryId: categoryId,
       );
+
 
       if (result.isSuccess) {
         groups.value = result.groups;
@@ -66,6 +72,13 @@ class ProfessorGroupController extends GetxController {
           colorText: Colors.white,
         );
       }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error inesperado: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading(false);
     }
@@ -113,26 +126,37 @@ class ProfessorGroupController extends GetxController {
   Future<void> loadStudents() async {
     try {
       // First try to use students from the course object if available
-      if (course != null && course!.enrolledStudents.isNotEmpty) {
-        students.value = course!.enrolledStudents;
+      if (course != null && course!.enrolledStudentInfo.isNotEmpty) {
+        studentInfo.value = course!.enrolledStudentInfo;
+        students.value =
+            course!.enrolledStudentInfo.map((s) => s.email).toList();
         return;
       }
 
       // Fallback to repository if course object doesn't have students
       final studentList = await _getStudentsUseCase(courseId);
       students.value = studentList;
+      // Crear StudentInfo desde la lista de emails (estructura antigua)
+      studentInfo.value = studentList
+          .map((email) => StudentInfo(
+                email: email,
+                name:
+                    email.split('@').first, // Usar parte del email como nombre
+              ))
+          .toList();
     } catch (e) {
       students.value = [];
+      studentInfo.value = [];
     }
   }
 
-  Future<bool> assignStudentToGroup(String studentEmail, String groupId) async {
+  Future<bool> assignStudentToGroup(String studentId, String groupId) async {
+
     isAssigningStudent(true);
     try {
-      final result = _assignStudentUseCase(
-        courseId: courseId,
+      final result = await _assignStudentUseCase(
         groupId: groupId,
-        studentEmail: studentEmail,
+        userId: studentId,
       );
 
       if (result.isSuccess) {
@@ -151,26 +175,19 @@ class ProfessorGroupController extends GetxController {
     }
   }
 
-  Future<bool> moveStudentToGroup(
-      String studentEmail, String fromGroupId, String toGroupId) async {
+  Future<bool> moveStudentToGroup(String studentEmail, String toGroupId) async {
     isAssigningStudent(true);
     try {
-      final result = _moveStudentUseCase(
-        courseId: courseId,
-        fromGroupId: fromGroupId,
+      final result = await _moveStudentUseCase(
         toGroupId: toGroupId,
-        studentEmail: studentEmail,
+        studentId: studentEmail,
       );
 
       if (result.isSuccess) {
         loadGroups(); // Recargar grupos para reflejar cambios
         loadStudents(); // Recargar estudiantes para reflejar cambios
-        Get.snackbar('Éxito', result.message,
-            backgroundColor: Colors.green, colorText: Colors.white);
         return true;
       } else {
-        Get.snackbar('Error', result.message,
-            backgroundColor: Colors.red, colorText: Colors.white);
         return false;
       }
     } finally {
@@ -178,31 +195,17 @@ class ProfessorGroupController extends GetxController {
     }
   }
 
-  Group? findStudentGroup(String studentEmail) {
+  // Versión asíncrona que hace la búsqueda completa
+  Future<Group?> findStudentGroup(String studentId) async {
     try {
-      // First try to find in the loaded groups
-      for (var group in groups) {
-        if (group.members.contains(studentEmail)) {
-          return group;
-        }
-      }
+      final result = await _findStudentGroupUseCase(
+        categoryId: categoryId,
+        studentId: studentId,
+      );
 
-      // Try to find by email mapping (if student is a name, try to find corresponding email)
-      String? emailToSearch = _getEmailForStudent(studentEmail);
-      if (emailToSearch != null) {
-        for (var group in groups) {
-          if (group.members.contains(emailToSearch)) {
-            return group;
-          }
-        }
-      }
-
-      // Fallback to repository (but handle the exception properly)
-      try {
-        final result = _groupRepository.findStudentGroup(
-            courseId, categoryId, studentEmail);
-        return result;
-      } catch (e) {
+      if (result.isSuccess) {
+        return result.group;
+      } else {
         return null;
       }
     } catch (e) {
@@ -210,45 +213,179 @@ class ProfessorGroupController extends GetxController {
     }
   }
 
-  // Helper method to map student names to emails
-  String? _getEmailForStudent(String studentName) {
-    // This is a simple mapping - you might want to make this more sophisticated
-    // or store this mapping in a database
-    final emailMappings = {
-      'gabriela': 'gabriela@example.com',
-      'betty': 'b@a.com', // Based on the logs, betty maps to b@a.com
-      'camila': 'c@a.com', // Based on the logs, camila maps to c@a.com
-      'daniela': 'daniela@example.com',
-      'eliana': 'eliana@example.com',
-      'fernanda': 'fernanda@example.com',
-      'b@a.com': 'b@a.com',
-      'c@a.com': 'c@a.com',
-    };
+  Future<void> assignStudentsRandomly() async {
+    isLoading(true);
 
-    return emailMappings[studentName.toLowerCase()];
+    try {
+      final unassignedStudents = getStudentsNotInAnyGroup();
+
+      if (unassignedStudents.isEmpty) {
+        Get.snackbar(
+          'Información',
+          'No hay estudiantes sin asignar a grupos',
+          backgroundColor: Colors.blue,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (groups.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'No hay grupos disponibles para asignar estudiantes',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Mezclar estudiantes aleatoriamente
+      final shuffledStudents = List<String>.from(unassignedStudents);
+      shuffledStudents.shuffle(Random());
+
+      // Distribuir estudiantes entre grupos de forma equilibrada
+      int studentIndex = 0;
+      int groupIndex = 0;
+
+      while (studentIndex < shuffledStudents.length) {
+        final group = groups[groupIndex];
+
+        // Verificar si el grupo tiene espacio
+        if (!group.isFull) {
+          String studentIdentifier = shuffledStudents[studentIndex];
+
+          // Asignar estudiante al grupo
+          final success =
+              await assignStudentToGroup(studentIdentifier, group.id);
+
+          if (success) {
+            studentIndex++;
+          } else {
+            // Si no se pudo asignar, continuar con el siguiente grupo
+            studentIndex++;
+          }
+        }
+
+        // Mover al siguiente grupo (circular)
+        groupIndex = (groupIndex + 1) % groups.length;
+
+        // Si todos los grupos están llenos, salir del bucle
+        if (groups.every((g) => g.isFull)) {
+          break;
+        }
+      }
+
+      // Recargar datos
+      loadGroups();
+      loadStudents();
+
+      Get.snackbar(
+        'Éxito',
+        'Asignación aleatoria completada',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error al realizar asignación aleatoria: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading(false);
+    }
   }
 
-  // Helper method to map emails to student names
-  String getNameForEmail(String email) {
-    // Reverse mapping from emails to names
-    final nameMappings = {
-      'gabriela@example.com': 'gabriela',
-      'b@a.com': 'betty',
-      'c@a.com': 'camila',
-      'daniela@example.com': 'daniela',
-      'eliana@example.com': 'eliana',
-      'fernanda@example.com': 'fernanda',
-    };
+  /// Asigna aleatoriamente todos los estudiantes (incluyendo los ya asignados)
+  Future<void> reassignAllStudentsRandomly() async {
+    isLoading(true);
 
-    return nameMappings[email.toLowerCase()] ?? email;
+    try {
+      // Obtener todos los estudiantes asignados
+      final allAssignedStudents = <String>[];
+      for (final group in groups) {
+        allAssignedStudents.addAll(group.members);
+      }
+
+      // Recargar grupos
+      loadGroups();
+
+      // Asignar aleatoriamente todos los estudiantes que estaban asignados
+      if (allAssignedStudents.isNotEmpty) {
+        await _assignStudentsToGroupsRandomly(allAssignedStudents);
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error al reasignar estudiantes: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading(false);
+    }
   }
 
-  GroupRepository get groupRepository => _groupRepository;
+  /// Asigna una lista de estudiantes a grupos de forma aleatoria
+  Future<void> _assignStudentsToGroupsRandomly(
+      List<String> studentsToAssign) async {
+    if (studentsToAssign.isEmpty || groups.isEmpty) return;
+
+    // Mezclar estudiantes aleatoriamente
+    final shuffledStudents = List<String>.from(studentsToAssign);
+    shuffledStudents.shuffle(Random());
+
+    // Distribuir estudiantes entre grupos de forma equilibrada
+    int studentIndex = 0;
+    int groupIndex = 0;
+
+    while (studentIndex < shuffledStudents.length) {
+      final group = groups[groupIndex];
+
+      // Verificar si el grupo tiene espacio
+      if (!group.isFull) {
+        String studentIdentifier = shuffledStudents[studentIndex];
+
+        // Asignar estudiante al grupo
+        final success = await assignStudentToGroup(studentIdentifier, group.id);
+
+        if (success) {
+          studentIndex++;
+        } else {
+          // Si no se pudo asignar, continuar con el siguiente grupo
+          studentIndex++;
+        }
+      }
+
+      // Mover al siguiente grupo (circular)
+      groupIndex = (groupIndex + 1) % groups.length;
+
+      // Si todos los grupos están llenos, salir del bucle
+      if (groups.every((g) => g.isFull)) {
+        break;
+      }
+    }
+  }
 
   List<String> getStudentsNotInAnyGroup() {
-    return students
-        .where((studentEmail) => findStudentGroup(studentEmail) == null)
-        .toList();
+
+    final unassigned = students.where((studentEmail) {
+      final isInGroup = _findStudentGroupSync(studentEmail) != null;
+      return !isInGroup;
+    }).toList();
+
+    return unassigned;
+  }
+
+  // Versión síncrona que busca en los grupos ya cargados
+  Group? _findStudentGroupSync(String studentEmail) {
+    for (final group in groups) {
+      if (group.members.contains(studentEmail)) {
+        return group;
+      }
+    }
+    return null;
   }
 
   List<String> getStudentsInGroup(Group group) {
@@ -260,15 +397,29 @@ class ProfessorGroupController extends GetxController {
 
   int get studentsInGroupsCount {
     return students
-        .where((studentEmail) => findStudentGroup(studentEmail) != null)
+        .where((studentEmail) => _findStudentGroupSync(studentEmail) != null)
         .length;
   }
 
   int get studentsNotInGroupsCount {
     return students
-        .where((studentEmail) => findStudentGroup(studentEmail) == null)
+        .where((studentEmail) => _findStudentGroupSync(studentEmail) == null)
         .length;
   }
 
   int get totalGroupsCount => groups.length;
+
+  // Métodos helper para obtener nombres y emails
+  String getStudentName(String email) {
+    final info = studentInfo.firstWhereOrNull((s) => s.email == email);
+    return info?.name ?? email.split('@').first;
+  }
+
+  String getStudentEmail(String name) {
+    final info = studentInfo.firstWhereOrNull((s) => s.name == name);
+    return info?.email ?? name;
+  }
+
+  List<String> get studentNames => studentInfo.map((s) => s.name).toList();
+  List<String> get studentEmails => studentInfo.map((s) => s.email).toList();
 }

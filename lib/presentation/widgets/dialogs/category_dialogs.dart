@@ -15,7 +15,7 @@ class CategoryDialogs {
     final groupCountController = TextEditingController();
     final studentsPerGroupController = TextEditingController();
 
-    final List<String> methods = ['random', 'self-assigned', 'manual'];
+    final List<String> methods = ['self-assigned', 'manual'];
     String selectedMethod = methods[0];
 
     Get.dialog(
@@ -124,7 +124,7 @@ class CategoryDialogs {
     final studentsPerGroupController =
         TextEditingController(text: category.studentsPerGroup.toString());
 
-    final List<String> methods = ['random', 'self-assigned', 'manual'];
+    final List<String> methods = ['self-assigned', 'manual'];
     String selectedMethod = category.groupingMethod;
 
     Get.dialog(
@@ -240,8 +240,7 @@ class CategoryDialogs {
           '¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.',
           style: TextStyle(fontSize: 16),
         ),
-        actionsPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         actions: [
           _buildCancelButton(),
           ElevatedButton.icon(
@@ -253,8 +252,7 @@ class CategoryDialogs {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             ),
             onPressed: () {
               // Solo llamamos al controlador.
@@ -265,7 +263,6 @@ class CategoryDialogs {
       ),
     );
   }
-
 
   static Widget _buildTextField({
     required TextEditingController controller,

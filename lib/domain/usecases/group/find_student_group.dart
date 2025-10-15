@@ -18,14 +18,13 @@ class FindStudentGroupUseCase {
 
   FindStudentGroupUseCase(this._repository);
 
-  FindStudentGroupResult call({
-    required String courseId,
+  Future<FindStudentGroupResult> call({
     required String categoryId,
-    required String studentEmail,
-  }) {
+    required String studentId,
+  }) async {
     try {
-      final group = _repository.findStudentGroup(courseId, categoryId, studentEmail);
-      
+      final group = await _repository.findStudentGroup(categoryId, studentId);
+
       if (group != null) {
         return FindStudentGroupResult(
           isSuccess: true,
@@ -36,7 +35,8 @@ class FindStudentGroupUseCase {
         return FindStudentGroupResult(
           isSuccess: false,
           group: null,
-          message: 'El estudiante no está asignado a ningún grupo en esta categoría',
+          message:
+              'El estudiante no está asignado a ningún grupo en esta categoría',
         );
       }
     } catch (e) {

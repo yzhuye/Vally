@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:vally_app/domain/services/api_service.dart';
+import 'package:vally_app/data/datasources/remote/auth/api_service.dart';
 import 'package:vally_app/domain/usecases/login/login_user.dart';
 import 'package:vally_app/data/repositories/auth/auth_repository_impl.dart';
 import 'package:vally_app/presentation/screens/home/home_screen.dart';

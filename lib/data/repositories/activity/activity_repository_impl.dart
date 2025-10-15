@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/repositories/activity_repository.dart';
-import '../../models/activity_hive_model.dart';
+import '../../datasources/in-memory/models/activity_hive_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:convert';

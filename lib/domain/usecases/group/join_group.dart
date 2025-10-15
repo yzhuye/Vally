@@ -15,13 +15,12 @@ class JoinGroupUseCase {
 
   JoinGroupUseCase(this._repository);
 
-  JoinGroupResult call({
-    required String courseId,
+  Future<JoinGroupResult> call({
     required String groupId,
-    required String studentEmail,
-  }) {
+    required String studentId,
+  }) async {
     try {
-      final success = _repository.joinGroup(courseId, groupId, studentEmail);
+      final success = await _repository.joinGroup(userId: studentId, groupId: groupId);
       
       if (success) {
         return JoinGroupResult(

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/course.dart';
-import '../../../domain/services/email_mapping_service.dart';
 import '../../widgets/course/course_detail_header.dart';
 import '../../widgets/group/group_card.dart';
 import '../../controllers/group/group_controller.dart';
-import '../../controllers/home/home_controller.dart';
 import '../../controllers/activity/student_activity_controller.dart';
 import 'student_evaluation_screen.dart';
+import '../../controllers/home/home_controller.dart';
 
 class CategoryActivityScreen extends StatefulWidget {
   final Course course;
@@ -34,13 +33,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   @override
   void initState() {
     super.initState();
-
-    final homeController = Get.find<HomeController>();
-    final userEmail = homeController.currentUser.value?.email ?? '';
-    
-    // Mapear el email del usuario autenticado al nombre usado en los grupos
-    studentEmail = EmailMappingService.mapUserEmailToGroupEmail(userEmail);
-
+    studentEmail = Get.find<HomeController>().currentUser.value?.email ?? '';
     // Initialize activity controller
     activityControllerTag =
         'student_activity_${widget.category.id}_$studentEmail';
@@ -90,22 +83,6 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
       Get.delete<StudentActivityController>(tag: activityControllerTag);
     }
     super.dispose();
-  }
-
-
-  // Helper method to map emails to student names
-  String _getNameForEmail(String email) {
-    // Reverse mapping from emails to names
-    final nameMappings = {
-      'gabriela@example.com': 'gabriela',
-      'b@a.com': 'betty',
-      'c@a.com': 'camila',
-      'daniela@example.com': 'daniela',
-      'eliana@example.com': 'eliana',
-      'fernanda@example.com': 'fernanda',
-    };
-
-    return nameMappings[email.toLowerCase()] ?? email;
   }
 
   @override
@@ -473,7 +450,6 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
               group: group,
               currentUserEmail: studentEmail,
               canJoin: canJoin,
-              nameMapper: (email) => _getNameForEmail(email),
               onJoin: () async {
                 if (canJoin) {
                   await groupController!.joinGroup(group.id);
