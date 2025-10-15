@@ -199,11 +199,34 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<void> deleteActivity(String activityId) async {
-    try {
-      await _activityBox.delete(activityId);
-    } catch (e) {
-      throw Exception('Error al eliminar actividad: $e');
+  Future<bool> deleteActivity(String activityId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
+
+    final url = Uri.parse("$baseUrl/delete");
+
+    final body = {
+      "tableName": "activities",
+      "idColumn": "_id",
+      "idValue": activityId,
+    };
+
+    final response = await http.delete(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      logger.d('data: $data');
+      return data["_id"] == activityId;
+    } else {
+      throw Exception(
+          "Error eliminando actividad: ${response.statusCode} ${response.body}");
     }
   }
 }
