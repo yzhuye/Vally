@@ -13,12 +13,12 @@ class CheckEvaluationEligibilityUseCase {
     this._groupRepository,
   );
 
-  CheckEvaluationEligibilityResult call({
+  Future<CheckEvaluationEligibilityResult> call({
     required String activityId,
     required String courseId,
     required String evaluatorId,
     required String evaluatedId,
-  }) {
+  }) async {
     try {
       // Verificar que no sea auto-evaluación
       if (evaluatorId == evaluatedId) {
@@ -27,7 +27,7 @@ class CheckEvaluationEligibilityUseCase {
       }
 
       // Verificar que la actividad existe
-      final activity = _activityRepository.getActivityById(activityId);
+      final activity = await _activityRepository.getActivityById(activityId);
       if (activity == null) {
         return CheckEvaluationEligibilityResult.notEligible(
             'Actividad no encontrada.');

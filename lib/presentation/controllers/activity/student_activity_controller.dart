@@ -25,6 +25,9 @@ class StudentActivityController extends GetxController {
   var activities = <Activity>[].obs;
   var myEvaluations = <Evaluation>[].obs;
   var isLoading = false.obs;
+  // Eligibility cache per evaluated student email
+  var eligibilityByMember = <String, bool>{}.obs;
+  var eligibilityLoadingByMember = <String, bool>{}.obs;
 
   StudentActivityController({
     required this.categoryId,
@@ -32,12 +35,15 @@ class StudentActivityController extends GetxController {
     required this.studentEmail,
   }) {
     final ActivityRepository activityRepository = ActivityRepositoryImpl();
-    final EvaluationRepository evaluationRepository = EvaluationRepositoryImpl();
+    final EvaluationRepository evaluationRepository =
+        EvaluationRepositoryImpl();
     final GroupRepository groupRepository = GroupRepositoryImpl();
 
     _getActivitiesUseCase = GetActivitiesByCategoryUseCase(activityRepository);
-    _createEvaluationUseCase = CreateEvaluationUseCase(evaluationRepository, activityRepository);
-    _getEvaluationsByEvaluatorUseCase = GetEvaluationsByEvaluatorUseCase(evaluationRepository);
+    _createEvaluationUseCase =
+        CreateEvaluationUseCase(evaluationRepository, activityRepository);
+    _getEvaluationsByEvaluatorUseCase =
+        GetEvaluationsByEvaluatorUseCase(evaluationRepository);
     _checkEligibilityUseCase = CheckEvaluationEligibilityUseCase(
       evaluationRepository,
       activityRepository,
@@ -73,7 +79,8 @@ class StudentActivityController extends GetxController {
 
   void loadMyEvaluations() {
     try {
-      final result = _getEvaluationsByEvaluatorUseCase(evaluatorId: studentEmail);
+      final result =
+          _getEvaluationsByEvaluatorUseCase(evaluatorId: studentEmail);
       if (result.isSuccess) {
         myEvaluations.value = result.evaluations;
       }
@@ -92,7 +99,7 @@ class StudentActivityController extends GetxController {
   }) async {
     isLoading(true);
 
-    try {      
+    try {
       final result = await _createEvaluationUseCase(
         activityId: activityId,
         evaluatorId: studentEmail,
@@ -138,18 +145,22 @@ class StudentActivityController extends GetxController {
     }
   }
 
-  bool canEvaluateStudent(String activityId, String evaluatedId) {
-    final result = _checkEligibilityUseCase(
+  Future<bool> canEvaluateStudent(String activityId, String evaluatedId) async {
+    final result = await _checkEligibilityUseCase(
       activityId: activityId,
       courseId: courseId,
       evaluatorId: studentEmail,
       evaluatedId: evaluatedId,
     );
+    // Update cache on direct checks as well
+    eligibilityByMember[evaluatedId] = result.isEligible;
+    eligibilityByMember.refresh();
     return result.isEligible;
   }
 
-  String getEligibilityMessage(String activityId, String evaluatedId) {
-    final result = _checkEligibilityUseCase(
+  Future<String> getEligibilityMessage(
+      String activityId, String evaluatedId) async {
+    final result = await _checkEligibilityUseCase(
       activityId: activityId,
       courseId: courseId,
       evaluatorId: studentEmail,
@@ -158,13 +169,52 @@ class StudentActivityController extends GetxController {
     return result.message;
   }
 
+  // Preload and cache eligibility for a list of members to avoid async in build
+  Future<void> preloadEligibility(
+      String activityId, List<String> memberEmails) async {
+    final List<Future<void>> pending = [];
+    for (final member in memberEmails) {
+      if (eligibilityByMember.containsKey(member) ||
+          (eligibilityLoadingByMember[member] ?? false)) {
+        continue;
+      }
+      eligibilityLoadingByMember[member] = true;
+      pending.add(_checkEligibilityUseCase(
+        activityId: activityId,
+        courseId: courseId,
+        evaluatorId: studentEmail,
+        evaluatedId: member,
+      ).then((result) {
+        eligibilityByMember[member] = result.isEligible;
+      }).whenComplete(() {
+        eligibilityLoadingByMember[member] = false;
+        // Trigger observers after batch updates
+        eligibilityByMember.refresh();
+        eligibilityLoadingByMember.refresh();
+      }));
+    }
+    if (pending.isNotEmpty) {
+      await Future.wait(pending);
+    }
+  }
+
+  bool isEligibilityKnown(String memberEmail) {
+    return eligibilityByMember.containsKey(memberEmail);
+  }
+
+  bool isEligibilityLoading(String memberEmail) {
+    return eligibilityLoadingByMember[memberEmail] == true;
+  }
+
   bool hasEvaluated(String activityId, String evaluatedId) {
     return myEvaluations.any((eval) =>
         eval.activityId == activityId && eval.evaluatedId == evaluatedId);
   }
 
   List<Evaluation> getEvaluationsForActivity(String activityId) {
-    return myEvaluations.where((eval) => eval.activityId == activityId).toList();
+    return myEvaluations
+        .where((eval) => eval.activityId == activityId)
+        .toList();
   }
 
   int getEvaluationCountForActivity(String activityId) {

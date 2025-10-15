@@ -186,8 +186,8 @@ class ActivityController extends GetxController {
     }
   }
 
-  Activity? getActivityById(String activityId) {
-    final result = _getActivityByIdUseCase(activityId: activityId);
+  Future<Activity?> getActivityById(String activityId) async {
+    final result = await _getActivityByIdUseCase(activityId: activityId);
     return result.isSuccess ? result.activity : null;
   }
 

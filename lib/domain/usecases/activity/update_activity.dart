@@ -1,9 +1,11 @@
 import '../../entities/course.dart';
 import '../../repositories/activity_repository.dart';
+import 'package:logger/logger.dart';
 
 class UpdateActivityUseCase {
   final ActivityRepository _repository;
-
+  static var logger = Logger();
+  
   UpdateActivityUseCase(this._repository);
 
   Future<UpdateActivityResult> call({
@@ -30,26 +32,18 @@ class UpdateActivityUseCase {
       }
 
       // Obtener la actividad existente
-      final existingActivity = _repository.getActivityById(activityId);
+      final existingActivity = await _repository.getActivityById(activityId);
       if (existingActivity == null) {
         return UpdateActivityResult.failure('Actividad no encontrada.');
       }
 
-      // Crear actividad actualizada
-      final updatedActivity = Activity(
-        id: existingActivity.id,
-        name: name.trim(),
-        description: description.trim(),
-        dueDate: dueDate,
-        categoryId: existingActivity.categoryId,
-        evaluations: existingActivity.evaluations,
-      );
-
-      await _repository.updateActivity(updatedActivity);
+      final updatedActivity = await _repository.updateActivity(
+          existingActivity, name.trim(), description.trim(), dueDate);
 
       return UpdateActivityResult.success(
-          'Actividad actualizada exitosamente.', updatedActivity);
+          'Actividad actualizada exitosamente.', updatedActivity!);
     } catch (e) {
+      logger.e('Error al actualizar actividad: $e');
       return UpdateActivityResult.failure('Error al actualizar actividad: $e');
     }
   }

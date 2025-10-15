@@ -8,7 +8,7 @@ class DeleteActivityUseCase {
   Future<DeleteActivityResult> call({required String activityId}) async {
     try {
       // Verificar que la actividad existe
-      final activity = _repository.getActivityById(activityId);
+      final activity = await _repository.getActivityById(activityId);
       if (activity == null) {
         return DeleteActivityResult.failure('Actividad no encontrada.');
       }

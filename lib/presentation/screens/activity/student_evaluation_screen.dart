@@ -23,7 +23,8 @@ class StudentEvaluationScreen extends StatefulWidget {
   });
 
   @override
-  State<StudentEvaluationScreen> createState() => _StudentEvaluationScreenState();
+  State<StudentEvaluationScreen> createState() =>
+      _StudentEvaluationScreenState();
 }
 
 class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
@@ -34,11 +35,13 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Mapear el email del usuario autenticado al nombre usado en los grupos
-    final mappedStudentEmail = EmailMappingService.mapUserEmailToGroupEmail(widget.studentEmail);
-    
-    controllerTag = 'student_activity_${widget.category.id}_$mappedStudentEmail';
+    final mappedStudentEmail =
+        EmailMappingService.mapUserEmailToGroupEmail(widget.studentEmail);
+
+    controllerTag =
+        'student_activity_${widget.category.id}_$mappedStudentEmail';
     activityController = Get.put(
       StudentActivityController(
         categoryId: widget.category.id,
@@ -49,8 +52,9 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
     );
 
     // Controller para obtener compañeros de grupo
-    final groupControllerTag = '${widget.course.id}_${widget.category.id}_$mappedStudentEmail';
-    
+    final groupControllerTag =
+        '${widget.course.id}_${widget.category.id}_$mappedStudentEmail';
+
     // Verificar si el controlador existe antes de intentar obtenerlo
     if (Get.isRegistered<GroupController>(tag: groupControllerTag)) {
       groupController = Get.find<GroupController>(tag: groupControllerTag);
@@ -65,7 +69,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
         tag: groupControllerTag,
       );
     }
-    
+
     // Cargar grupos después de inicializar el controlador
     WidgetsBinding.instance.addPostFrameCallback((_) {
       groupController.loadGroups();
@@ -78,7 +82,6 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
     // No eliminamos el GroupController aquí porque puede estar siendo usado por otras pantallas
     super.dispose();
   }
-
 
   // Método para actualizar la pantalla cuando regrese de una evaluación
   void _refreshEvaluations() {
@@ -156,19 +159,24 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: activityController.getDueDateColor(widget.activity.dueDate).withOpacity(0.1),
+                    color: activityController
+                        .getDueDateColor(widget.activity.dueDate)
+                        .withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: activityController.getDueDateColor(widget.activity.dueDate),
+                      color: activityController
+                          .getDueDateColor(widget.activity.dueDate),
                       width: 1,
                     ),
                   ),
                   child: Text(
                     activityController.formatDueDate(widget.activity.dueDate),
                     style: TextStyle(
-                      color: activityController.getDueDateColor(widget.activity.dueDate),
+                      color: activityController
+                          .getDueDateColor(widget.activity.dueDate),
                       fontWeight: FontWeight.w500,
                       fontSize: 12,
                     ),
@@ -252,6 +260,10 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                 );
               }
 
+              // Preload eligibility once members are known
+              activityController.preloadEligibility(
+                  widget.activity.id, groupMembers);
+
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: groupMembers.length,
@@ -259,9 +271,14 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                   final memberEmail = groupMembers[index];
                   final hasEvaluated = activityController.hasEvaluated(
                       widget.activity.id, memberEmail);
-                  final canEvaluate = activityController.canEvaluateStudent(
-                      widget.activity.id, memberEmail);
-                  final isExpired = activityController.isActivityExpired(widget.activity.dueDate);
+                  final canEvaluate =
+                      activityController.eligibilityByMember[memberEmail] ==
+                          true;
+                  final isChecking =
+                      activityController.isEligibilityLoading(memberEmail) ||
+                          !activityController.isEligibilityKnown(memberEmail);
+                  final isExpired = activityController
+                      .isActivityExpired(widget.activity.dueDate);
 
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 4),
@@ -271,7 +288,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
                       leading: CircleAvatar(
-                        backgroundColor: const Color(0xFF00A4BD).withOpacity(0.1),
+                        backgroundColor:
+                            const Color(0xFF00A4BD).withOpacity(0.1),
                         child: Text(
                           memberEmail.substring(0, 1).toUpperCase(),
                           style: const TextStyle(
@@ -290,7 +308,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                           const SizedBox(height: 4),
                           if (hasEvaluated)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.green[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -306,7 +325,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                             )
                           else if (isExpired)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.red[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -320,9 +340,27 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                                 ),
                               ),
                             )
+                          else if (isChecking)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Text(
+                                'Comprobando...',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            )
                           else if (!canEvaluate)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.orange[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -338,7 +376,8 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                             )
                           else
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.blue[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -354,9 +393,13 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                             ),
                         ],
                       ),
-                      trailing: !hasEvaluated && canEvaluate && !isExpired
+                      trailing: !hasEvaluated &&
+                              !isExpired &&
+                              !isChecking &&
+                              canEvaluate
                           ? ElevatedButton(
-                              onPressed: () => _showEvaluationDialog(memberEmail),
+                              onPressed: () =>
+                                  _showEvaluationDialog(memberEmail),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF00A4BD),
                                 foregroundColor: Colors.white,
@@ -383,22 +426,25 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
 
   void _showEvaluationDialog(String evaluatedEmail) async {
     await Get.to(() => EvaluationFormScreen(
-      course: widget.course,
-      category: widget.category,
-      activity: widget.activity,
-      evaluatedEmail: evaluatedEmail,
-      studentEmail: widget.studentEmail,
-    ));
-    
+          course: widget.course,
+          category: widget.category,
+          activity: widget.activity,
+          evaluatedEmail: evaluatedEmail,
+          studentEmail: widget.studentEmail,
+        ));
+
     // Cuando regrese de la pantalla de evaluación, actualizar la lista
     _refreshEvaluations();
   }
 
   void _showEvaluationDetails(String evaluatedEmail) {
     final evaluation = activityController.myEvaluations.firstWhere(
-      (eval) => eval.activityId == widget.activity.id && eval.evaluatedId == evaluatedEmail,
+      (eval) =>
+          eval.activityId == widget.activity.id &&
+          eval.evaluatedId == evaluatedEmail,
     );
-    
-    EvaluationDialogs.showEvaluationDetails(context, evaluation, evaluatedEmail);
+
+    EvaluationDialogs.showEvaluationDetails(
+        context, evaluation, evaluatedEmail);
   }
 }

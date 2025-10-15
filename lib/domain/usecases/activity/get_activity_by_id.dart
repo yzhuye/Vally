@@ -6,9 +6,9 @@ class GetActivityByIdUseCase {
 
   GetActivityByIdUseCase(this._repository);
 
-  GetActivityByIdResult call({required String activityId}) {
+  Future<GetActivityByIdResult> call({required String activityId}) async {
     try {
-      final activity = _repository.getActivityById(activityId);
+      final activity = await _repository.getActivityById(activityId);
       
       if (activity == null) {
         return GetActivityByIdResult.failure('Actividad no encontrada.');

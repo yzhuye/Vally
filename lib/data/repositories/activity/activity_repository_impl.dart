@@ -56,12 +56,46 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Activity? getActivityById(String activityId) {
-    try {
-      final activityHive = _activityBox.get(activityId);
-      return activityHive?.toActivity();
-    } catch (e) {
-      return null;
+  Future<Activity?> getActivityById(String activityId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
+
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "activities",
+      "_id": activityId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+
+      Map<String, dynamic>? row;
+      if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+        row = Map<String, dynamic>.from(decoded.first as Map);
+      } else if (decoded is Map<String, dynamic>) {
+        row = decoded;
+      }
+
+      if (row == null || row.isEmpty) {
+        return null;
+      }
+
+      final newActivity = Activity(
+        id: (row['_id'] ?? '').toString(),
+        name: (row['name'] ?? '').toString(),
+        description: (row['description'] ?? '').toString(),
+        dueDate: DateTime.tryParse((row['dueDate'] ?? '').toString()) ??
+            DateTime.now(),
+        categoryId: (row['categoryId'] ?? '').toString(),
+      );
+      return newActivity;
+    } else {
+      throw Exception(
+          "Error obteniendo actividad: ${response.statusCode} ${response.body}");
     }
   }
 
@@ -69,7 +103,6 @@ class ActivityRepositoryImpl implements ActivityRepository {
   Future<Activity?> createActivity(String name, String description,
       DateTime dueDate, String categoryId) async {
     final token = await storage.read(key: "accessToken");
-    ;
     if (token == null) throw Exception("No access token found");
 
     final url = Uri.parse("$baseUrl/insert");
@@ -79,7 +112,7 @@ class ActivityRepositoryImpl implements ActivityRepository {
       "records": [
         {
           "name": name,
-          "description": description ?? "",
+          "description": description,
           "dueDate": dueDate.toIso8601String(),
           "categoryId": categoryId,
         }
@@ -117,12 +150,51 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<void> updateActivity(Activity activity) async {
-    try {
-      final activityHive = ActivityHiveModel.fromActivity(activity);
-      await _activityBox.put(activity.id, activityHive);
-    } catch (e) {
-      throw Exception('Error al actualizar actividad: $e');
+  Future<Activity?> updateActivity(Activity activity, String name,
+      String description, DateTime dueDate) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
+
+    final url = Uri.parse("$baseUrl/update");
+
+    final body = {
+      "tableName": "activities",
+      "idColumn": "_id",
+      "idValue": activity.id,
+      "updates": {
+        "name": name,
+        "description": description,
+        "dueDate": dueDate.toIso8601String(),
+      }
+    };
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+
+      if (data.isNotEmpty) {
+        final newActivity = Activity(
+          id: data['_id'].toString(),
+          name: name,
+          description: description,
+          dueDate: dueDate,
+          categoryId: activity.categoryId,
+        );
+        return newActivity;
+      } else {
+        return null;
+      }
+    } else {
+      throw Exception(
+          "Error actualizando actividad: ${response.statusCode} ${response.body}");
     }
   }
 
