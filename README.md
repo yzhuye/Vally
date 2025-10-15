@@ -1,3 +1,9 @@
-# flutter_project
+# vally_app
 
-Estudiante Yazmina Yolanda Vecino Yepes: 2) Función para agregar cursos y visualizar usuarios inscritos, 4) función para visualizar los cursos en los que un usuario está inscrito y la creación de grupos desde la pestaña de profesor, permitiendo que los estudiantes se unan manualmente al grupo correspondiente según la categoría. Branch dev
+Kevin Torregosa: Integración de ROBLE para manejo de sesión
+
+Yovany Zhu: Listado de cursos disponibles
+
+Carlos Lopez: Pantalla Home integradora, mejoramiento de UI login y home
+
+Yazmina Vecino: Creacion de cursos
