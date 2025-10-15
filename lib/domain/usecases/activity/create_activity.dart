@@ -29,25 +29,13 @@ class CreateActivityUseCase {
             'La fecha de vencimiento debe ser futura.');
       }
 
-      final activity = Activity(
-        id: _generateId(),
-        name: name.trim(),
-        description: description.trim(),
-        dueDate: dueDate,
-        categoryId: categoryId,
-      );
-
-      await _repository.createActivity(activity);
+      final activity = await _repository.createActivity(name, description, dueDate, categoryId);
 
       return CreateActivityResult.success(
-          'Actividad creada exitosamente.', activity);
+          'Actividad creada exitosamente.', activity!);
     } catch (e) {
       return CreateActivityResult.failure('Error al crear actividad: $e');
     }
-  }
-
-  String _generateId() {
-    return 'activity_${DateTime.now().millisecondsSinceEpoch}';
   }
 }
 

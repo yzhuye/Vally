@@ -14,7 +14,8 @@ class ActivityRepositoryImpl implements ActivityRepository {
       "https://roble-api.openlab.uninorte.edu.co/database/vally_e89f74b54e";
 
   // REMOVE THIS LATER ❗❗❗
-  final Box<ActivityHiveModel> _activityBox = Hive.box<ActivityHiveModel>('activities');
+  final Box<ActivityHiveModel> _activityBox =
+      Hive.box<ActivityHiveModel>('activities');
   // REMOVE THIS LATER ❗❗❗
 
   @override
@@ -65,12 +66,53 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<void> createActivity(Activity activity) async {
-    try {
-      final activityHive = ActivityHiveModel.fromActivity(activity);
-      await _activityBox.put(activity.id, activityHive);
-    } catch (e) {
-      throw Exception('Error al crear actividad: $e');
+  Future<Activity?> createActivity(String name, String description,
+      DateTime dueDate, String categoryId) async {
+    final token = await storage.read(key: "accessToken");
+    ;
+    if (token == null) throw Exception("No access token found");
+
+    final url = Uri.parse("$baseUrl/insert");
+
+    final body = {
+      "tableName": "activities",
+      "records": [
+        {
+          "name": name,
+          "description": description ?? "",
+          "dueDate": dueDate.toIso8601String(),
+          "categoryId": categoryId,
+        }
+      ]
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      if (data.isNotEmpty) {
+        logger.d("Activity created: $data");
+        final activity = Activity(
+          id: data['_id'].toString(),
+          name: name,
+          description: description,
+          dueDate: dueDate,
+          categoryId: categoryId,
+        );
+        return activity;
+      } else {
+        return null;
+      }
+    } else {
+      throw Exception(
+          "Error creando actividad: ${response.statusCode} ${response.body}");
     }
   }
 
