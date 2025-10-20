@@ -1,168 +1,133 @@
-import 'package:hive/hive.dart';
-import '../../../domain/entities/course.dart';
-import '../../../domain/repositories/evaluation_repository.dart';
-import '../../datasources/in-memory/models/evaluation_hive_model.dart';
+import 'package:vally_app/domain/entities/course.dart';
+import 'package:vally_app/domain/repositories/evaluation_repository.dart';
+import 'package:vally_app/data/datasources/evaluation/evaluation_datasource.dart';
+import 'package:vally_app/data/datasources/in-memory/evaluation/evaluation_datasource_in_memory.dart';
+import 'package:vally_app/data/datasources/remote/evaluation/evaluation_datasource_remote.dart';
 
+/// Enum to define the available data source types
+enum EvaluationDataSourceType {
+  inMemory,
+  remote,
+}
+
+/// Implementation wrapper that uses the data source pattern
+/// This maintains backward compatibility while allowing easy switching between data sources
 class EvaluationRepositoryImpl implements EvaluationRepository {
-  Box<EvaluationHiveModel> get _evaluationBox => Hive.box<EvaluationHiveModel>('evaluations');
+  late final EvaluationDataSource _dataSource;
+
+  EvaluationRepositoryImpl({
+    EvaluationDataSourceType dataSourceType = EvaluationDataSourceType.inMemory,
+  }) {
+    _dataSource = _createDataSource(dataSourceType);
+  }
+
+  /// Factory method to create data source instances
+  static EvaluationDataSource _createDataSource(
+      EvaluationDataSourceType dataSourceType) {
+    switch (dataSourceType) {
+      case EvaluationDataSourceType.inMemory:
+        return EvaluationDataSourceInMemory();
+      case EvaluationDataSourceType.remote:
+        return EvaluationDataSourceRemote();
+    }
+  }
+
+  /// Creates an in-memory evaluation repository instance
+  static EvaluationRepositoryImpl createInMemory() {
+    return EvaluationRepositoryImpl(
+        dataSourceType: EvaluationDataSourceType.inMemory);
+  }
+
+  /// Creates a remote evaluation repository instance
+  static EvaluationRepositoryImpl createRemote() {
+    return EvaluationRepositoryImpl(
+        dataSourceType: EvaluationDataSourceType.remote);
+  }
+
+  /// Creates an evaluation repository with the specified data source type
+  static EvaluationRepositoryImpl create({
+    EvaluationDataSourceType dataSourceType = EvaluationDataSourceType.inMemory,
+  }) {
+    return EvaluationRepositoryImpl(dataSourceType: dataSourceType);
+  }
 
   @override
   Future<void> createEvaluation(Evaluation evaluation) async {
-    try {
-      
-      final evaluationHive = EvaluationHiveModel.fromEvaluation(evaluation);
-      await _evaluationBox.put(evaluation.id, evaluationHive);
-      
-    } catch (e) {
-      throw Exception('Error al crear evaluación: $e');
-    }
+    return _dataSource.createEvaluation(evaluation);
   }
 
   @override
   List<Evaluation> getEvaluationsByActivity(String activityId) {
-    try {
-      return _evaluationBox.values
-          .where((evalHive) => evalHive.activityId == activityId)
-          .map((evalHive) => evalHive.toEvaluation())
-          .toList();
-    } catch (e) {
-      return [];
-    }
+    return _dataSource.getEvaluationsByActivity(activityId);
   }
 
   @override
   List<Evaluation> getEvaluationsByEvaluator(String evaluatorId) {
-    try {
-      return _evaluationBox.values
-          .where((evalHive) => evalHive.evaluatorId == evaluatorId)
-          .map((evalHive) => evalHive.toEvaluation())
-          .toList();
-    } catch (e) {
-      return [];
-    }
+    return _dataSource.getEvaluationsByEvaluator(evaluatorId);
   }
 
   @override
   List<Evaluation> getEvaluationsForStudent(String studentId) {
-    try {
-      return _evaluationBox.values
-          .where((evalHive) => evalHive.evaluatedId == studentId)
-          .map((evalHive) => evalHive.toEvaluation())
-          .toList();
-    } catch (e) {
-      return [];
-    }
+    return _dataSource.getEvaluationsForStudent(studentId);
   }
 
   @override
   Evaluation? getEvaluationById(String evaluationId) {
-    try {
-      final evaluationHive = _evaluationBox.get(evaluationId);
-      return evaluationHive?.toEvaluation();
-    } catch (e) {
-      return null;
-    }
+    return _dataSource.getEvaluationById(evaluationId);
   }
 
   @override
   Future<void> updateEvaluation(Evaluation evaluation) async {
-    try {
-      final evaluationHive = EvaluationHiveModel.fromEvaluation(evaluation);
-      await _evaluationBox.put(evaluation.id, evaluationHive);
-    } catch (e) {
-      throw Exception('Error al actualizar evaluación: $e');
-    }
+    return _dataSource.updateEvaluation(evaluation);
   }
 
   @override
   Future<void> deleteEvaluation(String evaluationId) async {
-    try {
-      await _evaluationBox.delete(evaluationId);
-    } catch (e) {
-      throw Exception('Error al eliminar evaluación: $e');
-    }
+    return _dataSource.deleteEvaluation(evaluationId);
   }
 
   @override
   bool hasEvaluated(String activityId, String evaluatorId, String evaluatedId) {
-    try {
-      return _evaluationBox.values.any((evalHive) =>
-          evalHive.activityId == activityId &&
-          evalHive.evaluatorId == evaluatorId &&
-          evalHive.evaluatedId == evaluatedId);
-    } catch (e) {
-      return false;
-    }
+    return _dataSource.hasEvaluated(activityId, evaluatorId, evaluatedId);
   }
 
   @override
   double getAverageRatingForStudent(String activityId, String studentId) {
-    try {
-      final evaluations = _evaluationBox.values
-          .where((evalHive) =>
-              evalHive.activityId == activityId &&
-              evalHive.evaluatedId == studentId)
-          .map((evalHive) => evalHive.toEvaluation())
-          .toList();
-
-      if (evaluations.isEmpty) return 0.0;
-
-      final totalRating = evaluations.fold<double>(
-          0.0, (sum, eval) => sum + eval.averageRating);
-      return totalRating / evaluations.length;
-    } catch (e) {
-      return 0.0;
-    }
+    return _dataSource.getAverageRatingForStudent(activityId, studentId);
   }
 
   @override
   Map<String, dynamic> getActivityEvaluationStats(String activityId) {
-    try {
-      final evaluations = getEvaluationsByActivity(activityId);
+    return _dataSource.getActivityEvaluationStats(activityId);
+  }
+}
 
-      if (evaluations.isEmpty) {
-        return {
-          'totalEvaluations': 0,
-          'averageRating': 0.0,
-          'participationRate': 0.0,
-          'completedEvaluations': 0,
-        };
-      }
+/// Configuration class for evaluation repository
+/// This can be used to store configuration and easily switch data sources
+class EvaluationRepositoryConfig {
+  static EvaluationDataSourceType _dataSourceType =
+      EvaluationDataSourceType.inMemory;
 
-      final totalEvaluations = evaluations.length;
-      final totalRating = evaluations.fold<double>(
-          0.0, (sum, eval) => sum + eval.averageRating);
-      final averageRating = totalRating / totalEvaluations;
+  /// Get the current data source type
+  static EvaluationDataSourceType get dataSourceType => _dataSourceType;
 
-      // Agrupar por estudiante evaluado
-      final evaluationsByStudent = <String, List<Evaluation>>{};
-      for (final eval in evaluations) {
-        evaluationsByStudent[eval.evaluatedId] ??= [];
-        evaluationsByStudent[eval.evaluatedId]!.add(eval);
-      }
+  /// Set the data source type
+  static void setDataSourceType(EvaluationDataSourceType type) {
+    _dataSourceType = type;
+  }
 
-      return {
-        'totalEvaluations': totalEvaluations,
-        'averageRating': averageRating,
-        'studentsEvaluated': evaluationsByStudent.keys.length,
-        'evaluationsByStudent': evaluationsByStudent.map(
-          (studentId, evals) => MapEntry(
-            studentId,
-            {
-              'count': evals.length,
-              'averageRating': evals.fold<double>(
-                      0.0, (sum, eval) => sum + eval.averageRating) /
-                  evals.length,
-            },
-          ),
-        ),
-      };
-    } catch (e) {
-      return {
-        'totalEvaluations': 0,
-        'averageRating': 0.0,
-        'error': e.toString(),
-      };
-    }
+  /// Create an evaluation repository with the current configuration
+  static EvaluationRepositoryImpl createRepository() {
+    return EvaluationRepositoryImpl(dataSourceType: _dataSourceType);
+  }
+
+  /// Switch to in-memory data source
+  static void useInMemory() {
+    setDataSourceType(EvaluationDataSourceType.inMemory);
+  }
+
+  /// Switch to remote data source
+  static void useRemote() {
+    setDataSourceType(EvaluationDataSourceType.remote);
   }
 }
