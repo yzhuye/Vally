@@ -20,31 +20,31 @@ class EvaluationDataSourceInMemory implements EvaluationDataSource {
   }
 
   @override
-  List<Evaluation> getEvaluationsByActivity(String activityId) {
+  Future<List<Evaluation>> getEvaluationsByActivity(String activityId) async {
     try {
-      return _evaluationBox.values
+      return Future.value(_evaluationBox.values
           .where((evalHive) => evalHive.activityId == activityId)
           .map((evalHive) => evalHive.toEvaluation())
-          .toList();
+          .toList());
     } catch (e) {
-      return [];
+      return Future.value([]);
     }
   }
 
   @override
-  List<Evaluation> getEvaluationsByEvaluator(String evaluatorId) {
+  Future<List<Evaluation>> getEvaluationsByEvaluator(String evaluatorId) async {
     try {
-      return _evaluationBox.values
+      return Future.value(_evaluationBox.values
           .where((evalHive) => evalHive.evaluatorId == evaluatorId)
           .map((evalHive) => evalHive.toEvaluation())
-          .toList();
+          .toList());
     } catch (e) {
-      return [];
+      return Future.value([]);
     }
   }
 
   @override
-  List<Evaluation> getEvaluationsForStudent(String studentId) {
+  Future<List<Evaluation>> getEvaluationsForStudent(String studentId) async {
     try {
       return _evaluationBox.values
           .where((evalHive) => evalHive.evaluatedId == studentId)
@@ -56,12 +56,12 @@ class EvaluationDataSourceInMemory implements EvaluationDataSource {
   }
 
   @override
-  Evaluation? getEvaluationById(String evaluationId) {
+  Future<Evaluation?> getEvaluationById(String evaluationId) async {
     try {
       final evaluationHive = _evaluationBox.get(evaluationId);
-      return evaluationHive?.toEvaluation();
+      return Future.value(evaluationHive?.toEvaluation());
     } catch (e) {
-      return null;
+      return Future.value(null);
     }
   }
 
@@ -85,49 +85,49 @@ class EvaluationDataSourceInMemory implements EvaluationDataSource {
   }
 
   @override
-  bool hasEvaluated(String activityId, String evaluatorId, String evaluatedId) {
+  Future<bool> hasEvaluated(String activityId, String evaluatorId, String evaluatedId) async {
     try {
-      return _evaluationBox.values.any((evalHive) =>
+      return Future.value(_evaluationBox.values.any((evalHive) =>
           evalHive.activityId == activityId &&
           evalHive.evaluatorId == evaluatorId &&
-          evalHive.evaluatedId == evaluatedId);
+          evalHive.evaluatedId == evaluatedId));
     } catch (e) {
-      return false;
+      return Future.value(false);
     }
   }
 
   @override
-  double getAverageRatingForStudent(String activityId, String studentId) {
+  Future<double> getAverageRatingForStudent(String activityId, String studentId) async {
     try {
-      final evaluations = _evaluationBox.values
+      final evaluations = await _evaluationBox.values
           .where((evalHive) =>
               evalHive.activityId == activityId &&
               evalHive.evaluatedId == studentId)
           .map((evalHive) => evalHive.toEvaluation())
           .toList();
 
-      if (evaluations.isEmpty) return 0.0;
+      if (evaluations.isEmpty) return Future.value(0.0);
 
       final totalRating = evaluations.fold<double>(
           0.0, (sum, eval) => sum + eval.averageRating);
-      return totalRating / evaluations.length;
+      return Future.value(totalRating / evaluations.length);
     } catch (e) {
-      return 0.0;
+      return Future.value(0.0);
     }
   }
 
   @override
-  Map<String, dynamic> getActivityEvaluationStats(String activityId) {
+  Future<Map<String, dynamic>> getActivityEvaluationStats(String activityId) async {
     try {
-      final evaluations = getEvaluationsByActivity(activityId);
+      final evaluations = await getEvaluationsByActivity(activityId);
 
       if (evaluations.isEmpty) {
-        return {
+        return Future.value({
           'totalEvaluations': 0,
           'averageRating': 0.0,
           'participationRate': 0.0,
           'completedEvaluations': 0,
-        };
+        });
       }
 
       final totalEvaluations = evaluations.length;
@@ -142,7 +142,7 @@ class EvaluationDataSourceInMemory implements EvaluationDataSource {
         evaluationsByStudent[eval.evaluatedId]!.add(eval);
       }
 
-      return {
+      return Future.value({
         'totalEvaluations': totalEvaluations,
         'averageRating': averageRating,
         'studentsEvaluated': evaluationsByStudent.keys.length,
@@ -157,7 +157,7 @@ class EvaluationDataSourceInMemory implements EvaluationDataSource {
             },
           ),
         ),
-      };
+      });
     } catch (e) {
       return {
         'totalEvaluations': 0,
