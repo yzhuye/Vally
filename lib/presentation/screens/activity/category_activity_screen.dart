@@ -34,6 +34,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   void initState() {
     super.initState();
     studentEmail = Get.find<HomeController>().currentUser.value?.email ?? '';
+
     // Initialize activity controller
     activityControllerTag =
         'student_activity_${widget.category.id}_$studentEmail';
@@ -171,6 +172,32 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(width: 10),
+                // Botón de refresh
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00A4BD),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      if (activityController != null) {
+                        activityController!.refreshActivities();
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.refresh,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    tooltip: 'Refrescar actividades',
+                    padding: const EdgeInsets.all(10),
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -184,27 +211,30 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   }
 
   Widget _buildActivitiesView() {
-    if (widget.category.groupingMethod == 'self-assigned') {
-      if (groupController?.currentGroup == null) {
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.group_off,
-                size: 64,
-                color: Colors.grey,
-              ),
-              SizedBox(height: 16),
-              Text(
-                "Debes unirte a un grupo para ver las actividades.",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      }
+    // Verificar si el estudiante debe estar en un grupo para ver las actividades
+    // Solo aplicar esta restricción si hay grupos disponibles y el estudiante no está en ninguno
+    if (widget.category.groupingMethod == 'self-assigned' &&
+        groupController != null &&
+        groupController!.groups.isNotEmpty &&
+        groupController!.currentGroup == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.group_off,
+              size: 64,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16),
+            Text(
+              "Debes unirte a un grupo para ver las actividades.",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
     }
 
     return Obx(() {

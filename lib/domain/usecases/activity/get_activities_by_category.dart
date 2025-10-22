@@ -33,10 +33,8 @@ class GetActivitiesResult {
   });
 
   factory GetActivitiesResult.success(List<Activity> activities) =>
-      GetActivitiesResult._(
-          isSuccess: true, activities: activities);
+      GetActivitiesResult._(isSuccess: true, activities: activities);
 
   factory GetActivitiesResult.failure(String message) =>
-      GetActivitiesResult._(
-          isSuccess: false, message: message, activities: []);
+      GetActivitiesResult._(isSuccess: false, message: message, activities: []);
 }

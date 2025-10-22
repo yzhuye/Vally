@@ -64,6 +64,13 @@ class StudentActivityController extends GetxController {
       final result = await _getActivitiesUseCase(categoryId: categoryId);
       if (result.isSuccess) {
         activities.value = result.activities;
+      } else {
+        Get.snackbar(
+          'Error',
+          'Error al cargar actividades: ${result.message}',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.snackbar(
@@ -75,6 +82,11 @@ class StudentActivityController extends GetxController {
     } finally {
       isLoading(false);
     }
+  }
+
+  // Método para refrescar las actividades manualmente
+  void refreshActivities() {
+    loadActivities();
   }
 
   Future<void> loadMyEvaluations() async {
