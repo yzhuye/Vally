@@ -6,9 +6,9 @@ class GetEvaluationsByEvaluatorUseCase {
 
   GetEvaluationsByEvaluatorUseCase(this._repository);
 
-  GetEvaluationsByEvaluatorResult call({required String evaluatorId}) {
+  Future<GetEvaluationsByEvaluatorResult> call({required String evaluatorId}) async {
     try {
-      final evaluations = _repository.getEvaluationsByEvaluator(evaluatorId);
+      final evaluations = await _repository.getEvaluationsByEvaluator(evaluatorId);
       
       // Ordenar por fecha de creación (más recientes primero)
       evaluations.sort((a, b) => b.createdAt.compareTo(a.createdAt));

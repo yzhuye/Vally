@@ -142,6 +142,7 @@ class CourseManagementScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
+        /*
         // Tarjeta de Categorías
         Expanded(
           child: Container(
@@ -172,6 +173,7 @@ class CourseManagementScreen extends StatelessWidget {
             ),
           ),
         ),
+        */
       ],
     );
   }

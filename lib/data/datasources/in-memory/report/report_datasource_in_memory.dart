@@ -257,7 +257,7 @@ class ReportDataSourceInMemory implements ReportDataSource {
 
     for (final activity in activities) {
       final evaluations =
-          _evaluationRepository.getEvaluationsByActivity(activity.id);
+          await _evaluationRepository.getEvaluationsByActivity(activity.id);
       allEvaluations.addAll(evaluations);
     }
 

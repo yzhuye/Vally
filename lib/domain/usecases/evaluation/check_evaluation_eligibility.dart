@@ -40,7 +40,7 @@ class CheckEvaluationEligibilityUseCase {
       }
 
       // Verificar que no haya evaluado antes
-      if (_evaluationRepository.hasEvaluated(
+      if (await _evaluationRepository.hasEvaluated(
           activityId, evaluatorId, evaluatedId)) {
         return CheckEvaluationEligibilityResult.notEligible(
             'Ya has evaluado a este compañero en esta actividad.');

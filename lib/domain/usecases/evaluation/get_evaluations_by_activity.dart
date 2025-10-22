@@ -6,9 +6,9 @@ class GetEvaluationsByActivityUseCase {
 
   GetEvaluationsByActivityUseCase(this._repository);
 
-  GetEvaluationsByActivityResult call({required String activityId}) {
+  Future<GetEvaluationsByActivityResult> call({required String activityId}) async {
     try {
-      final evaluations = _repository.getEvaluationsByActivity(activityId);
+      final evaluations = await _repository.getEvaluationsByActivity(activityId);
       
       // Ordenar por fecha de creación (más recientes primero)
       evaluations.sort((a, b) => b.createdAt.compareTo(a.createdAt));

@@ -31,7 +31,7 @@ class CreateEvaluationUseCase {
       }
 
       // Verificar que no haya evaluado antes
-      if (_evaluationRepository.hasEvaluated(activityId, evaluatorId, evaluatedId)) {
+      if (await _evaluationRepository.hasEvaluated(activityId, evaluatorId, evaluatedId)) {
         return CreateEvaluationResult.failure(
             'Ya has evaluado a este compañero en esta actividad.');
       }

@@ -77,10 +77,10 @@ class StudentActivityController extends GetxController {
     }
   }
 
-  void loadMyEvaluations() {
+  Future<void> loadMyEvaluations() async {
     try {
       final result =
-          _getEvaluationsByEvaluatorUseCase(evaluatorId: studentEmail);
+          await _getEvaluationsByEvaluatorUseCase(evaluatorId: studentEmail);
       if (result.isSuccess) {
         myEvaluations.value = result.evaluations;
       }

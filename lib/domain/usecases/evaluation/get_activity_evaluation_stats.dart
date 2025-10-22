@@ -5,9 +5,9 @@ class GetActivityEvaluationStatsUseCase {
 
   GetActivityEvaluationStatsUseCase(this._repository);
 
-  GetActivityEvaluationStatsResult call({required String activityId}) {
+  Future<GetActivityEvaluationStatsResult> call({required String activityId}) async {
     try {
-      final stats = _repository.getActivityEvaluationStats(activityId);
+      final stats = await _repository.getActivityEvaluationStats(activityId);
       
       return GetActivityEvaluationStatsResult.success(stats);
     } catch (e) {

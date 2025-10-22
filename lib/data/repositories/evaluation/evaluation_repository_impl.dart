@@ -16,7 +16,7 @@ class EvaluationRepositoryImpl implements EvaluationRepository {
   late final EvaluationDataSource _dataSource;
 
   EvaluationRepositoryImpl({
-    EvaluationDataSourceType dataSourceType = EvaluationDataSourceType.inMemory,
+    EvaluationDataSourceType dataSourceType = EvaluationDataSourceType.remote,
   }) {
     _dataSource = _createDataSource(dataSourceType);
   }
@@ -57,23 +57,23 @@ class EvaluationRepositoryImpl implements EvaluationRepository {
   }
 
   @override
-  List<Evaluation> getEvaluationsByActivity(String activityId) {
-    return _dataSource.getEvaluationsByActivity(activityId);
+  Future<List<Evaluation>> getEvaluationsByActivity(String activityId) async {
+    return await _dataSource.getEvaluationsByActivity(activityId);
   }
 
   @override
-  List<Evaluation> getEvaluationsByEvaluator(String evaluatorId) {
-    return _dataSource.getEvaluationsByEvaluator(evaluatorId);
+  Future<List<Evaluation>> getEvaluationsByEvaluator(String evaluatorId) async {
+    return await _dataSource.getEvaluationsByEvaluator(evaluatorId);
   }
 
   @override
-  List<Evaluation> getEvaluationsForStudent(String studentId) {
-    return _dataSource.getEvaluationsForStudent(studentId);
+  Future<List<Evaluation>> getEvaluationsForStudent(String studentId) async {
+    return await _dataSource.getEvaluationsForStudent(studentId);
   }
 
   @override
-  Evaluation? getEvaluationById(String evaluationId) {
-    return _dataSource.getEvaluationById(evaluationId);
+  Future<Evaluation?> getEvaluationById(String evaluationId) async {
+    return await _dataSource.getEvaluationById(evaluationId);
   }
 
   @override
@@ -87,18 +87,18 @@ class EvaluationRepositoryImpl implements EvaluationRepository {
   }
 
   @override
-  bool hasEvaluated(String activityId, String evaluatorId, String evaluatedId) {
-    return _dataSource.hasEvaluated(activityId, evaluatorId, evaluatedId);
+  Future<bool> hasEvaluated(String activityId, String evaluatorId, String evaluatedId) async {
+    return await _dataSource.hasEvaluated(activityId, evaluatorId, evaluatedId);
   }
 
   @override
-  double getAverageRatingForStudent(String activityId, String studentId) {
-    return _dataSource.getAverageRatingForStudent(activityId, studentId);
+  Future<double> getAverageRatingForStudent(String activityId, String studentId) async {
+    return await _dataSource.getAverageRatingForStudent(activityId, studentId);
   }
 
   @override
-  Map<String, dynamic> getActivityEvaluationStats(String activityId) {
-    return _dataSource.getActivityEvaluationStats(activityId);
+  Future<Map<String, dynamic>> getActivityEvaluationStats(String activityId) async {
+    return await _dataSource.getActivityEvaluationStats(activityId);
   }
 }
 

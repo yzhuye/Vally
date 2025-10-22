@@ -1,105 +1,547 @@
 import 'package:vally_app/domain/entities/course.dart';
 import 'package:vally_app/data/datasources/evaluation/evaluation_datasource.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 /// Remote implementation of the evaluation data source
 /// This is a placeholder for future API integration
-/// TODO: Implement actual API calls when backend is ready
 class EvaluationDataSourceRemote implements EvaluationDataSource {
-  // TODO: Add API service dependencies when available
-  // late final EvaluationApiService _evaluationApiService;
+  final baseUrl =
+      "https://roble-api.openlab.uninorte.edu.co/database/vally_e89f74b54e";
+  final storage = FlutterSecureStorage();
 
-  EvaluationDataSourceRemote() {
-    // TODO: Initialize API services when available
-    // _evaluationApiService = EvaluationApiService();
+  @override
+  Future<Evaluation?> createEvaluation(Evaluation evaluation) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
+
+    final url = Uri.parse("$baseUrl/insert");
+
+    final body = {
+      "tableName": "evaluations",
+      "records": [
+        {
+          "activityId": evaluation.activityId,
+          "evaluatorId": evaluation.evaluatorId,
+          "evaluatedId": evaluation.evaluatedId,
+          "punctuality": evaluation.punctuality,
+          "contributions": evaluation.contributions,
+          "commitment": evaluation.commitment,
+          "attitude": evaluation.attitude,
+          "createdAt": evaluation.createdAt.toIso8601String(),
+        }
+      ]
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decoded = jsonDecode(response.body);
+
+      Map<String, dynamic>? row;
+      if (decoded is Map &&
+          decoded["inserted"] is List &&
+          decoded["inserted"].isNotEmpty) {
+        row = Map<String, dynamic>.from(decoded["inserted"].first as Map);
+      } else if (decoded is List &&
+          decoded.isNotEmpty &&
+          decoded.first is Map) {
+        row = Map<String, dynamic>.from(decoded.first as Map);
+      } else if (decoded is Map<String, dynamic> && decoded.isNotEmpty) {
+        row = decoded;
+      }
+
+      if (row != null && row.isNotEmpty) {
+        return Evaluation(
+          id: (row["_id"] ?? '').toString(),
+          activityId: (row["activityId"] ?? '').toString(),
+          evaluatorId: (row["evaluatorId"] ?? '').toString(),
+          evaluatedId: (row["evaluatedId"] ?? '').toString(),
+          punctuality: row["punctuality"] is num
+              ? (row["punctuality"] as num).toInt()
+              : int.tryParse(row["punctuality"].toString()) ?? 0,
+          contributions: row["contributions"] is num
+              ? (row["contributions"] as num).toInt()
+              : int.tryParse(row["contributions"].toString()) ?? 0,
+          commitment: row["commitment"] is num
+              ? (row["commitment"] as num).toInt()
+              : int.tryParse(row["commitment"].toString()) ?? 0,
+          attitude: row["attitude"] is num
+              ? (row["attitude"] as num).toInt()
+              : int.tryParse(row["attitude"].toString()) ?? 0,
+          createdAt: DateTime.tryParse((row["createdAt"] ?? '').toString()) ??
+              DateTime.now(),
+        );
+      }
+    }
+
+    throw Exception(
+      "Error creando evaluación: ${response.statusCode} ${response.body}",
+    );
   }
 
   @override
-  Future<void> createEvaluation(Evaluation evaluation) async {
-    // TODO: Implement API call to create evaluation
-    // return await _evaluationApiService.createEvaluation(evaluation);
+  Future<List<Evaluation>> getEvaluationsByActivity(String activityId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "evaluations",
+      "activityId": activityId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error obteniendo evaluaciones: ${response.statusCode}");
+    }
+
+    final data = jsonDecode(response.body);
+
+    if (data is! List) {
+      throw Exception(
+          "Formato de respuesta inesperado al obtener evaluaciones");
+    }
+
+    return data.map<Evaluation>((e) {
+      return Evaluation(
+        id: e["_id"],
+        activityId: e["activityId"],
+        evaluatorId: e["evaluatorId"],
+        evaluatedId: e["evaluatedId"],
+        punctuality: e["punctuality"],
+        contributions: e["contributions"],
+        commitment: e["commitment"],
+        attitude: e["attitude"],
+        createdAt: DateTime.parse(e["createdAt"]),
+      );
+    }).toList();
   }
 
   @override
-  List<Evaluation> getEvaluationsByActivity(String activityId) {
-    // TODO: Implement API call to get evaluations by activity
-    // return await _evaluationApiService.getEvaluationsByActivity(activityId);
+  Future<List<Evaluation>> getEvaluationsByEvaluator(String evaluatorId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "evaluations",
+      "evaluatorId": evaluatorId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error obteniendo evaluaciones: ${response.statusCode}");
+    }
+
+    final data = jsonDecode(response.body);
+
+    if (data is! List) {
+      throw Exception(
+          "Formato de respuesta inesperado al obtener evaluaciones");
+    }
+
+    return data.map<Evaluation>((e) {
+      return Evaluation(
+        id: e["_id"],
+        activityId: e["activityId"],
+        evaluatorId: e["evaluatorId"],
+        evaluatedId: e["evaluatedId"],
+        punctuality: e["punctuality"],
+        contributions: e["contributions"],
+        commitment: e["commitment"],
+        attitude: e["attitude"],
+        createdAt: DateTime.parse(e["createdAt"]),
+      );
+    }).toList();
   }
 
   @override
-  List<Evaluation> getEvaluationsByEvaluator(String evaluatorId) {
-    // TODO: Implement API call to get evaluations by evaluator
-    // return await _evaluationApiService.getEvaluationsByEvaluator(evaluatorId);
+  Future<List<Evaluation>> getEvaluationsForStudent(String studentId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "evaluations",
+      "evaluatedId": studentId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error obteniendo evaluaciones: ${response.statusCode}");
+    }
+
+    final data = jsonDecode(response.body);
+
+    if (data is! List) {
+      throw Exception(
+          "Formato de respuesta inesperado al obtener evaluaciones");
+    }
+
+    return data.map<Evaluation>((e) {
+      return Evaluation(
+        id: e["_id"],
+        activityId: e["activityId"],
+        evaluatorId: e["evaluatorId"],
+        evaluatedId: e["evaluatedId"],
+        punctuality: e["punctuality"],
+        contributions: e["contributions"],
+        commitment: e["commitment"],
+        attitude: e["attitude"],
+        createdAt: DateTime.parse(e["createdAt"]),
+      );
+    }).toList();
   }
 
   @override
-  List<Evaluation> getEvaluationsForStudent(String studentId) {
-    // TODO: Implement API call to get evaluations for student
-    // return await _evaluationApiService.getEvaluationsForStudent(studentId);
+  Future<Evaluation?> getEvaluationById(String evaluationId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "evaluations",
+      "_id": evaluationId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error obteniendo evaluación: ${response.statusCode}");
+    }
+
+    final decoded = jsonDecode(response.body);
+
+    Map<String, dynamic>? row;
+    if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+      row = Map<String, dynamic>.from(decoded.first as Map);
+    } else if (decoded is Map<String, dynamic>) {
+      row = decoded;
+    }
+
+    if (row == null || row.isEmpty) return null;
+
+    return Evaluation(
+      id: (row["_id"] ?? '').toString(),
+      activityId: (row["activityId"] ?? '').toString(),
+      evaluatorId: (row["evaluatorId"] ?? '').toString(),
+      evaluatedId: (row["evaluatedId"] ?? '').toString(),
+      punctuality: row["punctuality"] is num
+          ? (row["punctuality"] as num).toInt()
+          : int.tryParse(row["punctuality"].toString()) ?? 0,
+      contributions: row["contributions"] is num
+          ? (row["contributions"] as num).toInt()
+          : int.tryParse(row["contributions"].toString()) ?? 0,
+      commitment: row["commitment"] is num
+          ? (row["commitment"] as num).toInt()
+          : int.tryParse(row["commitment"].toString()) ?? 0,
+      attitude: row["attitude"] is num
+          ? (row["attitude"] as num).toInt()
+          : int.tryParse(row["attitude"].toString()) ?? 0,
+      createdAt: DateTime.tryParse((row["createdAt"] ?? '').toString()) ??
+          DateTime.now(),
+    );
   }
 
   @override
-  Evaluation? getEvaluationById(String evaluationId) {
-    // TODO: Implement API call to get evaluation by ID
-    // return await _evaluationApiService.getEvaluationById(evaluationId);
+  Future<Evaluation?> updateEvaluation(Evaluation evaluation) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
-  }
+    final url = Uri.parse("$baseUrl/update");
 
-  @override
-  Future<void> updateEvaluation(Evaluation evaluation) async {
-    // TODO: Implement API call to update evaluation
-    // return await _evaluationApiService.updateEvaluation(evaluation);
+    final body = {
+      "tableName": "evaluations",
+      "idColumn": "_id",
+      "idValue": evaluation.id,
+      "updates": {
+        "activityId": evaluation.activityId,
+        "evaluatorId": evaluation.evaluatorId,
+        "evaluatedId": evaluation.evaluatedId,
+        "punctuality": evaluation.punctuality,
+        "contributions": evaluation.contributions,
+        "commitment": evaluation.commitment,
+        "attitude": evaluation.attitude,
+      }
+    };
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final response = await http.put(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decoded = jsonDecode(response.body);
+
+      Map<String, dynamic>? row;
+      if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+        row = Map<String, dynamic>.from(decoded.first as Map);
+      } else if (decoded is Map<String, dynamic>) {
+        row = decoded;
+      }
+
+      if (row != null && row.isNotEmpty) {
+        return Evaluation(
+          id: (row["_id"] ?? '').toString(),
+          activityId: (row["activityId"] ?? '').toString(),
+          evaluatorId: (row["evaluatorId"] ?? '').toString(),
+          evaluatedId: (row["evaluatedId"] ?? '').toString(),
+          punctuality: row["punctuality"] is num
+              ? (row["punctuality"] as num).toInt()
+              : int.tryParse(row["punctuality"].toString()) ?? 0,
+          contributions: row["contributions"] is num
+              ? (row["contributions"] as num).toInt()
+              : int.tryParse(row["contributions"].toString()) ?? 0,
+          commitment: row["commitment"] is num
+              ? (row["commitment"] as num).toInt()
+              : int.tryParse(row["commitment"].toString()) ?? 0,
+          attitude: row["attitude"] is num
+              ? (row["attitude"] as num).toInt()
+              : int.tryParse(row["attitude"].toString()) ?? 0,
+          createdAt: DateTime.tryParse((row["createdAt"] ?? '').toString()) ??
+              DateTime.now(),
+        );
+      }
+    }
+
+    throw Exception(
+      "Error actualizando evaluación: ${response.statusCode} ${response.body}",
+    );
   }
 
   @override
   Future<void> deleteEvaluation(String evaluationId) async {
-    // TODO: Implement API call to delete evaluation
-    // return await _evaluationApiService.deleteEvaluation(evaluationId);
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/delete");
+
+    final body = {
+      "tableName": "evaluations",
+      "idColumn": "_id",
+      "idValue": evaluationId,
+    };
+
+    final response = await http.delete(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error eliminando evaluación: ${response.statusCode}");
+    }
   }
 
   @override
-  bool hasEvaluated(String activityId, String evaluatorId, String evaluatedId) {
-    // TODO: Implement API call to check if evaluation exists
-    // return await _evaluationApiService.hasEvaluated(activityId, evaluatorId, evaluatedId);
+  Future<bool> hasEvaluated(
+      String activityId, String evaluatorId, String evaluatedId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "evaluations",
+      "activityId": activityId,
+      "evaluatorId": evaluatorId,
+      "evaluatedId": evaluatedId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error buscando evaluación: ${response.statusCode}");
+    }
+
+    final data = jsonDecode(response.body);
+
+    if (data is List && data.isNotEmpty) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
-  double getAverageRatingForStudent(String activityId, String studentId) {
-    // TODO: Implement API call to get average rating
-    // return await _evaluationApiService.getAverageRatingForStudent(activityId, studentId);
+  Future<double> getAverageRatingForStudent(
+      String activityId, String studentId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "evaluations",
+      "activityId": activityId,
+      "evaluatedId": studentId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error obteniendo evaluaciones: ${response.statusCode}");
+    }
+
+    final data = jsonDecode(response.body);
+    if (data is! List || data.isEmpty) return 0.0;
+
+    double totalSum = 0;
+    int totalCount = 0;
+
+    for (final eval in data) {
+      final punctuality = (eval["punctuality"] ?? 0).toDouble();
+      final contributions = (eval["contributions"] ?? 0).toDouble();
+      final commitment = (eval["commitment"] ?? 0).toDouble();
+      final attitude = (eval["attitude"] ?? 0).toDouble();
+
+      // Sumar los 4 valores de cada evaluación
+      totalSum += punctuality + contributions + commitment + attitude;
+      totalCount += 4;
+    }
+
+    final average = totalCount > 0 ? totalSum / totalCount : 0.0;
+    return average;
   }
 
   @override
-  Map<String, dynamic> getActivityEvaluationStats(String activityId) {
-    // TODO: Implement API call to get activity evaluation stats
-    // return await _evaluationApiService.getActivityEvaluationStats(activityId);
+  Future<Map<String, dynamic>> getActivityEvaluationStats(
+      String activityId) async {
+    try {
+      final token = await storage.read(key: "accessToken");
+      if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+      final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+        "tableName": "evaluations",
+        "activityId": activityId,
+      });
+
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            "Error obteniendo evaluaciones: ${response.statusCode}");
+      }
+
+      final data = jsonDecode(response.body);
+      if (data is! List || data.isEmpty) {
+        return {
+          'totalEvaluations': 0,
+          'averageRating': 0.0,
+          'participationRate': 0.0,
+          'completedEvaluations': 0,
+        };
+      }
+
+      final evaluations = data.map<Evaluation>((e) {
+        return Evaluation(
+          id: e["_id"],
+          activityId: e["activityId"],
+          evaluatorId: e["evaluatorId"],
+          evaluatedId: e["evaluatedId"],
+          punctuality: e["punctuality"],
+          contributions: e["contributions"],
+          commitment: e["commitment"],
+          attitude: e["attitude"],
+          createdAt: DateTime.parse(e["createdAt"]),
+        );
+      }).toList();
+
+      if (evaluations.isEmpty) {
+        return {
+          'totalEvaluations': 0,
+          'averageRating': 0.0,
+          'participationRate': 0.0,
+          'completedEvaluations': 0,
+        };
+      }
+
+      final totalEvaluations = evaluations.length;
+      double totalRating = 0.0;
+
+      for (final eval in evaluations) {
+        final avgEvalRating = (eval.punctuality +
+                eval.contributions +
+                eval.commitment +
+                eval.attitude) /
+            4.0;
+        totalRating += avgEvalRating;
+      }
+
+      final averageRating = totalRating / totalEvaluations;
+
+      final Map<String, List<Evaluation>> evaluationsByStudent = {};
+
+      for (final eval in evaluations) {
+        evaluationsByStudent[eval.evaluatedId] ??= [];
+        evaluationsByStudent[eval.evaluatedId]!.add(eval);
+      }
+
+      final evaluationsByStudentStats = evaluationsByStudent.map(
+        (studentId, evals) {
+          final avgStudentRating = evals.fold<double>(
+                0.0,
+                (sum, e) =>
+                    sum +
+                    ((e.punctuality +
+                            e.contributions +
+                            e.commitment +
+                            e.attitude) /
+                        4.0),
+              ) /
+              evals.length;
+
+          return MapEntry(studentId, {
+            'count': evals.length,
+            'averageRating': avgStudentRating,
+          });
+        },
+      );
+
+      return {
+        'totalEvaluations': totalEvaluations,
+        'averageRating': averageRating,
+        'studentsEvaluated': evaluationsByStudent.keys.length,
+        'evaluationsByStudent': evaluationsByStudentStats,
+      };
+    } catch (e) {
+      return {
+        'totalEvaluations': 0,
+        'averageRating': 0.0,
+        'error': e.toString(),
+      };
+    }
   }
 }

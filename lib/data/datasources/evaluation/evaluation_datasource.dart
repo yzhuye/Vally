@@ -7,16 +7,16 @@ abstract class EvaluationDataSource {
   Future<void> createEvaluation(Evaluation evaluation);
 
   /// Get all evaluations for a specific activity
-  List<Evaluation> getEvaluationsByActivity(String activityId);
+  Future<List<Evaluation>> getEvaluationsByActivity(String activityId);
 
   /// Get all evaluations made by a specific evaluator
-  List<Evaluation> getEvaluationsByEvaluator(String evaluatorId);
+  Future<List<Evaluation>> getEvaluationsByEvaluator(String evaluatorId);
 
   /// Get all evaluations for a specific student
-  List<Evaluation> getEvaluationsForStudent(String studentId);
+  Future<List<Evaluation>> getEvaluationsForStudent(String studentId);
 
   /// Get a specific evaluation by ID
-  Evaluation? getEvaluationById(String evaluationId);
+  Future<Evaluation?> getEvaluationById(String evaluationId);
 
   /// Update an existing evaluation
   Future<void> updateEvaluation(Evaluation evaluation);
@@ -25,11 +25,11 @@ abstract class EvaluationDataSource {
   Future<void> deleteEvaluation(String evaluationId);
 
   /// Check if an evaluator has already evaluated a student for an activity
-  bool hasEvaluated(String activityId, String evaluatorId, String evaluatedId);
+  Future<bool> hasEvaluated(String activityId, String evaluatorId, String evaluatedId);
 
   /// Get average rating for a student in a specific activity
-  double getAverageRatingForStudent(String activityId, String studentId);
+  Future<double> getAverageRatingForStudent(String activityId, String studentId);
 
   /// Get evaluation statistics for an activity
-  Map<String, dynamic> getActivityEvaluationStats(String activityId);
+  Future<Map<String, dynamic>> getActivityEvaluationStats(String activityId);
 }

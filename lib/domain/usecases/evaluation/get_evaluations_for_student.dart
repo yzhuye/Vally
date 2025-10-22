@@ -6,9 +6,9 @@ class GetEvaluationsForStudentUseCase {
 
   GetEvaluationsForStudentUseCase(this._repository);
 
-  GetEvaluationsForStudentResult call({required String studentId}) {
+  Future<GetEvaluationsForStudentResult> call({required String studentId}) async {
     try {
-      final evaluations = _repository.getEvaluationsForStudent(studentId);
+      final evaluations = await _repository.getEvaluationsForStudent(studentId);
       
       // Ordenar por fecha de creación (más recientes primero)
       evaluations.sort((a, b) => b.createdAt.compareTo(a.createdAt));

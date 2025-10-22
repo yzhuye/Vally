@@ -1,8 +1,6 @@
-import 'package:hive/hive.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../domain/entities/course.dart';
 import '../../../domain/repositories/activity_repository.dart';
-import '../../datasources/in-memory/models/activity_hive_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:convert';
@@ -12,11 +10,6 @@ class ActivityRepositoryImpl implements ActivityRepository {
   late final Logger logger = Logger();
   static const baseUrl =
       "https://roble-api.openlab.uninorte.edu.co/database/vally_e89f74b54e";
-
-  // REMOVE THIS LATER ❗❗❗
-  final Box<ActivityHiveModel> _activityBox =
-      Hive.box<ActivityHiveModel>('activities');
-  // REMOVE THIS LATER ❗❗❗
 
   @override
   Future<List<Activity>> getActivitiesByCategory(String categoryId) async {
