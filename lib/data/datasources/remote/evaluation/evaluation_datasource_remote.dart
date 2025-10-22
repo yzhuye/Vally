@@ -44,20 +44,41 @@ class EvaluationDataSourceRemote implements EvaluationDataSource {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
+      final decoded = jsonDecode(response.body);
 
-      if (data["inserted"] != null && data["inserted"].isNotEmpty) {
-        final inserted = data["inserted"].first;
+      Map<String, dynamic>? row;
+      if (decoded is Map &&
+          decoded["inserted"] is List &&
+          decoded["inserted"].isNotEmpty) {
+        row = Map<String, dynamic>.from(decoded["inserted"].first as Map);
+      } else if (decoded is List &&
+          decoded.isNotEmpty &&
+          decoded.first is Map) {
+        row = Map<String, dynamic>.from(decoded.first as Map);
+      } else if (decoded is Map<String, dynamic> && decoded.isNotEmpty) {
+        row = decoded;
+      }
+
+      if (row != null && row.isNotEmpty) {
         return Evaluation(
-          id: inserted["_id"],
-          activityId: inserted["activityId"],
-          evaluatorId: inserted["evaluatorId"],
-          evaluatedId: inserted["evaluatedId"],
-          punctuality: inserted["punctuality"],
-          contributions: inserted["contributions"],
-          commitment: inserted["commitment"],
-          attitude: inserted["attitude"],
-          createdAt: DateTime.parse(inserted["createdAt"]),
+          id: (row["_id"] ?? '').toString(),
+          activityId: (row["activityId"] ?? '').toString(),
+          evaluatorId: (row["evaluatorId"] ?? '').toString(),
+          evaluatedId: (row["evaluatedId"] ?? '').toString(),
+          punctuality: row["punctuality"] is num
+              ? (row["punctuality"] as num).toInt()
+              : int.tryParse(row["punctuality"].toString()) ?? 0,
+          contributions: row["contributions"] is num
+              ? (row["contributions"] as num).toInt()
+              : int.tryParse(row["contributions"].toString()) ?? 0,
+          commitment: row["commitment"] is num
+              ? (row["commitment"] as num).toInt()
+              : int.tryParse(row["commitment"].toString()) ?? 0,
+          attitude: row["attitude"] is num
+              ? (row["attitude"] as num).toInt()
+              : int.tryParse(row["attitude"].toString()) ?? 0,
+          createdAt: DateTime.tryParse((row["createdAt"] ?? '').toString()) ??
+              DateTime.now(),
         );
       }
     }
@@ -209,18 +230,36 @@ class EvaluationDataSourceRemote implements EvaluationDataSource {
       throw Exception("Error obteniendo evaluación: ${response.statusCode}");
     }
 
-    final data = jsonDecode(response.body);
+    final decoded = jsonDecode(response.body);
+
+    Map<String, dynamic>? row;
+    if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+      row = Map<String, dynamic>.from(decoded.first as Map);
+    } else if (decoded is Map<String, dynamic>) {
+      row = decoded;
+    }
+
+    if (row == null || row.isEmpty) return null;
 
     return Evaluation(
-      id: data["_id"],
-      activityId: data["activityId"],
-      evaluatorId: data["evaluatorId"],
-      evaluatedId: data["evaluatedId"],
-      punctuality: data["punctuality"],
-      contributions: data["contributions"],
-      commitment: data["commitment"],
-      attitude: data["attitude"],
-      createdAt: DateTime.parse(data["createdAt"]),
+      id: (row["_id"] ?? '').toString(),
+      activityId: (row["activityId"] ?? '').toString(),
+      evaluatorId: (row["evaluatorId"] ?? '').toString(),
+      evaluatedId: (row["evaluatedId"] ?? '').toString(),
+      punctuality: row["punctuality"] is num
+          ? (row["punctuality"] as num).toInt()
+          : int.tryParse(row["punctuality"].toString()) ?? 0,
+      contributions: row["contributions"] is num
+          ? (row["contributions"] as num).toInt()
+          : int.tryParse(row["contributions"].toString()) ?? 0,
+      commitment: row["commitment"] is num
+          ? (row["commitment"] as num).toInt()
+          : int.tryParse(row["commitment"].toString()) ?? 0,
+      attitude: row["attitude"] is num
+          ? (row["attitude"] as num).toInt()
+          : int.tryParse(row["attitude"].toString()) ?? 0,
+      createdAt: DateTime.tryParse((row["createdAt"] ?? '').toString()) ??
+          DateTime.now(),
     );
   }
 
@@ -256,18 +295,35 @@ class EvaluationDataSourceRemote implements EvaluationDataSource {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      if (data != null && data.isNotEmpty) {
+      final decoded = jsonDecode(response.body);
+
+      Map<String, dynamic>? row;
+      if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+        row = Map<String, dynamic>.from(decoded.first as Map);
+      } else if (decoded is Map<String, dynamic>) {
+        row = decoded;
+      }
+
+      if (row != null && row.isNotEmpty) {
         return Evaluation(
-          id: data["_id"],
-          activityId: data["activityId"],
-          evaluatorId: data["evaluatorId"],
-          evaluatedId: data["evaluatedId"],
-          punctuality: data["punctuality"],
-          contributions: data["contributions"],
-          commitment: data["commitment"],
-          attitude: data["attitude"],
-          createdAt: DateTime.parse(data["createdAt"]),
+          id: (row["_id"] ?? '').toString(),
+          activityId: (row["activityId"] ?? '').toString(),
+          evaluatorId: (row["evaluatorId"] ?? '').toString(),
+          evaluatedId: (row["evaluatedId"] ?? '').toString(),
+          punctuality: row["punctuality"] is num
+              ? (row["punctuality"] as num).toInt()
+              : int.tryParse(row["punctuality"].toString()) ?? 0,
+          contributions: row["contributions"] is num
+              ? (row["contributions"] as num).toInt()
+              : int.tryParse(row["contributions"].toString()) ?? 0,
+          commitment: row["commitment"] is num
+              ? (row["commitment"] as num).toInt()
+              : int.tryParse(row["commitment"].toString()) ?? 0,
+          attitude: row["attitude"] is num
+              ? (row["attitude"] as num).toInt()
+              : int.tryParse(row["attitude"].toString()) ?? 0,
+          createdAt: DateTime.tryParse((row["createdAt"] ?? '').toString()) ??
+              DateTime.now(),
         );
       }
     }
