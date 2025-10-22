@@ -15,7 +15,7 @@ class UpdateEvaluationUseCase {
   }) async {
     try {
       // Obtener la evaluación existente
-      final existingEvaluation = _repository.getEvaluationById(evaluationId);
+      final existingEvaluation = await _repository.getEvaluationById(evaluationId);
       if (existingEvaluation == null) {
         return UpdateEvaluationResult.failure('Evaluación no encontrada.');
       }

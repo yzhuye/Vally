@@ -7,7 +7,8 @@ import 'dart:convert';
 /// Remote implementation of the evaluation data source
 /// This is a placeholder for future API integration
 class EvaluationDataSourceRemote implements EvaluationDataSource {
-  final baseUrl = "https://roble-api.openlab.uninorte.edu.co/database/vally_e89f74b54e";
+  final baseUrl =
+      "https://roble-api.openlab.uninorte.edu.co/database/vally_e89f74b54e";
   final storage = FlutterSecureStorage();
 
   @override
@@ -88,7 +89,8 @@ class EvaluationDataSourceRemote implements EvaluationDataSource {
     final data = jsonDecode(response.body);
 
     if (data is! List) {
-      throw Exception("Formato de respuesta inesperado al obtener evaluaciones");
+      throw Exception(
+          "Formato de respuesta inesperado al obtener evaluaciones");
     }
 
     return data.map<Evaluation>((e) {
@@ -128,7 +130,8 @@ class EvaluationDataSourceRemote implements EvaluationDataSource {
     final data = jsonDecode(response.body);
 
     if (data is! List) {
-      throw Exception("Formato de respuesta inesperado al obtener evaluaciones");
+      throw Exception(
+          "Formato de respuesta inesperado al obtener evaluaciones");
     }
 
     return data.map<Evaluation>((e) {
@@ -168,7 +171,8 @@ class EvaluationDataSourceRemote implements EvaluationDataSource {
     final data = jsonDecode(response.body);
 
     if (data is! List) {
-      throw Exception("Formato de respuesta inesperado al obtener evaluaciones");
+      throw Exception(
+          "Formato de respuesta inesperado al obtener evaluaciones");
     }
 
     return data.map<Evaluation>((e) {
@@ -253,7 +257,7 @@ class EvaluationDataSourceRemote implements EvaluationDataSource {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      if (data!= null && data.isNotEmpty) {
+      if (data != null && data.isNotEmpty) {
         return Evaluation(
           id: data["_id"],
           activityId: data["activityId"],
@@ -301,29 +305,187 @@ class EvaluationDataSourceRemote implements EvaluationDataSource {
   }
 
   @override
-  Future<bool> hasEvaluated(String activityId, String evaluatorId, String evaluatedId) async {
-    // TODO: Implement API call to check if evaluation exists
-    // return await _evaluationApiService.hasEvaluated(activityId, evaluatorId, evaluatedId);
+  Future<bool> hasEvaluated(
+      String activityId, String evaluatorId, String evaluatedId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "evaluations",
+      "activityId": activityId,
+      "evaluatorId": evaluatorId,
+      "evaluatedId": evaluatedId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error buscando evaluación: ${response.statusCode}");
+    }
+
+    final data = jsonDecode(response.body);
+
+    if (data is List && data.isNotEmpty) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
-  Future<double> getAverageRatingForStudent(String activityId, String studentId) async {
-    // TODO: Implement API call to get average rating
-    // return await _evaluationApiService.getAverageRatingForStudent(activityId, studentId);
+  Future<double> getAverageRatingForStudent(
+      String activityId, String studentId) async {
+    final token = await storage.read(key: "accessToken");
+    if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+    final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "evaluations",
+      "activityId": activityId,
+      "evaluatedId": studentId,
+    });
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Error obteniendo evaluaciones: ${response.statusCode}");
+    }
+
+    final data = jsonDecode(response.body);
+    if (data is! List || data.isEmpty) return 0.0;
+
+    double totalSum = 0;
+    int totalCount = 0;
+
+    for (final eval in data) {
+      final punctuality = (eval["punctuality"] ?? 0).toDouble();
+      final contributions = (eval["contributions"] ?? 0).toDouble();
+      final commitment = (eval["commitment"] ?? 0).toDouble();
+      final attitude = (eval["attitude"] ?? 0).toDouble();
+
+      // Sumar los 4 valores de cada evaluación
+      totalSum += punctuality + contributions + commitment + attitude;
+      totalCount += 4;
+    }
+
+    final average = totalCount > 0 ? totalSum / totalCount : 0.0;
+    return average;
   }
 
   @override
-  Future<Map<String, dynamic>> getActivityEvaluationStats(String activityId) async {
-    // TODO: Implement API call to get activity evaluation stats
-    // return await _evaluationApiService.getActivityEvaluationStats(activityId);
+  Future<Map<String, dynamic>> getActivityEvaluationStats(
+      String activityId) async {
+    try {
+      final token = await storage.read(key: "accessToken");
+      if (token == null) throw Exception("No access token found");
 
-    throw UnimplementedError('Remote implementation not yet available. '
-        'This will be implemented when the backend API is ready.');
+      final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+        "tableName": "evaluations",
+        "activityId": activityId,
+      });
+
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            "Error obteniendo evaluaciones: ${response.statusCode}");
+      }
+
+      final data = jsonDecode(response.body);
+      if (data is! List || data.isEmpty) {
+        return {
+          'totalEvaluations': 0,
+          'averageRating': 0.0,
+          'participationRate': 0.0,
+          'completedEvaluations': 0,
+        };
+      }
+
+      final evaluations = data.map<Evaluation>((e) {
+        return Evaluation(
+          id: e["_id"],
+          activityId: e["activityId"],
+          evaluatorId: e["evaluatorId"],
+          evaluatedId: e["evaluatedId"],
+          punctuality: e["punctuality"],
+          contributions: e["contributions"],
+          commitment: e["commitment"],
+          attitude: e["attitude"],
+          createdAt: DateTime.parse(e["createdAt"]),
+        );
+      }).toList();
+
+      if (evaluations.isEmpty) {
+        return {
+          'totalEvaluations': 0,
+          'averageRating': 0.0,
+          'participationRate': 0.0,
+          'completedEvaluations': 0,
+        };
+      }
+
+      final totalEvaluations = evaluations.length;
+      double totalRating = 0.0;
+
+      for (final eval in evaluations) {
+        final avgEvalRating = (eval.punctuality +
+                eval.contributions +
+                eval.commitment +
+                eval.attitude) /
+            4.0;
+        totalRating += avgEvalRating;
+      }
+
+      final averageRating = totalRating / totalEvaluations;
+
+      final Map<String, List<Evaluation>> evaluationsByStudent = {};
+
+      for (final eval in evaluations) {
+        evaluationsByStudent[eval.evaluatedId] ??= [];
+        evaluationsByStudent[eval.evaluatedId]!.add(eval);
+      }
+
+      final evaluationsByStudentStats = evaluationsByStudent.map(
+        (studentId, evals) {
+          final avgStudentRating = evals.fold<double>(
+                0.0,
+                (sum, e) =>
+                    sum +
+                    ((e.punctuality +
+                            e.contributions +
+                            e.commitment +
+                            e.attitude) /
+                        4.0),
+              ) /
+              evals.length;
+
+          return MapEntry(studentId, {
+            'count': evals.length,
+            'averageRating': avgStudentRating,
+          });
+        },
+      );
+
+      return {
+        'totalEvaluations': totalEvaluations,
+        'averageRating': averageRating,
+        'studentsEvaluated': evaluationsByStudent.keys.length,
+        'evaluationsByStudent': evaluationsByStudentStats,
+      };
+    } catch (e) {
+      return {
+        'totalEvaluations': 0,
+        'averageRating': 0.0,
+        'error': e.toString(),
+      };
+    }
   }
 }

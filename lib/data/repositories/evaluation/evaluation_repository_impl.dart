@@ -16,7 +16,7 @@ class EvaluationRepositoryImpl implements EvaluationRepository {
   late final EvaluationDataSource _dataSource;
 
   EvaluationRepositoryImpl({
-    EvaluationDataSourceType dataSourceType = EvaluationDataSourceType.inMemory,
+    EvaluationDataSourceType dataSourceType = EvaluationDataSourceType.remote,
   }) {
     _dataSource = _createDataSource(dataSourceType);
   }
