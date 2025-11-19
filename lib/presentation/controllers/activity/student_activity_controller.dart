@@ -15,7 +15,7 @@ import '../../../domain/repositories/group_repository.dart';
 class StudentActivityController extends GetxController {
   final String categoryId;
   final String courseId;
-  final String studentEmail;
+  final String studentId;
 
   late final GetActivitiesByCategoryUseCase _getActivitiesUseCase;
   late final CreateEvaluationUseCase _createEvaluationUseCase;
@@ -32,7 +32,7 @@ class StudentActivityController extends GetxController {
   StudentActivityController({
     required this.categoryId,
     required this.courseId,
-    required this.studentEmail,
+    required this.studentId,
   }) {
     final ActivityRepository activityRepository = ActivityRepositoryImpl();
     final EvaluationRepository evaluationRepository =
@@ -92,7 +92,7 @@ class StudentActivityController extends GetxController {
   Future<void> loadMyEvaluations() async {
     try {
       final result =
-          await _getEvaluationsByEvaluatorUseCase(evaluatorId: studentEmail);
+          await _getEvaluationsByEvaluatorUseCase(evaluatorId: studentId);
       if (result.isSuccess) {
         myEvaluations.value = result.evaluations;
       }
@@ -114,7 +114,7 @@ class StudentActivityController extends GetxController {
     try {
       final result = await _createEvaluationUseCase(
         activityId: activityId,
-        evaluatorId: studentEmail,
+        evaluatorId: studentId,
         evaluatedId: evaluatedId,
         punctuality: punctuality,
         contributions: contributions,
@@ -161,7 +161,7 @@ class StudentActivityController extends GetxController {
     final result = await _checkEligibilityUseCase(
       activityId: activityId,
       courseId: courseId,
-      evaluatorId: studentEmail,
+      evaluatorId: studentId,
       evaluatedId: evaluatedId,
     );
     // Update cache on direct checks as well
@@ -175,7 +175,7 @@ class StudentActivityController extends GetxController {
     final result = await _checkEligibilityUseCase(
       activityId: activityId,
       courseId: courseId,
-      evaluatorId: studentEmail,
+      evaluatorId: studentId,
       evaluatedId: evaluatedId,
     );
     return result.message;
@@ -194,7 +194,7 @@ class StudentActivityController extends GetxController {
       pending.add(_checkEligibilityUseCase(
         activityId: activityId,
         courseId: courseId,
-        evaluatorId: studentEmail,
+        evaluatorId: studentId,
         evaluatedId: member,
       ).then((result) {
         eligibilityByMember[member] = result.isEligible;

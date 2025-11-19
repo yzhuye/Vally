@@ -61,7 +61,6 @@ class ProfessorGroupController extends GetxController {
         categoryId: categoryId,
       );
 
-
       if (result.isSuccess) {
         groups.value = result.groups;
       } else {
@@ -135,6 +134,7 @@ class ProfessorGroupController extends GetxController {
 
       // Fallback to repository if course object doesn't have students
       final studentList = await _getStudentsUseCase(courseId);
+      print('Loaded students: $studentList');
       students.value = studentList;
       // Crear StudentInfo desde la lista de emails (estructura antigua)
       studentInfo.value = studentList
@@ -151,7 +151,6 @@ class ProfessorGroupController extends GetxController {
   }
 
   Future<bool> assignStudentToGroup(String studentId, String groupId) async {
-
     isAssigningStudent(true);
     try {
       final result = await _assignStudentUseCase(
@@ -369,7 +368,6 @@ class ProfessorGroupController extends GetxController {
   }
 
   List<String> getStudentsNotInAnyGroup() {
-
     final unassigned = students.where((studentEmail) {
       final isInGroup = _findStudentGroupSync(studentEmail) != null;
       return !isInGroup;

@@ -33,7 +33,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
   @override
   void initState() {
     super.initState();
-    studentEmail = Get.find<HomeController>().currentUser.value?.email ?? '';
+    studentEmail = Get.find<HomeController>().currentUser.value?.id ?? '';
 
     // Initialize activity controller
     activityControllerTag =
@@ -42,7 +42,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
       StudentActivityController(
         categoryId: widget.category.id,
         courseId: widget.course.id,
-        studentEmail: studentEmail,
+        studentId: studentEmail,
       ),
       tag: activityControllerTag,
     );
@@ -58,7 +58,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
         GroupController(
           courseId: widget.course.id,
           categoryId: widget.category.id,
-          studentEmail: studentEmail,
+          studentId: studentEmail,
         ),
         tag: controllerTag,
       );
@@ -411,7 +411,7 @@ class _CategoryActivityScreenState extends State<CategoryActivityScreen> {
           course: widget.course,
           category: widget.category,
           activity: activity,
-          studentEmail: studentEmail,
+          studentId: studentEmail,
         ));
   }
 

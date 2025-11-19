@@ -11,7 +11,6 @@ class GroupRepositoryImpl implements GroupRepository {
 
   @override
   Future<List<Group>> getGroupsByCategory(String categoryId) async {
-
     final token = await storage.read(key: "accessToken");
     if (token == null) throw Exception("No access token found");
 
@@ -24,7 +23,6 @@ class GroupRepositoryImpl implements GroupRepository {
       url,
       headers: {"Authorization": "Bearer $token"},
     );
-
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as List<dynamic>;
@@ -54,6 +52,78 @@ class GroupRepositoryImpl implements GroupRepository {
     } else {
       throw Exception(
           "Error obteniendo grupos: ${response.statusCode} ${response.body}");
+    }
+  }
+
+  // Método privado para resolver un userId (email, _id o username)
+  Future<String> resolveUserId(String candidate) async {
+    try {
+      final token = await storage.read(key: "accessToken");
+      if (token == null) throw Exception("No access token found");
+
+      // Caso 1: si contiene @ → buscar por email
+      if (candidate.contains("@")) {
+        final url = Uri.parse("$baseUrl/read").replace(queryParameters: {
+          "tableName": "users",
+          "email": candidate,
+        });
+
+        final resp = await http.get(
+          url,
+          headers: {"Authorization": "Bearer $token"},
+        );
+
+        if (resp.statusCode == 200) {
+          final users = jsonDecode(resp.body);
+
+          if (users is List && users.isNotEmpty) {
+            return users[0]["_id"].toString();
+          }
+        }
+
+        throw Exception("User not found by email");
+      }
+
+      // Caso 2: buscar por _id
+      final byIdUrl = Uri.parse("$baseUrl/read").replace(queryParameters: {
+        "tableName": "users",
+        "_id": candidate,
+      });
+
+      final byIdResp = await http.get(
+        byIdUrl,
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (byIdResp.statusCode == 200) {
+        final users = jsonDecode(byIdResp.body);
+        if (users is List && users.isNotEmpty) {
+          return users[0]["_id"].toString();
+        }
+      }
+
+      // Caso 3: fallback → buscar por username
+      final byUsernameUrl =
+          Uri.parse("$baseUrl/read").replace(queryParameters: {
+        "tableName": "users",
+        "username": candidate,
+      });
+
+      final byUsernameResp = await http.get(
+        byUsernameUrl,
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (byUsernameResp.statusCode == 200) {
+        final users = jsonDecode(byUsernameResp.body);
+        if (users is List && users.isNotEmpty) {
+          return users[0]["_id"].toString();
+        }
+      }
+
+      throw Exception("User not found by id/username");
+    } catch (e) {
+      throw Exception("Unable to resolve user id: $e");
     }
   }
 
@@ -120,8 +190,7 @@ class GroupRepositoryImpl implements GroupRepository {
           return email;
         }
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     // Si no se puede convertir, devolver el valor original
     return userId;
@@ -178,9 +247,8 @@ class GroupRepositoryImpl implements GroupRepository {
     required String userId,
     required String groupId,
   }) async {
-
-    // Asegurar que userId sea un email
-    final emailUserId = await _convertUserIdToEmail(userId);
+    // Asegurar que userId sea un userId válido
+    final emailUserId = await resolveUserId(userId);
 
     final token = await storage.read(key: "accessToken");
     if (token == null) throw Exception("No access token found");
@@ -209,11 +277,9 @@ class GroupRepositoryImpl implements GroupRepository {
     final int currentCapacity =
         int.tryParse(group["currentCapacity"].toString()) ?? 0;
 
-
     if (currentCapacity >= maxCapacity) {
       return false;
     }
-
 
     final insertUrl = Uri.parse("$baseUrl/insert");
     final insertBody = {
@@ -235,12 +301,10 @@ class GroupRepositoryImpl implements GroupRepository {
       body: jsonEncode(insertBody),
     );
 
-
     if (insertResponse.statusCode != 200 && insertResponse.statusCode != 201) {
       throw Exception(
           "Error insertando en user_groups: ${insertResponse.statusCode}");
     }
-
 
     final updateUrl = Uri.parse("$baseUrl/update");
     final newCapacity = currentCapacity + 1;
@@ -253,7 +317,6 @@ class GroupRepositoryImpl implements GroupRepository {
       }
     };
 
-
     final updateResponse = await http.put(
       updateUrl,
       headers: {
@@ -264,7 +327,6 @@ class GroupRepositoryImpl implements GroupRepository {
     );
 
     final success = updateResponse.statusCode == 200;
-
 
     return success;
   }
@@ -278,7 +340,7 @@ class GroupRepositoryImpl implements GroupRepository {
     if (token == null) throw Exception("No access token found");
 
     // Asegurar que userId sea un email
-    final emailUserId = await _convertUserIdToEmail(userId);
+    final emailUserId = await resolveUserId(userId);
 
     final getGroupUrl = Uri.parse("$baseUrl/read").replace(queryParameters: {
       "tableName": "groups",
@@ -381,7 +443,7 @@ class GroupRepositoryImpl implements GroupRepository {
 
     try {
       // Asegurar que userId sea un email
-      final emailUserId = await _convertUserIdToEmail(userId);
+      final emailUserId = await resolveUserId(userId);
       final getGroupUrl = Uri.parse("$baseUrl/read").replace(queryParameters: {
         "tableName": "groups",
         "_id": newGroupId,
@@ -458,7 +520,7 @@ class GroupRepositoryImpl implements GroupRepository {
     if (token == null) throw Exception("No access token found");
 
     // Convertir studentId a email si es necesario
-    final emailStudentId = await _convertUserIdToEmail(studentId);
+    final emailStudentId = await resolveUserId(studentId);
 
     // Fetch all groups for the category (single request)
     final groups = await getGroupsByCategory(categoryId);

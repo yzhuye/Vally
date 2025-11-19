@@ -11,14 +11,14 @@ class StudentEvaluationScreen extends StatefulWidget {
   final Course course;
   final Category category;
   final Activity activity;
-  final String studentEmail;
+  final String studentId;
 
   const StudentEvaluationScreen({
     super.key,
     required this.course,
     required this.category,
     required this.activity,
-    required this.studentEmail,
+    required this.studentId,
   });
 
   @override
@@ -37,19 +37,19 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
 
     // Usar el email directamente (ya está normalizado en el sistema)
     controllerTag =
-        'student_activity_${widget.category.id}_${widget.studentEmail}';
+        'student_activity_${widget.category.id}_${widget.studentId}';
     activityController = Get.put(
       StudentActivityController(
         categoryId: widget.category.id,
         courseId: widget.course.id,
-        studentEmail: widget.studentEmail,
+        studentId: widget.studentId,
       ),
       tag: controllerTag,
     );
 
     // Controller para obtener compañeros de grupo
     final groupControllerTag =
-        '${widget.course.id}_${widget.category.id}_${widget.studentEmail}';
+        '${widget.course.id}_${widget.category.id}_${widget.studentId}';
 
     // Verificar si el controlador existe antes de intentar obtenerlo
     if (Get.isRegistered<GroupController>(tag: groupControllerTag)) {
@@ -60,7 +60,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
         GroupController(
           courseId: widget.course.id,
           categoryId: widget.category.id,
-          studentEmail: widget.studentEmail,
+          studentId: widget.studentId,
         ),
         tag: groupControllerTag,
       );
@@ -236,7 +236,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
               }
 
               final groupMembers = currentGroup.members
-                  .where((member) => member != widget.studentEmail)
+                  .where((member) => member != widget.studentId)
                   .toList();
 
               if (groupMembers.isEmpty) {
@@ -426,7 +426,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
           category: widget.category,
           activity: widget.activity,
           evaluatedEmail: evaluatedEmail,
-          studentEmail: widget.studentEmail,
+          studentId: widget.studentId,
         ));
 
     // Cuando regrese de la pantalla de evaluación, actualizar la lista

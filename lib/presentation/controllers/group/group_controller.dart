@@ -10,7 +10,7 @@ import 'package:vally_app/domain/usecases/group/find_student_group.dart';
 class GroupController extends GetxController {
   final String courseId;
   final String categoryId;
-  final String studentEmail;
+  final String studentId;
 
   late final GroupRepository _repository;
   late final GetGroupsByCategoryUseCase _getGroupsUseCase;
@@ -23,7 +23,7 @@ class GroupController extends GetxController {
   GroupController({
     required this.courseId,
     required this.categoryId,
-    required this.studentEmail,
+    required this.studentId,
   }) {
     _repository = GroupRepositoryImpl();
     _getGroupsUseCase = GetGroupsByCategoryUseCase(_repository);
@@ -61,12 +61,11 @@ class GroupController extends GetxController {
 
   Future<void> joinGroup(String groupId) async {
     isLoading(true);
-
     try {
       // Verificar si ya está en un grupo usando el caso de uso
       final currentGroupResult = await _findStudentGroupUseCase(
         categoryId: categoryId,
-        studentId: studentEmail,
+        studentId: studentId,
       );
 
       if (currentGroupResult.isSuccess && currentGroupResult.group != null) {
@@ -79,10 +78,9 @@ class GroupController extends GetxController {
         return;
       }
 
-
       final result = await _joinGroupUseCase(
         groupId: groupId,
-        studentId: studentEmail,
+        studentId: studentId,
       );
 
       if (result.isSuccess) {
@@ -107,7 +105,7 @@ class GroupController extends GetxController {
   }
 
   Group? get currentGroup {
-    return groups.firstWhereOrNull((g) => g.members.contains(studentEmail));
+    return groups.firstWhereOrNull((g) => g.members.contains(studentId));
   }
 
   bool canJoinGroup(Group group) {

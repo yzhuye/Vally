@@ -9,7 +9,7 @@ class EvaluationFormScreen extends StatefulWidget {
   final Category category;
   final Activity activity;
   final String evaluatedEmail;
-  final String studentEmail;
+  final String studentId;
 
   const EvaluationFormScreen({
     super.key,
@@ -17,7 +17,7 @@ class EvaluationFormScreen extends StatefulWidget {
     required this.category,
     required this.activity,
     required this.evaluatedEmail,
-    required this.studentEmail,
+    required this.studentId,
   });
 
   @override
@@ -26,10 +26,10 @@ class EvaluationFormScreen extends StatefulWidget {
 
 class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Métricas de evaluación
   int punctuality = 3; // Puntualidad
-  int contributions = 3; // Contribuciones  
+  int contributions = 3; // Contribuciones
   int commitment = 3; // Compromiso
   int attitude = 3; // Actitud
 
@@ -38,7 +38,8 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
   @override
   void initState() {
     super.initState();
-    final controllerTag = 'student_activity_${widget.category.id}_${widget.studentEmail}';
+    final controllerTag =
+        'student_activity_${widget.category.id}_${widget.studentId}';
     controller = Get.find<StudentActivityController>(tag: controllerTag);
   }
 
@@ -89,7 +90,8 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF00A4BD).withValues(alpha: 0.1),
+                                  color: const Color(0xFF00A4BD)
+                                      .withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -125,19 +127,24 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                           ),
                           const SizedBox(height: 16),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: controller.getDueDateColor(widget.activity.dueDate).withValues(alpha: 0.1),
+                              color: controller
+                                  .getDueDateColor(widget.activity.dueDate)
+                                  .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: controller.getDueDateColor(widget.activity.dueDate),
+                                color: controller
+                                    .getDueDateColor(widget.activity.dueDate),
                                 width: 1,
                               ),
                             ),
                             child: Text(
                               controller.formatDueDate(widget.activity.dueDate),
                               style: TextStyle(
-                                color: controller.getDueDateColor(widget.activity.dueDate),
+                                color: controller
+                                    .getDueDateColor(widget.activity.dueDate),
                                 fontWeight: FontWeight.w500,
                                 fontSize: 14,
                               ),
@@ -168,9 +175,12 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                         children: [
                           CircleAvatar(
                             radius: 24,
-                            backgroundColor: const Color(0xFF00A4BD).withValues(alpha: 0.1),
+                            backgroundColor:
+                                const Color(0xFF00A4BD).withValues(alpha: 0.1),
                             child: Text(
-                              widget.evaluatedEmail.substring(0, 1).toUpperCase(),
+                              widget.evaluatedEmail
+                                  .substring(0, 1)
+                                  .toUpperCase(),
                               style: const TextStyle(
                                 color: Color(0xFF00A4BD),
                                 fontWeight: FontWeight.bold,
@@ -231,31 +241,36 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                     // Métricas de evaluación
                     _buildMetricCard(
                       title: '1. Puntualidad',
-                      description: 'Cumplimiento de plazos y horarios establecidos',
+                      description:
+                          'Cumplimiento de plazos y horarios establecidos',
                       icon: Icons.schedule_outlined,
                       currentValue: punctuality,
                       onChanged: (value) => setState(() => punctuality = value),
                     ),
-                    
+
                     _buildMetricCard(
                       title: '2. Contribuciones',
-                      description: 'Calidad y cantidad de aportes al trabajo en equipo',
+                      description:
+                          'Calidad y cantidad de aportes al trabajo en equipo',
                       icon: Icons.lightbulb_outline,
                       currentValue: contributions,
-                      onChanged: (value) => setState(() => contributions = value),
+                      onChanged: (value) =>
+                          setState(() => contributions = value),
                     ),
-                    
+
                     _buildMetricCard(
                       title: '3. Compromiso',
-                      description: 'Dedicación y responsabilidad con las tareas asignadas',
+                      description:
+                          'Dedicación y responsabilidad con las tareas asignadas',
                       icon: Icons.task_alt_outlined,
                       currentValue: commitment,
                       onChanged: (value) => setState(() => commitment = value),
                     ),
-                    
+
                     _buildMetricCard(
                       title: '4. Actitud',
-                      description: 'Disposición positiva y colaborativa en el equipo',
+                      description:
+                          'Disposición positiva y colaborativa en el equipo',
                       icon: Icons.emoji_emotions_outlined,
                       currentValue: attitude,
                       onChanged: (value) => setState(() => attitude = value),
@@ -304,9 +319,15 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(5, (index) {
-                              final avgRating = (punctuality + contributions + commitment + attitude) / 4.0;
+                              final avgRating = (punctuality +
+                                      contributions +
+                                      commitment +
+                                      attitude) /
+                                  4.0;
                               return Icon(
-                                index < avgRating ? Icons.star : Icons.star_border,
+                                index < avgRating
+                                    ? Icons.star
+                                    : Icons.star_border,
                                 color: Colors.amber,
                                 size: 20,
                               );
@@ -322,7 +343,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
               ),
             ),
           ),
-          
+
           // Botones de acción
           Container(
             padding: const EdgeInsets.all(20),
@@ -342,32 +363,35 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                 Expanded(
                   flex: 2,
                   child: Obx(() => ElevatedButton(
-                    onPressed: controller.isLoading.value ? null : _submitEvaluation,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00A4BD),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: controller.isLoading.value
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            'Enviar Evaluación',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : _submitEvaluation,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00A4BD),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                  )),
+                        ),
+                        child: controller.isLoading.value
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                'Enviar Evaluación',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      )),
                 ),
               ],
             ),
@@ -462,8 +486,12 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         child: Icon(
-                          index <= currentValue ? Icons.star : Icons.star_border,
-                          color: index <= currentValue ? Colors.amber : Colors.grey[400],
+                          index <= currentValue
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: index <= currentValue
+                              ? Colors.amber
+                              : Colors.grey[400],
                           size: 28,
                         ),
                       ),
@@ -513,15 +541,17 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
       commitment: commitment,
       attitude: attitude,
     );
-    
+
     if (success) {
       await Future.delayed(const Duration(milliseconds: 800));
 
-      if (Get.isRegistered<StudentActivityController>(tag: 'student_activity_${widget.category.id}_${widget.studentEmail}')) {
-        final controller = Get.find<StudentActivityController>(tag: 'student_activity_${widget.category.id}_${widget.studentEmail}');
+      if (Get.isRegistered<StudentActivityController>(
+          tag: 'student_activity_${widget.category.id}_${widget.studentId}')) {
+        final controller = Get.find<StudentActivityController>(
+            tag: 'student_activity_${widget.category.id}_${widget.studentId}');
         controller.loadMyEvaluations();
       }
-      
+
       Get.back();
     }
   }
