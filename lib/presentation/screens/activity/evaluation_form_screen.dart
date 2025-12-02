@@ -8,6 +8,7 @@ class EvaluationFormScreen extends StatefulWidget {
   final Course course;
   final Category category;
   final Activity activity;
+  final String evaluatedId;
   final String evaluatedEmail;
   final String studentId;
 
@@ -16,6 +17,7 @@ class EvaluationFormScreen extends StatefulWidget {
     required this.course,
     required this.category,
     required this.activity,
+    required this.evaluatedId,
     required this.evaluatedEmail,
     required this.studentId,
   });
@@ -535,7 +537,7 @@ class _EvaluationFormScreenState extends State<EvaluationFormScreen> {
   Future<void> _submitEvaluation() async {
     final success = await controller.createEvaluation(
       activityId: widget.activity.id,
-      evaluatedId: widget.evaluatedEmail,
+      evaluatedId: widget.evaluatedId,
       punctuality: punctuality,
       contributions: contributions,
       commitment: commitment,

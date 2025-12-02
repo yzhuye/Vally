@@ -5,6 +5,23 @@ import 'package:vally_app/presentation/controllers/report/report_controller.dart
 class StudentAverageWidget extends StatelessWidget {
   final ReportController controller;
 
+  static const Map<String, String> userIdToEmail = {
+    "u6p906xXwf88": "a@a.com",
+    "UxRv_0n6JrKl": "b@a.com",
+    "_ZisA-3aGbIV": "c@a.com",
+    "OR13yh3nw1fo": "d@a.com",
+    "_po1R4z69HLb": "e@a.com",
+    "khAu7VXBKzc2": "f@a.com",
+    "wKABtl1W4vzv": "a@b.com",
+    "MHUYnowwwEQe": "b@b.com",
+    "Fs4NEnaW27oq": "c@b.com",
+    "lGf1JRBzp1fb": "d@b.com",
+    "Cz_jTBjKQ_9q": "e@b.com",
+    "21po1Q2Md8_D": "g@a.com",
+    "SE6jJBW2-pqB": "f@b.com",
+    "WSFoen3R37sW": "g@b.com",
+  };
+
   const StudentAverageWidget({
     super.key,
     required this.controller,
@@ -187,7 +204,9 @@ class StudentAverageWidget extends StatelessWidget {
                 backgroundColor: const Color(0xFF2196F3),
                 radius: 20,
                 child: Text(
-                  student.studentName.substring(0, 1).toUpperCase(),
+                  (userIdToEmail[student.studentId] ?? student.studentId)
+                      .substring(0, 1)
+                      .toUpperCase(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -200,7 +219,7 @@ class StudentAverageWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      student.studentName,
+                      userIdToEmail[student.studentId] ?? student.studentId,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

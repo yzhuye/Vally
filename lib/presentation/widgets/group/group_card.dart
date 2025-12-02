@@ -17,6 +17,24 @@ class GroupCard extends StatelessWidget {
     this.nameMapper,
   });
 
+  // Mapa rápido de userId -> email
+  static const Map<String, String> userIdToEmail = {
+    "u6p906xXwf88": "a@a.com",
+    "UxRv_0n6JrKl": "b@a.com",
+    "_ZisA-3aGbIV": "c@a.com",
+    "OR13yh3nw1fo": "d@a.com",
+    "_po1R4z69HLb": "e@a.com",
+    "khAu7VXBKzc2": "f@a.com",
+    "wKABtl1W4vzv": "a@b.com",
+    "MHUYnowwwEQe": "b@b.com",
+    "Fs4NEnaW27oq": "c@b.com",
+    "lGf1JRBzp1fb": "d@b.com",
+    "Cz_jTBjKQ_9q": "e@b.com",
+    "21po1Q2Md8_D": "g@a.com",
+    "SE6jJBW2-pqB": "f@b.com",
+    "WSFoen3R37sW": "g@b.com",
+  };
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -94,9 +112,10 @@ class GroupCard extends StatelessWidget {
               ),
             ),
             ...group.members.map(
-              (member) {
+              (memberId) {
+                final email = userIdToEmail[memberId] ?? memberId;
                 final isCurrentUser =
-                    currentUserEmail != null && member == currentUserEmail;
+                    currentUserEmail != null && memberId == currentUserEmail;
                 return Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
@@ -115,9 +134,7 @@ class GroupCard extends StatelessWidget {
                             : null,
                       ),
                       child: Text(
-                        isCurrentUser
-                            ? '${nameMapper?.call(member) ?? member} (Tú)'
-                            : nameMapper?.call(member) ?? member,
+                        isCurrentUser ? '$email (Tú)' : email,
                         style: TextStyle(
                           color: isCurrentUser
                               ? const Color(0xFF00A4BD)
@@ -172,8 +189,7 @@ class GroupCard extends StatelessWidget {
     if (currentUserEmail == null) return false;
 
     final isCurrentUser = group.members.contains(currentUserEmail);
-    if (isCurrentUser)
-      return false; // Los estudiantes ya en el grupo no pueden hacer nada
+    if (isCurrentUser) return false;
 
     if (group.isFull) return false;
 

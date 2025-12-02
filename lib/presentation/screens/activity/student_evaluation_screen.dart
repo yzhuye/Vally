@@ -31,6 +31,23 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
   late GroupController groupController;
   late String controllerTag;
 
+  static const Map<String, String> userIdToEmail = {
+    "u6p906xXwf88": "a@a.com",
+    "UxRv_0n6JrKl": "b@a.com",
+    "_ZisA-3aGbIV": "c@a.com",
+    "OR13yh3nw1fo": "d@a.com",
+    "_po1R4z69HLb": "e@a.com",
+    "khAu7VXBKzc2": "f@a.com",
+    "wKABtl1W4vzv": "a@b.com",
+    "MHUYnowwwEQe": "b@b.com",
+    "Fs4NEnaW27oq": "c@b.com",
+    "lGf1JRBzp1fb": "d@b.com",
+    "Cz_jTBjKQ_9q": "e@b.com",
+    "21po1Q2Md8_D": "g@a.com",
+    "SE6jJBW2-pqB": "f@b.com",
+    "WSFoen3R37sW": "g@b.com",
+  };
+
   @override
   void initState() {
     super.initState();
@@ -264,15 +281,15 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: groupMembers.length,
                 itemBuilder: (context, index) {
-                  final memberEmail = groupMembers[index];
+                  final memberId = groupMembers[index];
+                  final memberEmail = userIdToEmail[memberId] ?? memberId;
                   final hasEvaluated = activityController.hasEvaluated(
-                      widget.activity.id, memberEmail);
+                      widget.activity.id, memberId);
                   final canEvaluate =
-                      activityController.eligibilityByMember[memberEmail] ==
-                          true;
+                      activityController.eligibilityByMember[memberId] == true;
                   final isChecking =
-                      activityController.isEligibilityLoading(memberEmail) ||
-                          !activityController.isEligibilityKnown(memberEmail);
+                      activityController.isEligibilityLoading(memberId) ||
+                          !activityController.isEligibilityKnown(memberId);
                   final isExpired = activityController
                       .isActivityExpired(widget.activity.dueDate);
 
@@ -395,7 +412,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                               canEvaluate
                           ? ElevatedButton(
                               onPressed: () =>
-                                  _showEvaluationDialog(memberEmail),
+                                  _showEvaluationDialog(memberId, memberEmail),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF00A4BD),
                                 foregroundColor: Colors.white,
@@ -407,7 +424,7 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
                             )
                           : null,
                       onTap: hasEvaluated
-                          ? () => _showEvaluationDetails(memberEmail)
+                          ? () => _showEvaluationDetails(memberId, memberEmail)
                           : null,
                     ),
                   );
@@ -420,11 +437,12 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
     );
   }
 
-  void _showEvaluationDialog(String evaluatedEmail) async {
+  void _showEvaluationDialog(String memberId, String evaluatedEmail) async {
     await Get.to(() => EvaluationFormScreen(
           course: widget.course,
           category: widget.category,
           activity: widget.activity,
+          evaluatedId: memberId,
           evaluatedEmail: evaluatedEmail,
           studentId: widget.studentId,
         ));
@@ -433,11 +451,11 @@ class _StudentEvaluationScreenState extends State<StudentEvaluationScreen> {
     _refreshEvaluations();
   }
 
-  void _showEvaluationDetails(String evaluatedEmail) {
+  void _showEvaluationDetails(String evaluatedId, String evaluatedEmail) {
     final evaluation = activityController.myEvaluations.firstWhere(
       (eval) =>
           eval.activityId == widget.activity.id &&
-          eval.evaluatedId == evaluatedEmail,
+          eval.evaluatedId == evaluatedId,
     );
 
     EvaluationDialogs.showEvaluationDetails(
