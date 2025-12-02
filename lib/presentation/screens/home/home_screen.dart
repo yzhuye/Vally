@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vally_app/presentation/controllers/home/home_controller.dart';
-import 'package:vally_app/presentation//widgets/course/course_card.dart';
-import 'package:vally_app/presentation//widgets/dialogs/course_dialogs.dart';
+import 'package:vally_app/presentation/widgets/course/course_card.dart';
+import 'package:vally_app/presentation/widgets/dialogs/course_dialogs.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,6 +17,11 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Color(0xFF757575)),
+            onPressed: () => controller.loadUserCourses(),
+            tooltip: 'Recargar',
+          ),
           IconButton(
             icon:
                 const Icon(Icons.notifications_none, color: Color(0xFF757575)),
@@ -35,9 +40,12 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Obx(() => Text(
-              'Hola,\n${controller.currentUser.value?.username ?? ''}',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            )),
+                  'Hola,\n${controller.currentUser.value?.username ?? ''}',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )),
             const SizedBox(height: 20),
             Obx(() => Row(
                   children: [
@@ -48,12 +56,12 @@ class HomeScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               controller.selectedUserType.value == 'Estudiante'
-                                  ? Color(0xFF00A4BD)
+                                  ? const Color(0xFF00A4BD)
                                   : Colors.grey[200],
                           foregroundColor:
                               controller.selectedUserType.value == 'Estudiante'
                                   ? Colors.white
-                                  : Color(0xFF757575),
+                                  : const Color(0xFF757575),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -69,12 +77,12 @@ class HomeScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               controller.selectedUserType.value == 'Profesor'
-                                  ? Color(0xFF00A4BD)
+                                  ? const Color(0xFF00A4BD)
                                   : Colors.grey[200],
                           foregroundColor:
                               controller.selectedUserType.value == 'Profesor'
                                   ? Colors.white
-                                  : Color(0xFF757575),
+                                  : const Color(0xFF757575),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -139,15 +147,17 @@ class HomeScreen extends StatelessWidget {
                     }
                   },
                   icon: Icon(
-                      controller.selectedUserType.value == 'Profesor'
-                          ? Icons.add
-                          : Icons.group_add,
-                      color: Color(0xFF00A4BD)),
+                    controller.selectedUserType.value == 'Profesor'
+                        ? Icons.add
+                        : Icons.group_add,
+                    color: const Color(0xFF00A4BD),
+                  ),
                   label: Text(
-                      controller.selectedUserType.value == 'Profesor'
-                          ? 'Crear Curso'
-                          : 'Unirse a Curso',
-                      style: const TextStyle(color: Color(0xFF00A4BD))),
+                    controller.selectedUserType.value == 'Profesor'
+                        ? 'Crear Curso'
+                        : 'Unirse a Curso',
+                    style: const TextStyle(color: Color(0xFF00A4BD)),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.cyan[50],
                     minimumSize: const Size(double.infinity, 60),
